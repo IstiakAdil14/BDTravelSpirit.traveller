@@ -1,0 +1,103 @@
+'use client';
+
+import {
+  FaFacebook,
+  FaInstagram,
+  FaTwitter,
+  FaPinterest,
+  FaYoutube
+} from 'react-icons/fa';
+import {
+  Globe,
+  Users,
+  Award,
+  Shield
+} from 'lucide-react';
+import FooterUI from './FooterUI';
+
+const impactStats = [
+  { number: '10K+', label: 'Happy Travelers' },
+  { number: '500+', label: 'Expert Guides' },
+  { number: '50+', label: 'Destinations' },
+  { number: '98%', label: 'Satisfaction Rate' },
+];
+
+const linkColumns = [
+  {
+    title: 'Company',
+    icon: Globe,
+    color: 'text-blue-400',
+    links: [
+      { name: 'About Us', href: '/about' },
+      { name: 'Contact', href: '/contact' },
+      { name: 'Privacy Policy', href: '/privacy' },
+      { name: 'Mission & Vision', href: '/mission-vision' },
+      { name: 'Careers', href: '/careers' },
+    ],
+  },
+  {
+    title: 'For Guides',
+    icon: Users,
+    color: 'text-emerald-400',
+    links: [
+      { name: 'Become a Guide', href: '/become-guide' },
+      { name: 'Guide Resources', href: '/guide-resources' },
+      { name: 'Success Stories', href: '/success-stories' },
+      { name: 'Training', href: '/training' },
+    ],
+  },
+  {
+    title: 'For Travelers',
+    icon: Award,
+    color: 'text-purple-400',
+    links: [
+      { name: 'Find Tours', href: '/tours' },
+      { name: 'Travel Tips', href: '/tips' },
+      { name: 'Reviews', href: '/reviews' },
+      { name: 'Support', href: '/support' },
+    ],
+  },
+  {
+    title: 'Support',
+    icon: Shield,
+    color: 'text-orange-400',
+    links: [
+      { name: 'Help Center', href: '/help' },
+      { name: 'Contact Us', href: '/contact' },
+      { name: 'Safety', href: '/safety' },
+      { name: 'Terms', href: '/terms' },
+    ],
+  },
+];
+
+const socialIcons = [
+  { Icon: FaFacebook, href: 'https://facebook.com/bdtravelspirit', label: 'Facebook' },
+  { Icon: FaInstagram, href: 'https://instagram.com/bdtravelspirit', label: 'Instagram' },
+  { Icon: FaTwitter, href: 'https://twitter.com/bdtravelspirit', label: 'Twitter' },
+  { Icon: FaPinterest, href: 'https://pinterest.com/bdtravelspirit', label: 'Pinterest' },
+  { Icon: FaYoutube, href: 'https://youtube.com/bdtravelspirit', label: 'YouTube' },
+];
+
+const paymentMethods = [
+  { src: '/images/payments/bkash.png', alt: 'bKash' },
+  { src: '/images/payments/nogod.png', alt: 'Nagad' },
+  { src: '/images/payments/rocket.png', alt: 'Rocket' },
+  { src: '/images/payments/upai.png', alt: 'Upay' },
+  { src: '/images/payments/visa.png', alt: 'Visa' },
+  { src: '/images/payments/mastercard.png', alt: 'Mastercard' },
+  { src: '/images/payments/paypal.png', alt: 'PayPal' },
+  { src: '/images/payments/stripe.png', alt: 'Stripe' },
+];
+
+const Footer = () => {
+  return (
+    <FooterUI
+      impactStats={impactStats}
+      linkColumns={linkColumns}
+      socialIcons={socialIcons}
+      paymentMethods={paymentMethods}
+    />
+  );
+};
+
+export default Footer;
