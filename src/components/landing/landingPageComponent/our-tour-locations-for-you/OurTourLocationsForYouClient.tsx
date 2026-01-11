@@ -1,8 +1,17 @@
-import React from 'react';
+'use client';
+
 import OurTourLocationsForYouUI from './OurTourLocationsForYouUI';
-import { ourTourLocations } from '@/constants/ourTourLocations';
+import { useEffect, useState } from 'react';
 
 export default function OurTourLocationsForYouClient() {
+  const [tourLocations, setTourLocations] = useState([]);
+  
+  useEffect(() => {
+    fetch('/api/tour-locations')
+      .then(res => res.json())
+      .then(data => setTourLocations(data.data || []));
+  }, []);
+
   const stats = {
     destinations: '50+',
     travelers: '10k+',
@@ -12,8 +21,10 @@ export default function OurTourLocationsForYouClient() {
 
   return (
     <OurTourLocationsForYouUI
-      tourLocations={ourTourLocations}
+      tourLocations={tourLocations}
       stats={stats}
     />
   );
 }
+
+

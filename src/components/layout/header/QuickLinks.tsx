@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ChevronDown, MapPin, Sparkles } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 type TourItem = {
   name: string;
@@ -317,34 +318,35 @@ export default function QuickLinks() {
               <div className={`transition-opacity duration-200 ${isAnimating ? "opacity-0" : "opacity-100"}`}>
                 <div className="grid grid-cols-3 gap-4">
                   {selectedSubData?.tours.map((tour, idx) => (
-                    <Link
-                      key={tour.name}
-                      href={tour.url}
-                      title={tour.name} 
-                      className="group flex items-center gap-4 p-3 rounded-xl hover:bg-gradient-to-br hover:from-emerald-50 hover:to-teal-50 transition-all duration-200 hover:shadow-md border border-transparent hover:border-emerald-100"
-                      style={{
-                        animation: `fadeInUp 0.3s ease-out ${idx * 0.03}s both`
-                      }}
-                    >
-                      <div className="relative flex-shrink-0">
-                        <img
-                          src={tour.img}
-                          alt={tour.name}
-                          className="w-14 h-14 object-cover rounded-xl shadow-sm group-hover:shadow-md transition-shadow duration-200"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/0 to-teal-500/0 group-hover:from-emerald-500/10 group-hover:to-teal-500/10 rounded-xl transition-all duration-200"></div>
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="tour-title font-semibold text-gray-900 text-sm truncate group-hover:text-emerald-600 transition-colors">
-                          {tour.name}
-                        </p>
+<Tooltip key={tour.name}>
+  <TooltipTrigger asChild>
+    <Link href={tour.url} className="group flex items-center gap-4 p-3 rounded-xl hover:bg-gradient-to-br hover:from-emerald-50 hover:to-teal-50 transition-all duration-200 hover:shadow-md border border-transparent hover:border-emerald-100"
+      style={{ animation: `fadeInUp 0.3s ease-out ${idx * 0.03}s both` }}
+    >
+      <div className="relative flex-shrink-0">
+        <img
+          src={tour.img}
+          alt={tour.name}
+          className="w-14 h-14 object-cover rounded-xl shadow-sm group-hover:shadow-md transition-shadow duration-200"
+        />
+        <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/0 to-teal-500/0 group-hover:from-emerald-500/10 group-hover:to-teal-500/10 rounded-xl transition-all duration-200"></div>
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="tour-title font-semibold text-gray-900 text-sm truncate group-hover:text-emerald-600 transition-colors">
+          {tour.name}
+        </p>
+        <p className="text-xs text-gray-500 truncate flex items-center gap-1 mt-0.5">
+          <MapPin className="w-3 h-3" />
+          {tour.region}
+        </p>
+      </div>
+    </Link>
+  </TooltipTrigger>
+  <TooltipContent side="top">
+    {tour.name}
+  </TooltipContent>
+</Tooltip>
 
-                        <p className="text-xs text-gray-500 truncate flex items-center gap-1 mt-0.5">
-                          <MapPin className="w-3 h-3" />
-                          {tour.region}
-                        </p>
-                      </div>
-                    </Link>
                   ))}
                 </div>
               </div>

@@ -1,13 +1,92 @@
 // src/lib/fake-tours.ts
-// Deterministic faker generator for dev. Uses seed to keep reproducible output.
+// Deterministic faker generator for dev. Uses seed to keep reproducible output. 
 // Exports generateTour, generateTours, generateFAQs, generateReviews, generateGuides, paginate, topFAQs, faqPage.
 import { faker } from '@faker-js/faker';
-import { encodeTourId } from '../utils/encodeTourId';
-import type { TourFull, TourSummary, FAQ, Review, Guide, Media } from '../types/tour';
+import { encodeTourId } from '@/utils/encodeTourId';
+
+// Define standalone types to avoid conflicts and external dependencies
+export type Media = {
+  url: string;
+  type: 'image' | 'video';
+  alt: string;
+  width: number;
+  height: number;
+}
+
+export type TourSummary = {
+  id: string;
+  encodedId: string;
+  title: string;
+  shortDescription: string;
+  heroImage: string;
+  priceFrom: number;
+  rating: number;
+  reviews: number;
+  duration: string;
+  groupSize: string;
+}
+
+export type TourFull = TourSummary & {
+  slug: string;
+  gallery: Media[];
+  short: string;
+  description: string;
+  highlights: string[];
+  itinerary: any[];
+  inclusions: string[];
+  exclusions: string[];
+  durationDays: number;
+  location: {
+    country: string;
+    region: string;
+    coords: { lat: number; lng: number };
+  };
+  hostGuideId: string;
+  stats: {
+    totalReviews: number;
+    averageRating: number;
+    participants: number;
+  };
+  createdAt: string;
+  updatedAt: string;
+  // Fields matching Tour interface for compatibility
+  _id?: string;
+  price?: number;
+  video?: string | null;
+  categories?: string[];
+}
+
+export type FAQ = {
+  id: string;
+  tourId: string;
+  question: string;
+  answer: string;
+  likes: number;
+  createdAt: string;
+}
+
+export type Review = {
+  id: string;
+  tourId: string;
+  author: { id: string; name: string; avatar: string };
+  rating: number;
+  title: string;
+  body: string;
+  createdAt: string;
+}
+
+export type Guide = {
+  id: string;
+  name: string;
+  rating: number;
+  experienceYears: number;
+  languages: string[];
+  profileImage: string;
+}
 
 export type GenOptions = {
   seed?: number;
-  imageHost?: string; // base host for generated images (picsum by default)
+  imageHost?: string;
 };
 
 const DEFAULTS: Required<GenOptions> = { seed: 12345, imageHost: 'https://picsum.photos' };
@@ -85,6 +164,11 @@ export function generateTour(id: string, opts: GenOptions = {}): TourFull {
     },
     createdAt: created.toISOString(),
     updatedAt: updated.toISOString(),
+    // Compatibility fields
+    _id: id,
+    price: summary.priceFrom,
+    video: null,
+    categories: ['Adventure', 'Nature'],
   };
 
   return tour;
@@ -112,8 +196,8 @@ export function generateTours(count: number, opts: GenOptions = {}): TourSummary
       createdAt,
       updatedAt,
       ...summary
-    } = t as any;
-    return summary as TourSummary;
+    } = t;
+    return summary;
   });
 }
 
@@ -130,12 +214,10 @@ export function generateFAQs(tourId: string, count: number, opts: GenOptions = {
   }));
 }
 
-// Return top K FAQs sorted by likes descending (useful for initial SSR top 10)
 export function topFAQs(faqs: FAQ[], top = 10): FAQ[] {
   return [...faqs].sort((a, b) => (b.likes ?? 0) - (a.likes ?? 0)).slice(0, top);
 }
 
-// Simple paginated FAQ response shape: { total, faqs }
 export function faqPage(faqs: FAQ[], skip = 0, limit = 10) {
   const total = faqs.length;
   const page = faqs.slice(skip, skip + limit);

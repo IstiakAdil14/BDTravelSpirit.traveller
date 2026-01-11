@@ -1,45 +1,51 @@
+// connect.ts
 import mongoose from "mongoose";
 
-const MONGODB_URI = process.env.MONGODB_URI!;
-
+const MONGODB_URI = process.env.MONGODB_URI;
 if (!MONGODB_URI) {
   throw new Error("Please define the MONGODB_URI environment variable inside .env.local");
 }
 
 /**
- * Global is used here to maintain a cached connection across hot reloads
- * in development. This prevents connections growing exponentially
- * during API Route usage.
+ * Keep a cached connection across hot reloads in development.
+ * This prevents creating new connections on every module reload.
  */
-let cached = (global as any).mongoose;
-
-if (!cached) {
-  cached = (global as any).mongoose = { conn: null, promise: null };
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  var _mongooseConnection: {
+    conn: typeof mongoose | null;
+    promise: Promise<typeof mongoose> | null;
+  } | undefined;
 }
 
-async function connectToDatabase() {
+const cached = global._mongooseConnection ?? (global._mongooseConnection = { conn: null, promise: null });
+
+export async function dbConnect(): Promise<typeof mongoose> {
   if (cached.conn) {
     return cached.conn;
   }
 
   if (!cached.promise) {
-    const opts = {
+    const opts: mongoose.ConnectOptions = {
+      // Prevent mongoose from buffering commands if not connected
       bufferCommands: false,
+      // Use the new URL parser and unified topology by default in modern mongoose versions
+      // (these are defaults in recent versions; keep here for clarity)
+      // useNewUrlParser: true,
+      // useUnifiedTopology: true,
     };
 
-    cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
-      return mongoose;
-    });
+    cached.promise = mongoose.connect(MONGODB_URI!, opts).then((m) => m);
   }
 
   try {
     cached.conn = await cached.promise;
-  } catch (e) {
+  } catch (error) {
     cached.promise = null;
-    throw e;
+    throw error;
   }
 
   return cached.conn;
 }
 
-export default connectToDatabase;
+export default dbConnect;

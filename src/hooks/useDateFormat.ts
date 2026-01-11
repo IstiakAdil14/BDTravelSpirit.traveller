@@ -1,12 +1,6 @@
-'use client';
-import { useCallback } from 'react';
-
-export default function useDateFormat() {
-  return useCallback((iso: string) => {
-    try {
-      return new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'short', day: 'numeric' }).format(new Date(iso));
-    } catch {
-      return iso;
-    }
-  }, []);
+// src/hooks/useDateFormat.ts
+export function useDateFormat(dateStr?: string) {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
 }

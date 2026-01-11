@@ -400,10 +400,10 @@ const TourSchema = new Schema<ITour>(
 
 // Indexes
 TourSchema.index({ status: 1, publishedAt: -1 });
-TourSchema.index({ slug: 1 });
+// TourSchema.index({ slug: 1 }); // Defined in schema
 TourSchema.index({ "destinations.city": 1, "destinations.country": 1 });
-TourSchema.index({ categories: 1 });
-TourSchema.index({ audience: 1 });
+// TourSchema.index({ categories: 1 }); // Defined in schema
+// TourSchema.index({ audience: 1 }); // Defined in schema
 TourSchema.index({ featured: 1, trendingUntil: -1 });
 
 export const TourModel = models.Tour || model<ITour>("Tour", TourSchema);
