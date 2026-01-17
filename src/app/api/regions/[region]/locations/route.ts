@@ -9,3 +9,4 @@ export async function GET(req: Request, { params }: { params: { region: string }
     headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120" },
   });
 }
+

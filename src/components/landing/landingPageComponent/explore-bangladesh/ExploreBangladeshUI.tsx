@@ -2,6 +2,7 @@
 
 import { MapPin, ArrowRight, Compass } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 
 interface Destination {
     id: number;
@@ -15,6 +16,12 @@ interface ExploreBangladeshUIProps {
 }
 
 const ExploreBangladeshUI = ({ destinations }: ExploreBangladeshUIProps) => {
+    const router = useRouter();
+
+    const handleDestinationClick = (destinationName: string) => {
+        router.push(`/tours/region/all-locations?region=${destinationName.toLowerCase()}`);
+    };
+
     return (
         <section className="py-4 md:py-24 bg-gradient-to-br from-emerald-50/50 via-white to-teal-50/30 relative overflow-hidden">
             {/* Background decoration */}
@@ -68,7 +75,10 @@ const ExploreBangladeshUI = ({ destinations }: ExploreBangladeshUIProps) => {
                             transition={{ duration: 0.5, delay: index * 0.1 }}
                             className="group"
                         >
-                            <div className="rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer h-72 sm:h-80 relative">
+                            <div 
+                                className="rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer h-72 sm:h-80 relative"
+                                onClick={() => handleDestinationClick(destination.name)}
+                            >
                                 {/* Background Image */}
                                 <div
                                     className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"

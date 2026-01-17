@@ -19,14 +19,18 @@ export async function getLocationsForRegion(region: string): Promise<LocationSum
   // Aggregate distinct locations within the region with counts and a sample tour for link/image
   const pipeline: any[] = [
     {
+      $unwind: "$destinations"
+    },
+    {
       $match: {
-        region: { $regex: new RegExp(`^${region}$`, "i") },
-        location: { $exists: true, $ne: "" },
+        "destinations.region": { $regex: new RegExp(`^${region}$`, "i") },
+        "destinations.city": { $exists: true, $ne: "" },
+        status: "published"
       },
     },
     {
       $group: {
-        _id: "$location",
+        _id: "$destinations.city",
         count: { $sum: 1 },
         sampleId: { $first: "$_id" },
         sampleSlug: { $first: "$slug" },
