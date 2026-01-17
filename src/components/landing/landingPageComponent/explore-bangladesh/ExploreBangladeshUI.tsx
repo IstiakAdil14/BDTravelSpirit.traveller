@@ -19,7 +19,7 @@ const ExploreBangladeshUI = ({ destinations }: ExploreBangladeshUIProps) => {
     const router = useRouter();
 
     const handleDestinationClick = (destinationName: string) => {
-        router.push(`/tours/region/all-locations?region=${destinationName.toLowerCase()}`);
+        router.push(`/tours?region=${destinationName.toLowerCase()}`);
     };
 
     return (
@@ -65,7 +65,7 @@ const ExploreBangladeshUI = ({ destinations }: ExploreBangladeshUIProps) => {
                 </motion.div>
 
                 {/* Destinations Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mb-12 max-w-7xl mx-auto">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 max-w-7xl mx-auto">
                     {destinations.map((destination, index) => (
                         <motion.div
                             key={destination.id}
@@ -133,20 +133,6 @@ const ExploreBangladeshUI = ({ destinations }: ExploreBangladeshUIProps) => {
                         </motion.div>
                     ))}
                 </div>
-
-                {/* Bottom CTA */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.6, delay: 0.4 }}
-                    className="text-center"
-                >
-                    <button suppressHydrationWarning={true} className="group inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 rounded-full font-semibold text-white shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95">
-                        <span>View All Destinations</span>
-                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
-                    </button>
-                </motion.div>
             </div>
         </section>
     );

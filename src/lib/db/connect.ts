@@ -1,9 +1,16 @@
 // connect.ts
 import mongoose from "mongoose";
 
-const MONGODB_URI = process.env.MONGODB_URI;
-if (!MONGODB_URI) {
-  throw new Error("Please define the MONGODB_URI environment variable inside .env.local");
+let MONGODB_URI = process.env.MONGODB_URI;
+
+function getMongoUri() {
+  if (!MONGODB_URI) {
+    MONGODB_URI = process.env.MONGODB_URI;
+  }
+  if (!MONGODB_URI) {
+    throw new Error("Please define the MONGODB_URI environment variable inside .env.local");
+  }
+  return MONGODB_URI;
 }
 
 /**
@@ -35,7 +42,8 @@ export async function dbConnect(): Promise<typeof mongoose> {
       // useUnifiedTopology: true,
     };
 
-    cached.promise = mongoose.connect(MONGODB_URI!, opts).then((m) => m);
+    const mongoUri = getMongoUri();
+    cached.promise = mongoose.connect(mongoUri, opts).then((m) => m);
   }
 
   try {

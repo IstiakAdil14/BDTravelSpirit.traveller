@@ -9,7 +9,9 @@ import Link from "next/link";
 // Type definitions for type safety
 interface TourOperator {
     id: number;
+    _id: string;
     name: string;
+    slug: string;
     logo: string;
     rating: number;
     reviews: number;
@@ -99,8 +101,8 @@ const StarRating = ({ rating, reviews }: StarRatingProps) => {
                     >
                         <Star
                             className={`w-4 h-4 transition-all duration-300 ${i < Math.floor(rating)
-                                    ? 'text-yellow-400 fill-yellow-400 drop-shadow-sm'
-                                    : 'text-gray-300'
+                                ? 'text-yellow-400 fill-yellow-400 drop-shadow-sm'
+                                : 'text-gray-300'
                                 }`}
                             aria-hidden="true"
                         />
@@ -129,77 +131,79 @@ const OperatorCard = ({ operator, index }: OperatorCardProps) => {
         : operator.name;
 
     return (
-        <motion.article
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.4, delay: index * 0.05 }}
-            className="relative bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl hover:shadow-2xl transition-shadow duration-300 border border-gray-200/50 overflow-hidden group h-40"
-        >
-            <div className="flex h-full relative">
-                {/* Left Side - Icon Area */}
-                <div className="w-[35%] relative bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 flex items-center justify-center overflow-hidden">
-                    {/* Subtle background pattern */}
-                    <div className="absolute inset-0 opacity-20">
-                        <div className="absolute top-0 left-0 w-20 h-20 bg-emerald-400/20 rounded-full blur-2xl" />
-                        <div className="absolute bottom-0 right-0 w-24 h-24 bg-teal-400/20 rounded-full blur-2xl" />
+        <Link href={`/tours?operator=${operator.slug}`}>
+            <motion.article
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: index * 0.05 }}
+                className="relative bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl hover:shadow-2xl transition-shadow duration-300 border border-gray-200/50 overflow-hidden group h-40 cursor-pointer"
+            >
+                <div className="flex h-full relative">
+                    {/* Left Side - Icon Area */}
+                    <div className="w-[35%] relative bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 flex items-center justify-center overflow-hidden">
+                        {/* Subtle background pattern */}
+                        <div className="absolute inset-0 opacity-20">
+                            <div className="absolute top-0 left-0 w-20 h-20 bg-emerald-400/20 rounded-full blur-2xl" />
+                            <div className="absolute bottom-0 right-0 w-24 h-24 bg-teal-400/20 rounded-full blur-2xl" />
+                        </div>
+
+                        {/* Logo or Icon */}
+                        <div className="relative">
+                            {operator.logo && !logoError ? (
+                                <img
+                                    src={operator.logo}
+                                    alt={`${operator.name} logo`}
+                                    className="w-14 h-14 object-contain drop-shadow-lg group-hover:scale-105 transition-transform duration-300"
+                                    onError={() => setLogoError(true)}
+                                />
+                            ) : (
+                                <Award className="w-14 h-14 text-emerald-600 drop-shadow-lg group-hover:scale-105 transition-transform duration-300" aria-hidden="true" />
+                            )}
+                        </div>
                     </div>
 
-                    {/* Logo or Icon */}
-                    <div className="relative">
-                        {operator.logo && !logoError ? (
-                            <img
-                                src={operator.logo}
-                                alt={`${operator.name} logo`}
-                                className="w-14 h-14 object-contain drop-shadow-lg group-hover:scale-105 transition-transform duration-300"
-                                onError={() => setLogoError(true)}
-                            />
-                        ) : (
-                            <Award className="w-14 h-14 text-emerald-600 drop-shadow-lg group-hover:scale-105 transition-transform duration-300" aria-hidden="true" />
-                        )}
-                    </div>
-                </div>
+                    {/* Right Side - Content */}
+                    <div className="w-[65%] p-6 flex flex-col justify-between">
+                        {/* Header */}
+                        <div>
+                            <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-emerald-600 transition-colors duration-200 line-clamp-1" title={operator.name}>
+                                {displayName}
+                            </h3>
 
-                {/* Right Side - Content */}
-                <div className="w-[65%] p-6 flex flex-col justify-between">
-                    {/* Header */}
-                    <div>
-                        <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-emerald-600 transition-colors duration-200 line-clamp-1" title={operator.name}>
-                            {displayName}
-                        </h3>
+                            {/* Rating */}
+                            <StarRating rating={operator.rating} reviews={operator.reviews} />
+                        </div>
 
-                        {/* Rating */}
-                        <StarRating rating={operator.rating} reviews={operator.reviews} />
-                    </div>
+                        {/* Specialties */}
+                        <div className="flex flex-wrap gap-2 my-4">
+                            {operator.specialties.slice(0, 2).map((specialty, idx) => (
+                                <span
+                                    key={idx}
+                                    className="px-3 py-1.5 bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-700 text-xs font-semibold rounded-full border border-emerald-200/50"
+                                >
+                                    {specialty}
+                                </span>
+                            ))}
+                        </div>
 
-                    {/* Specialties */}
-                    <div className="flex flex-wrap gap-2 my-4">
-                        {operator.specialties.slice(0, 2).map((specialty, idx) => (
-                            <span
-                                key={idx}
-                                className="px-3 py-1.5 bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-700 text-xs font-semibold rounded-full border border-emerald-200/50"
-                            >
-                                {specialty}
-                            </span>
-                        ))}
-                    </div>
-
-                    {/* Footer */}
-                    <div className="flex items-center justify-start gap-4 text-xs pt-4 border-t border-gray-200/60">
-                        {operator.certified && (
-                            <div className="flex items-center gap-2 px-3 py-1.5 bg-green-50 rounded-full border border-green-200/50">
-                                <Shield className="w-4 h-4 text-green-600" aria-hidden="true" />
-                                <span className="font-semibold text-green-700">Certified</span>
+                        {/* Footer */}
+                        <div className="flex items-center justify-start gap-4 text-xs pt-4 border-t border-gray-200/60">
+                            {operator.certified && (
+                                <div className="flex items-center gap-2 px-3 py-1.5 bg-green-50 rounded-full border border-green-200/50">
+                                    <Shield className="w-4 h-4 text-green-600" aria-hidden="true" />
+                                    <span className="font-semibold text-green-700">Certified</span>
+                                </div>
+                            )}
+                            <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 rounded-full border border-emerald-200/50">
+                                <Users className="w-4 h-4 text-emerald-600" aria-hidden="true" />
+                                <span className="font-semibold text-emerald-700">{operator.experience}</span>
                             </div>
-                        )}
-                        <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 rounded-full border border-emerald-200/50">
-                            <Users className="w-4 h-4 text-emerald-600" aria-hidden="true" />
-                            <span className="font-semibold text-emerald-700">{operator.experience}</span>
                         </div>
                     </div>
                 </div>
-            </div>
-        </motion.article>
+            </motion.article>
+        </Link>
     );
 };
 
@@ -207,15 +211,15 @@ const OperatorCard = ({ operator, index }: OperatorCardProps) => {
  * SectionBadge Component - Premium animated badge
  */
 const SectionBadge = ({ children }: { children: React.ReactNode }) => (
-     <motion.div
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        whileInView={{ opacity: 1, scale: 1 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.6, type: "spring", bounce: 0.4 }}
-                        className="flex justify-center mb-10"
-                    >
-                        <div className="group inline-flex items-center gap-3 rounded-full bg-gradient-to-r from-emerald-500/20 via-teal-500/20 to-cyan-500/20 border-2 border-emerald-400/30 px-6 py-1 backdrop-blur-sm hover:border-emerald-400/50 transition-all duration-300 shadow-lg hover:shadow-emerald-200/50">
-                            <span className="text-emerald-700 font-semibold tracking-wide text-sm uppercase">{children}</span>
+    <motion.div
+        initial={{ opacity: 0, scale: 0.8 }}
+        whileInView={{ opacity: 1, scale: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6, type: "spring", bounce: 0.4 }}
+        className="flex justify-center mb-10"
+    >
+        <div className="group inline-flex items-center gap-3 rounded-full bg-gradient-to-r from-emerald-500/20 via-teal-500/20 to-cyan-500/20 border-2 border-emerald-400/30 px-6 py-1 backdrop-blur-sm hover:border-emerald-400/50 transition-all duration-300 shadow-lg hover:shadow-emerald-200/50">
+            <span className="text-emerald-700 font-semibold tracking-wide text-sm uppercase">{children}</span>
             <TrendingUp className="w-4 h-4 text-emerald-600 relative z-10" />
         </div>
     </motion.div>
@@ -283,15 +287,17 @@ const TravelWithBestTourOperatorsUI = ({ operators, showAll = false, hideCTA = f
                 </motion.div>
 
                 {/* Tour Operators Grid with enhanced spacing */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20 max-w-7xl mx-auto">
-                    {(showAll ? operators : operators.slice(0, 6)).map((operator, index) => (
-                        <OperatorCard
-                            key={operator.id}
-                            operator={operator}
-                            index={index}
-                        />
-                    ))}
-                </div>
+                {operators && operators.length > 0 && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20 max-w-7xl mx-auto">
+                        {(showAll ? operators : operators.slice(0, 6)).map((operator, index) => (
+                            <OperatorCard
+                                key={operator.id}
+                                operator={operator}
+                                index={index}
+                            />
+                        ))}
+                    </div>
+                )}
 
                 {/* Premium CTA Section */}
                 {!hideCTA && (
