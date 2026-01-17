@@ -9,6 +9,7 @@ import HeroSkeleton from '@/components/tours/[region]/all-locations/HeroSkeleton
 import MapSkeleton from '@/components/tours/[region]/all-locations/MapSkeleton';
 import LocationSkeleton from '@/components/tours/[region]/all-locations/LocationSkeleton';
 import OperatorDetailPage from '@/components/operators/OperatorDetailPage';
+import OperatorDetailSkeleton from '@/components/operators/OperatorDetailSkeleton';
 
 const regionMap: { [key: string]: string } = {
   'barishal': 'Barishal',
@@ -86,6 +87,10 @@ export default function ToursContent() {
   }, [region, location, category, operator]);
 
   if (loading) {
+    if (operator) {
+      return <OperatorDetailSkeleton />;
+    }
+
     return (
       <div className="space-y-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 ml-4 mr-4">
