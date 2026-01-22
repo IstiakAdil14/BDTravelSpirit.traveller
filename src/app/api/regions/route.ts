@@ -1,20 +1,20 @@
-import { NextResponse } from "next/server";
-import { dbConnect } from "@/lib/db/connect";
-import Region from "@/models/region.model";
+import { NextResponse } from 'next/server';
+import { dbConnect } from '@/lib/db/connect';
+import Region from '@/models/region.model';
 
-export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
-  const name = searchParams.get("name")?.toLowerCase();
-  
-  await dbConnect();
-  
-  if (name) {
-    const region = await Region.findOne({ 
-      name: { $regex: new RegExp(`^${name}$`, 'i') } 
-    });
-    return NextResponse.json(region);
+export async function GET() {
+  try {
+    await dbConnect();
+    const destinations = await Region.find({}).lean();
+    
+    const destinationsWithTourPlaces = destinations.map(dest => ({
+      ...dest,
+      tourPlaces: dest.tourCount || 0
+    }));
+
+    return NextResponse.json(destinationsWithTourPlaces);
+  } catch (error) {
+    console.error('Error loading regions:', error);
+    return NextResponse.json([]);
   }
-  
-  const regions = await Region.find({});
-  return NextResponse.json(regions);
 }

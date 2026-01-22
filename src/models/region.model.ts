@@ -4,6 +4,7 @@ const RegionSchema = new Schema(
 {
   name: String,
   image: String,
+  tourCount: { type: Number, default: 0 },
 },
 { timestamps: true }
 );

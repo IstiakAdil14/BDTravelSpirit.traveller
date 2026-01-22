@@ -3,9 +3,11 @@
 import { MapPin, ArrowRight, Compass } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import { useState } from 'react';
 
 interface Destination {
-    id: number;
+    _id: string;
     name: string;
     image: string;
     tourPlaces: number;
@@ -68,22 +70,27 @@ const ExploreBangladeshUI = ({ destinations }: ExploreBangladeshUIProps) => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 max-w-7xl mx-auto">
                     {destinations.map((destination, index) => (
                         <motion.div
-                            key={destination.id}
+                            key={destination._id}
                             initial={{ opacity: 0, y: 30 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ duration: 0.5, delay: index * 0.1 }}
                             className="group"
                         >
-                            <div 
+                            <div
                                 className="rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer h-72 sm:h-80 relative"
                                 onClick={() => handleDestinationClick(destination.name)}
                             >
                                 {/* Background Image */}
-                                <div
-                                    className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
-                                    style={{ backgroundImage: `url(${destination.image})` }}
-                                />
+                                <div className="absolute inset-0 transition-transform duration-700 group-hover:scale-110">
+                                    <Image
+                                        src={destination.image}
+                                        alt={destination.name}
+                                        fill
+                                        className="object-cover"
+                                        priority={index < 4}
+                                    />
+                                </div>
 
                                 {/* Gradient Overlay */}
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent group-hover:from-black/90 transition-all duration-500" />
@@ -108,7 +115,7 @@ const ExploreBangladeshUI = ({ destinations }: ExploreBangladeshUIProps) => {
                                                     <MapPin className="w-4 h-4 text-emerald-300" />
                                                 </div>
                                                 <span className="text-sm text-gray-200 font-medium">
-                                                    {destination.tourPlaces} tour places
+                                                    {destination.tourPlaces} tours
                                                 </span>
                                             </div>
 

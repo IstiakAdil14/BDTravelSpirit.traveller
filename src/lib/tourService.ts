@@ -16,29 +16,31 @@ export async function getFullTourBySlug(slug: string) {
     if (!mongoose.models.Asset) mongoose.model("Asset", AssetModel.schema);
 
     const tourDoc = await TourModel.findOne({ slug })
-        .populate("heroImage") // Populate heroImage to get publicUrl
-        .lean() as (ITour & { heroImage?: IAsset; _id: mongoose.Types.ObjectId }) | null;
+        .populate("heroImage")
+        .populate("gallery")
+        .populate("destinations.images")
+        .populate("itinerary.images")
+        .populate("destinations.attractions.images")
+        .lean() as any;
 
     if (!tourDoc) return null;
 
     const tourId = tourDoc._id;
     const tourIdStr = tourId.toString();
 
-    // Parallel fetches
-    const [galleryDocs, reviewDocs, faqDocs, guideDocs, recDocs] = await Promise.all([
-        AssetModel.find({ _id: { $in: tourDoc.gallery || [] } }).lean(),
+    // Parallel fetches for other related models
+    const [reviewDocs, faqDocs, guideDocs, recDocs] = await Promise.all([
         ReviewModel.find({ tour: tourId })
             .sort({ createdAt: -1 })
             .limit(10)
-            .populate("user", "name avatar") // Populate user name
+            .populate("user", "name avatar")
             .lean(),
         TourFAQModel.find({ tour: tourId }).sort({ createdAt: -1 }).limit(10).lean(),
         GuideModel.find({ _id: { $in: tourDoc.guideIds || [] } }).lean(),
-        // Simple recommendation logic: same country
         TourModel.find({
             "destinations.country": tourDoc.destinations?.[0]?.country,
             _id: { $ne: tourId },
-            status: "published" // Assuming we only want published tours
+            status: "published"
         })
             .populate("heroImage")
             .limit(6)
@@ -47,14 +49,11 @@ export async function getFullTourBySlug(slug: string) {
 
     // --- MAPPERS ---
 
-    const mapTour = (t: any): Tour => {
-        const heroAsset = t.heroImage as any;
+    const mapTour = (t: any): any => {
         return {
+            ...t,
             _id: t._id.toString(),
-            slug: t.slug,
-            title: t.title,
-            description: t.summary || t.description || "", // summary is required in schema
-            heroImage: heroAsset?.publicUrl || "",
+            heroImage: t.heroImage, // Now populated
             priceFrom: t.basePrice?.amount,
             durationDays: t.duration?.days,
             location: t.mainLocation?.address ? `${t.mainLocation.address.city || ""}, ${t.mainLocation.address.country || ""}` : t.destinations?.[0]?.country || "",
@@ -63,8 +62,8 @@ export async function getFullTourBySlug(slug: string) {
                 travelers: t.popularityScore || 0,
                 reviews: t.ratings?.count || 0,
             },
-            createdAt: t.createdAt?.toISOString(),
-            updatedAt: t.updatedAt?.toISOString(),
+            createdAt: t.createdAt?.toISOString ? t.createdAt.toISOString() : t.createdAt,
+            updatedAt: t.updatedAt?.toISOString ? t.updatedAt.toISOString() : t.updatedAt,
         };
     };
 
@@ -104,7 +103,7 @@ export async function getFullTourBySlug(slug: string) {
     // --- ASSEMBLE ---
 
     const tour = mapTour(tourDoc);
-    const gallery = galleryDocs.map((doc, i) => mapMedia(doc, i));
+    const gallery = (tourDoc.gallery || []).map((doc: any, i: number) => mapMedia(doc, i));
     const reviews = reviewDocs.map(mapReview);
     const faqs = faqDocs.map(mapFaq);
     const guides = guideDocs.map(mapGuide);
@@ -133,6 +132,7 @@ export async function getTours(options: { limit?: number; status?: string; isFea
         priceFrom: t.basePrice?.amount,
         durationDays: t.duration?.days,
         location: t.destinations?.[0]?.city || t.destinations?.[0]?.country || "",
+        region: t.destinations?.[0]?.region || t.mainLocation?.address?.region || "",
         rating: t.ratings?.average || 0,
         stats: {
             travelers: t.popularityScore || 0,

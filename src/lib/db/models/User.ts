@@ -29,10 +29,7 @@ const UserSchema = new mongoose.Schema<User>(
     },
     password: {
       type: String,
-      required: function (this: User) {
-        // Password is required only if not using OAuth
-        return !this.image; // If no image (OAuth), password is required
-      },
+      required: false, // Make password optional for OAuth users
     },
     image: String,
     role: {

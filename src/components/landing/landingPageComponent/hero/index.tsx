@@ -1,6 +1,7 @@
-"use client"
 import { Suspense } from 'react';
 import HeroClient from './HeroClient';
+import { dbConnect } from '@/lib/db/connect';
+import { HeroSlideModel } from '@/models/heroSlide.model';
 
 const HeroSkeleton = () => (
   <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
@@ -45,10 +46,13 @@ const HeroSkeleton = () => (
   </section>
 );
 
-export default function HeroSection() {
+export default async function HeroSection() {
+  await dbConnect();
+  const slides = await HeroSlideModel.find({ isActive: true }).sort({ order: 1 }).lean();
+
   return (
     <Suspense fallback={<HeroSkeleton />}>
-      <HeroClient />
+      <HeroClient slides={JSON.parse(JSON.stringify(slides))} />
     </Suspense>
   );
 }

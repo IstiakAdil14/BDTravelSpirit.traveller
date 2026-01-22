@@ -2,16 +2,17 @@ import mongoose, { Schema, models } from "mongoose";
 
 
 const LocationSchema = new Schema(
-{
-name: String,
-region: String,
-image: String,
-duration: String,
-price: Number,
-shortDescription: String,
-rating: Number,
-},
-{ timestamps: true }
+    {
+        name: String,
+        slug: { type: String, unique: true },
+        region: String,
+        image: String,
+        duration: String,
+        price: Number,
+        shortDescription: String,
+        rating: Number,
+    },
+    { timestamps: true }
 );
 
 

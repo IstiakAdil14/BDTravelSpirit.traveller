@@ -1,8 +1,9 @@
-import NextAuth from "next-auth";
+import { NextAuthOptions } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 import connectToDatabase from "@/lib/db/connect";
 import UserModel from "@/lib/db/models/User";
+import { getUserDashboardPath } from "@/lib/utils/userRouting";
 
 // Check for required environment variables
 if (!process.env.NEXTAUTH_SECRET) {
@@ -12,11 +13,18 @@ if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
   console.warn("Google OAuth credentials not set. Google sign-in will not work.");
 }
 
-export const authOptions = NextAuth({
+export const authOptions: NextAuthOptions = {
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      authorization: {
+        params: {
+          prompt: "consent",
+          access_type: "offline",
+          response_type: "code"
+        }
+      }
     }),
     Credentials({
       name: "credentials",
@@ -66,8 +74,9 @@ export const authOptions = NextAuth({
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   pages: {
-    signIn: "/auth/login",
-    error: "/auth/login",
+    signIn: "/auth/signin",
+    error: "/auth/error",
+    verifyRequest: "/auth/verify-request",
   },
   callbacks: {
     /**
@@ -100,69 +109,37 @@ export const authOptions = NextAuth({
       return session;
     },
 
-    /**
-     * On Google sign-in, create user if missing, or sync name/image/emailVerified for existing users.
-     * Uses `profile` to detect Google email verification.
-     */
     async signIn({ user, account, profile }: any) {
       if (account?.provider === "google") {
         try {
           await connectToDatabase();
-
           const existingUser = await UserModel.findOne({ email: user.email });
 
-          // Determine if Google marked the email as verified (boolean)
-          const googleEmailVerified = Boolean(
-            profile?.email_verified ?? (profile && (profile as any).verified_email)
-          );
-
-          if (!existingUser) {
-            const created = await UserModel.create({
-              name: user.name ?? undefined,
-              email: user.email,
-              image: user.image ?? undefined,
-              role: "traveler",
-              emailVerified: googleEmailVerified ? new Date() : null,
-            });
-
-            if (created && created._id) {
-              // ensure subsequent callbacks see the DB id
-              user.id = created._id.toString();
-            }
-          } else {
-            // Update only changed fields
-            let changed = false;
-
-            if (user.name && user.name !== existingUser.name) {
-              existingUser.name = user.name;
-              changed = true;
-            }
-
-            if (user.image && user.image !== existingUser.image) {
-              existingUser.image = user.image;
-              changed = true;
-            }
-
-            if (googleEmailVerified && !existingUser.emailVerified) {
-              existingUser.emailVerified = new Date();
-              changed = true;
-            }
-
-            if (changed) {
-              await existingUser.save();
-            }
-
-            // attach DB id to user for jwt/session callbacks
-            user.id = existingUser._id?.toString() ?? user.id;
+          if (existingUser) {
+            user.id = existingUser._id?.toString();
+            user.role = existingUser.role;
+            return true;
           }
+
+          // Create user if they don't exist
+          const newUser = await UserModel.create({
+            name: user.name,
+            email: user.email,
+            image: user.image, // Use 'image' field to match schema
+            isVerified: true, // Google users are pre-verified
+            accountStatus: 'active'
+          });
+          
+          user.id = newUser._id.toString();
+          user.role = newUser.role;
+          return true;
         } catch (error) {
-          // Log but don't block sign-in for transient DB errors
           console.error("Google sign in sync error:", error);
+          return false;
         }
       }
-
       return true;
     },
   },
   secret: process.env.NEXTAUTH_SECRET,
-});
+};

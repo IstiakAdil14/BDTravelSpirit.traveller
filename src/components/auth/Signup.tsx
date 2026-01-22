@@ -1,12 +1,31 @@
 "use client";
 
-import { signIn } from "next-auth/react";
+import { signIn, getSession } from "next-auth/react";
 import { FcGoogle } from "react-icons/fc";
 import Link from "next/link";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import AccountExistsPopup from "@/components/ui/AccountExistsPopup";
 
 export default function Signup() {
-    const handleGoogleSignIn = () => {
-        signIn("google", { callbackUrl: "/" });
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState("");
+    const [showAccountExistsPopup, setShowAccountExistsPopup] = useState(false);
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    
+    useEffect(() => {
+        if (searchParams.get('error') === 'AccountExists') {
+            setShowAccountExistsPopup(true);
+        }
+    }, [searchParams]);
+    
+    const handleGoogleSignIn = async () => {
+        setIsLoading(true);
+        setError("");
+        
+        // Start Google OAuth to get email, but don't create session yet
+        window.location.href = `/api/auth/signin/google?callbackUrl=${encodeURIComponent('/auth/signup?verify=true')}`;
     };
 
     return (
@@ -18,13 +37,21 @@ export default function Signup() {
                     <p className="text-gray-600">Create your account to explore Bangladesh</p>
                 </div>
 
+                {/* Error Message */}
+                {error && (
+                    <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                        {error}
+                    </div>
+                )}
+
                 {/* Google Sign In Button */}
                 <button
                     onClick={handleGoogleSignIn}
-                    className="w-full flex items-center justify-center gap-3 px-6 py-3 bg-white border-2 border-gray-200 rounded-xl hover:border-gray-300 hover:shadow-md transition-all duration-200 font-medium text-gray-700"
+                    disabled={isLoading}
+                    className="w-full flex items-center justify-center gap-3 px-6 py-3 bg-white border-2 border-gray-200 rounded-xl hover:border-gray-300 hover:shadow-md transition-all duration-200 font-medium text-gray-700 disabled:opacity-50"
                 >
                     <FcGoogle className="w-6 h-6" />
-                    <span>Continue with Google</span>
+                    <span>{isLoading ? "Checking..." : "Continue with Google"}</span>
                 </button>
 
                 {/* Benefits */}
@@ -78,6 +105,14 @@ export default function Signup() {
                     </Link>
                 </p>
             </div>
+            
+            <AccountExistsPopup 
+                show={showAccountExistsPopup} 
+                onClose={() => {
+                    setShowAccountExistsPopup(false);
+                    router.push('/auth/login');
+                }} 
+            />
         </div>
     );
 }

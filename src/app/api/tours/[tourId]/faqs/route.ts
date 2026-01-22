@@ -11,9 +11,9 @@ function decodeCursor(cursor: string) {
   return Buffer.from(cursor, "base64").toString("ascii");
 }
 
-export async function GET(req: Request, { params }: { params: { tourId: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ tourId: string }> }) {
   await dbConnect();
-  const { tourId } = params;
+  const { tourId } = await params;
   const url = new URL(req.url);
   const cursor = url.searchParams.get("cursor");
   const limit = Math.min(Number(url.searchParams.get("limit") || "10"), 50);

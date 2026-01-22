@@ -105,7 +105,7 @@ const FeaturesUI = ({ features }: FeaturesUIProps) => {
                     transition={{ duration: 0.8 }}
                     className="text-center mb-16"
                 >
-                    <h2 className="heading-4xl font-display font-bold mb-6 heading-gradient">
+                    <h2 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold leading-tight mb-6 bg-gradient-to-r from-gray-900 via-emerald-800 to-teal-800 bg-clip-text text-transparent">
                         Partner with BD Travel Spirit&apos;s
                     </h2>
                     <p className="text-lg text-gray-800 max-w-2xl mx-auto">

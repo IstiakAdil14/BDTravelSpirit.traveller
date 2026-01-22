@@ -3,34 +3,15 @@
 import { useState, useEffect, useCallback } from "react";
 import HeroUI from './HeroUI';
 
-const HeroClient = () => {
+const HeroClient = ({ slides: initialSlides }: { slides: any[] }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
+  const [slides] = useState<any[]>(initialSlides);
 
-  const slides = [
-    {
-      image: "/images/hero_img/hero_img_1.jpg",
-      title: "Discover Bangladesh",
-      subtitle: "Authentic experiences await",
-      alt: "Scenic view of Bangladesh landscape"
-    },
-    {
-      image: "/images/hero_img/hero_img_2.png",
-      title: "Heritage & Adventure",
-      subtitle: "Explore the heart of Bengal",
-      alt: "Cultural heritage sites of Bangladesh"
-    },
-    {
-      image: "/images/hero_img/hero_img_3.png",
-      title: "Sustainable & Tourism",
-      subtitle: "Travel responsibly, experience deeply",
-      alt: "Sustainable tourism in Bangladesh"
-    },
-  ];
 
   useEffect(() => {
-    if (isPaused) return;
+    if (isPaused || slides.length === 0) return;
 
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
@@ -55,6 +36,8 @@ const HeroClient = () => {
     setIsPaused(true);
     setTimeout(() => setIsPaused(false), 3000);
   }, []);
+
+  if (slides.length === 0) return null;
 
   return (
     <HeroUI

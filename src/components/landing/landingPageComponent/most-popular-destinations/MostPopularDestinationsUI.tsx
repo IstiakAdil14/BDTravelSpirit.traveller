@@ -9,9 +9,10 @@ interface MostPopularDestinationsUIProps {
     title: string;
     subtitle: string;
     buttonText: string;
+    destinations: any[];
 }
 
-const MostPopularDestinationsUI = ({ title, subtitle, buttonText }: MostPopularDestinationsUIProps) => {
+const MostPopularDestinationsUI = ({ title, subtitle, buttonText, destinations }: MostPopularDestinationsUIProps) => {
     return (
         <section className="py-4 bg-gradient-to-br from-white to-gray-50">
             <div className="container mx-auto px-4">
@@ -22,7 +23,7 @@ const MostPopularDestinationsUI = ({ title, subtitle, buttonText }: MostPopularD
                     viewport={{ once: true }}
                     transition={{ duration: 0.6, type: "spring", bounce: 0.4 }}
                     className="flex justify-center mb-10"
-                    >
+                >
                     <div className="group inline-flex items-center gap-3 rounded-full bg-gradient-to-r from-emerald-500/20 via-teal-500/20 to-cyan-500/20 border-2 border-emerald-400/30 px-6 py-1 backdrop-blur-sm hover:border-emerald-400/50 transition-all duration-300 shadow-lg hover:shadow-emerald-200/50">
                         <span className="text-emerald-700 font-semibold tracking-wide text-sm uppercase">Most Popular</span>
                     </div>
@@ -45,7 +46,7 @@ const MostPopularDestinationsUI = ({ title, subtitle, buttonText }: MostPopularD
                 </motion.div>
 
                 {/* Images carousel */}
-                <PopularDestinationsCarousel />
+                <PopularDestinationsCarousel destinations={destinations} />
                 {/* CTA Button */}
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}
@@ -57,6 +58,7 @@ const MostPopularDestinationsUI = ({ title, subtitle, buttonText }: MostPopularD
                     <Button
                         size="lg"
                         className="group inline-flex items-center gap-2 px-8 py-6 bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 rounded-full font-semibold text-white shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95"
+                        onClick={() => window.location.href = '/most-popular-destinations'}
                     >
                         {buttonText}
                     </Button>

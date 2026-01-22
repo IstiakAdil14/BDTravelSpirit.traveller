@@ -6,6 +6,7 @@ import { User, LogOut, Settings } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import SignOutDialog from './SignOutDialog';
 import { useIsClient } from '@/hooks/useIsClient';
 
@@ -15,6 +16,7 @@ export default function AccountMenu() {
   const [userType, setUserType] = useState<'traveler' | 'guide'>('traveler');
   const menuRef = useRef<HTMLDivElement>(null);
   const { data: session, status } = useSession();
+  const router = useRouter();
   const isClient = useIsClient();
 
   useEffect(() => {
@@ -36,6 +38,10 @@ export default function AccountMenu() {
     setShowSignOutDialog(false);
   };
 
+  const handleProfileClick = () => {
+    setIsOpen(!isOpen);
+  };
+
   return (
     <div className="relative" ref={menuRef} onMouseLeave={() => setIsOpen(false)}>
       {/* Trigger Button */}
@@ -44,7 +50,7 @@ export default function AccountMenu() {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onMouseEnter={() => setIsOpen(true)}
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={handleProfileClick}
           className="flex items-center space-x-2 px-4 py-2 bg-white border border-gray-200 rounded-xl hover:shadow-md transition-all cursor-pointer"
         >
           {session?.user?.image ? (
@@ -63,7 +69,7 @@ export default function AccountMenu() {
       ) : (
         <button
           onMouseEnter={() => setIsOpen(true)}
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={handleProfileClick}
           className="flex items-center space-x-2 px-4 py-2 bg-white border border-gray-200 rounded-xl hover:shadow-md transition-all cursor-pointer"
         >
           {session?.user?.image ? (
@@ -92,49 +98,31 @@ export default function AccountMenu() {
             onMouseEnter={() => setIsOpen(true)}
             className="absolute top-full right-0 mt-2 w-72 bg-white rounded-xl shadow-lg border border-gray-200 z-50 overflow-hidden"
           >
-            {status === 'authenticated' && session?.user ? (
+            {session?.user ? (
+              // Authenticated user menu
               <>
-                {/* User Info */}
                 <div className="px-4 py-3 border-b border-gray-200">
-                  <div className="flex items-center space-x-3">
-                    {session.user.image ? (
-                      <Image
-                        src={session.user.image}
-                        alt={session.user.name || 'User'}
-                        width={40}
-                        height={40}
-                        className="w-10 h-10 rounded-full"
-                      />
-                    ) : (
-                      <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-                        <User className="w-5 h-5 text-gray-600" />
-                      </div>
-                    )}
-                    <div>
-                      <h3 className="text-sm font-semibold text-gray-900">
-                        {session.user.name}
-                      </h3>
-                      <p className="text-xs text-gray-500">{session.user.email}</p>
-                    </div>
-                  </div>
+                  <h3 className="text-sm font-semibold text-gray-900">My Account</h3>
+                  <p className="text-xs text-gray-500">{session.user.email}</p>
                 </div>
-
-                {/* Menu Items */}
                 <div className="p-2">
-                  <button className="w-full flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer">
-                    <Settings className="w-4 h-4" />
-                    <span>Settings</span>
-                  </button>
+                  <Link href="/dashboard">
+                    <button className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                      <User className="w-4 h-4" />
+                      Dashboard
+                    </button>
+                  </Link>
                   <button
                     onClick={handleSignOutClick}
-                    className="w-full flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors cursor-pointer"
+                    className="w-full flex items-center gap-3 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                   >
                     <LogOut className="w-4 h-4" />
-                    <span>Sign Out</span>
+                    Sign Out
                   </button>
                 </div>
               </>
             ) : (
+              // Non-authenticated user menu
               <>
                 {/* Header */}
                 <div className="px-4 py-3 border-b border-gray-200">

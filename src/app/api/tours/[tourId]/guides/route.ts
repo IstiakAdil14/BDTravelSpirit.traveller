@@ -4,9 +4,9 @@ import { dbConnect } from "@/lib/db/connect";
 import { GuideModel as Guide } from "@/models/guide.model";
 import mongoose from "mongoose";
 
-export async function GET(req: Request, { params }: { params: { tourId: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ tourId: string }> }) {
   await dbConnect();
-  const { tourId } = params;
+  const { tourId } = await params;
   const url = new URL(req.url);
   const offset = Math.max(Number(url.searchParams.get("offset") || "0"), 0);
   const limit = Math.min(Number(url.searchParams.get("limit") || "10"), 50);

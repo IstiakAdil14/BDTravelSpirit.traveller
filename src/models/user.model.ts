@@ -118,10 +118,8 @@ const UserSchema = new Schema<IUser>(
     },
     password: {
       type: String,
-      // Allow null for OAuth users
-      required: function (this: IUser) {
-        return this.role === USER_ROLE.TRAVELER;
-      },
+      // Make password optional for OAuth users
+      required: false,
     },
 
     // Role-based permissions
@@ -264,4 +262,6 @@ UserSchema.index({ dateOfBirth: 1 });
  * =========================
  */
 export type IUserDoc = IUser & mongoose.Document;
-export const UserModel = models.User || model<IUserDoc>("User", UserSchema);
+// Force model re-creation by deleting from cache
+delete mongoose.models.User;
+export const UserModel = model<IUserDoc>("User", UserSchema);

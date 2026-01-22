@@ -1,28 +1,50 @@
 import { NextResponse } from "next/server";
 import { dbConnect } from "@/lib/db/connect";
-import Location from "@/models/location.model";
+import { TourModel } from "@/models/tour.model";
+import { AssetModel } from "@/models/asset.model";
 
+const regionMap: { [key: string]: string } = {
+  'barishal': 'Barishal',
+  'chittagong': 'Chittagong', 
+  'dhaka': 'Dhaka',
+  'khulna': 'Khulna',
+  'mymensingh': 'Mymensingh',
+  'rajshahi': 'Rajshahi',
+  'rangpur': 'Rangpur',
+  'sylhet': 'Sylhet'
+};
 
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const region = searchParams.get("region")?.toLowerCase();
     
-    console.log('API: Searching for region:', region);
-    
     await dbConnect();
     
-    // First check if any locations exist
-    const totalCount = await Location.countDocuments();
-    console.log('Total locations in DB:', totalCount);
+    if (region) {
+      const displayRegion = regionMap[region] || region;
+      
+      const tours = await TourModel.find({
+        'destinations.region': { $regex: new RegExp(`^${displayRegion}$`, 'i') },
+        status: 'published'
+      }).populate('heroImage').lean();
+      
+      const locations = tours.map(tour => ({
+        _id: tour._id,
+        name: tour.title,
+        slug: tour.slug,
+        region: displayRegion,
+        image: tour.heroImage?.publicUrl || '/images/default-tour.jpg',
+        duration: tour.duration ? `${tour.duration.days} days` : 'Multi-day',
+        price: tour.basePrice?.amount || 0,
+        shortDescription: tour.summary,
+        rating: tour.ratings?.average || 4.5
+      }));
+      
+      return NextResponse.json(locations);
+    }
     
-    const locations = await Location.find({ 
-      region: { $regex: new RegExp(`^${region}$`, 'i') } 
-    });
-    console.log('API: Found locations:', locations.length);
-    console.log('Sample location:', locations[0]);
-    
-    return NextResponse.json(locations);
+    return NextResponse.json([]);
   } catch (error) {
     console.error('API Error:', error);
     return NextResponse.json({ error: 'Failed to fetch locations' }, { status: 500 });
