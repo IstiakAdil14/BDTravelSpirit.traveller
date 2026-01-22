@@ -10,6 +10,8 @@ import MapSkeleton from '@/components/tours/[region]/all-locations/MapSkeleton';
 import LocationSkeleton from '@/components/tours/[region]/all-locations/LocationSkeleton';
 import OperatorDetailPage from '@/components/operators/OperatorDetailPage';
 import OperatorDetailSkeleton from '@/components/operators/OperatorDetailSkeleton';
+import TourDetailsContent from './tour-details/TourDetailsContent';
+import TourDetailsSkeleton from './tour-details/TourDetailsSkeleton';
 
 const regionMap: { [key: string]: string } = {
   'barishal': 'Barishal',
@@ -39,24 +41,37 @@ export default function ToursContent() {
   const [locations, setLocations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [operatorData, setOperatorData] = useState<any>(null);
+  const [tourDetails, setTourDetails] = useState<any>(null);
 
   const region = searchParams.get('region');
   const location = searchParams.get('location');
   const category = searchParams.get('category');
   const operator = searchParams.get('operator');
+  const tourSlug = searchParams.get('tour');
 
   useEffect(() => {
     async function fetchData() {
       setLoading(true);
 
+      // If tour slug is present, fetch full tour details
+      if (tourSlug) {
+        try {
+          const res = await fetch(`/api/tours/slug/${tourSlug}`);
+          if (res.ok) {
+            const data = await res.json();
+            setTourDetails(data);
+          }
+        } catch (error) {
+          console.error('Error fetching tour details:', error);
+        }
+      }
       // If operator parameter is present, fetch operator tours
-      if (operator) {
+      else if (operator) {
         try {
           const operatorRes = await fetch(`/api/tour-operators?slug=${operator}`);
           const operatorData = operatorRes.ok ? await operatorRes.json() : null;
 
           setOperatorData(operatorData);
-          // Set locations to operator's tours if available
           setLocations(operatorData?.tours || []);
         } catch (error) {
           console.error('Error fetching operator data:', error);
@@ -84,12 +99,11 @@ export default function ToursContent() {
     }
 
     fetchData();
-  }, [region, location, category, operator]);
+  }, [region, location, category, operator, tourSlug]);
 
   if (loading) {
-    if (operator) {
-      return <OperatorDetailSkeleton />;
-    }
+    if (operator) return <OperatorDetailSkeleton />;
+    if (tourSlug) return <TourDetailsSkeleton />;
 
     return (
       <div className="space-y-16">
@@ -108,10 +122,15 @@ export default function ToursContent() {
     );
   }
 
+  // If tour parameter is present, show full tour details
+  if (tourSlug && tourDetails) {
+    return <TourDetailsContent tour={tourDetails} />;
+  }
+
   // If operator parameter is present, show full operator details
   if (operator && operatorData) {
     return (
-      <div className="-mt-55"> {/* Offset the container's mt-40 since OperatorDetailPage has its own internal spacing */}
+      <div className="-mt-55">
         <OperatorDetailPage operator={operatorData} />
       </div>
     );
@@ -119,10 +138,9 @@ export default function ToursContent() {
 
   if (!region) {
     return (
-      <div className="text-center">
+      <div className="text-center py-20">
         <h1 className="text-4xl font-bold mb-8">Explore Bangladesh Tours</h1>
-        <p className="text-lg mb-8">Select a region to start exploring amazing destinations</p>
-        {/* Add region selection component here */}
+        <p className="text-lg mb-8 text-gray-600 font-medium">Select a region to start exploring amazing destinations</p>
       </div>
     );
   }

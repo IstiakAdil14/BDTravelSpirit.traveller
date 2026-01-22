@@ -6,16 +6,11 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 import { encodeTourIdClient } from '@/lib/utils/encodeTourId.client';
 
-export default function PopularDestinationsCarousel() {
-  const [destinations, setDestinations] = useState([]);
+export default function PopularDestinationsCarousel({ destinations: initialDestinations }: { destinations: any[] }) {
+  const [destinations] = useState(initialDestinations);
   const [currentIndex, setCurrentIndex] = useState(0);
   const router = useRouter();
 
-  useEffect(() => {
-    fetch('/api/popular-destinations')
-      .then(res => res.json())
-      .then(data => setDestinations(data.data || []));
-  }, []);
 
   const nextSlide = useCallback(() => {
     setCurrentIndex((prev) => (prev + 1) % destinations.length);
@@ -29,9 +24,9 @@ export default function PopularDestinationsCarousel() {
     setCurrentIndex(index);
   }, []);
 
-  const handleDestinationClick = useCallback((destinationId: string) => {
-    const encodedTourId = encodeTourIdClient(destinationId);
-    router.push(`/tours/${encodedTourId}`);
+  const handleDestinationClick = useCallback((destination: any) => {
+    const region = destination.destination?.toLowerCase().replace(/\s+/g, '-') || 'bangladesh';
+    router.push(`/tours?region=${region}&tour=${destination.slug}&most-popular-destination=true`);
   }, [router]);
 
   useEffect(() => {
@@ -85,27 +80,28 @@ export default function PopularDestinationsCarousel() {
       >
         {destinations.map((destination: any, index: number) => (
           <div
-            key={destination.id}
+            key={destination._id}
             className="absolute w-80 h-96 rounded-3xl shadow-xl overflow-hidden transition-all duration-700 ease-in-out cursor-pointer hover:shadow-2xl"
             style={{
               transform: getCardTransform(index),
               zIndex: getCardZIndex(index),
               transformStyle: 'preserve-3d',
             }}
-            onClick={() => handleDestinationClick(destination.id)}
+            onClick={() => handleDestinationClick(destination)}
           >
             <Image
-              src={destination.image.src}
-              alt={destination.image.alt}
+              src={destination.heroImage || '/images/placeholder.jpg'}
+              alt={destination.title}
               fill
               className="object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-              <h3 className="text-2xl font-bold mb-1">{destination.name}</h3>
-              <p className="text-sm opacity-90 mb-2">{destination.description}</p>
+              <h3 className="text-2xl font-bold mb-1">{destination.title}</h3>
+              <p className="text-sm opacity-90 mb-2">{destination.destination}</p>
               <div className="flex items-center justify-between text-xs">
-                <span>★ {destination.stats.rating}</span>
+                <span>★ {destination.rating?.toFixed(1) || '0.0'}</span>
+                <span>{destination.currency} {destination.price}</span>
               </div>
             </div>
           </div>

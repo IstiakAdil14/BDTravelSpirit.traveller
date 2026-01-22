@@ -9,7 +9,7 @@ import Image from 'next/image';
 import Autoplay from 'embla-carousel-autoplay';
 
 interface TourLocation {
-    id: string;
+    _id: string;
     name: string;
     image: string;
     description: string;
@@ -37,14 +37,14 @@ const OurTourLocationsForYouUI = ({ tourLocations, stats }: OurTourLocationsForY
             <div className="container mx-auto px-4">
                 {/* Section Badge */}
                 <motion.div
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        whileInView={{ opacity: 1, scale: 1 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.6, type: "spring", bounce: 0.4 }}
-                        className="flex justify-center mb-10"
-                    >
-                        <div className="group inline-flex items-center gap-3 rounded-full bg-gradient-to-r from-emerald-500/20 via-teal-500/20 to-cyan-500/20 border-2 border-emerald-400/30 px-6 py-1 backdrop-blur-sm hover:border-emerald-400/50 transition-all duration-300 shadow-lg hover:shadow-emerald-200/50">
-                            <span className="text-emerald-700 font-semibold tracking-wide text-sm uppercase">OUR TOUR LOCATIONS</span>
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, type: "spring", bounce: 0.4 }}
+                    className="flex justify-center mb-10"
+                >
+                    <div className="group inline-flex items-center gap-3 rounded-full bg-gradient-to-r from-emerald-500/20 via-teal-500/20 to-cyan-500/20 border-2 border-emerald-400/30 px-6 py-1 backdrop-blur-sm hover:border-emerald-400/50 transition-all duration-300 shadow-lg hover:shadow-emerald-200/50">
+                        <span className="text-emerald-700 font-semibold tracking-wide text-sm uppercase">OUR TOUR LOCATIONS</span>
                     </div>
                 </motion.div>
 
@@ -76,7 +76,7 @@ const OurTourLocationsForYouUI = ({ tourLocations, stats }: OurTourLocationsForY
                     >
                         <CarouselContent className="-ml-2 sm:-ml-4 md:-ml-4 mb-4">
                             {tourLocations.map((location) => (
-                                <CarouselItem key={location.id} className="pl-2 sm:pl-4 md:pl-4 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
+                                <CarouselItem key={location._id} className="pl-2 sm:pl-4 md:pl-4 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
                                     <div
                                         className="bg-white rounded-3xl overflow-hidden shadow-lg transition-all duration-500 border border-gray-100 group cursor-pointer hover:shadow-xl hover:-translate-y-1"
                                         onMouseEnter={() => { }}
@@ -110,7 +110,7 @@ const OurTourLocationsForYouUI = ({ tourLocations, stats }: OurTourLocationsForY
 
                                             {/* Highlights */}
                                             <div className="flex flex-wrap gap-1 mb-3">
-                                                {location.highlights.slice(0, 2).map((highlight, idx) => (
+                                                {location.highlights?.slice(0, 2).map((highlight, idx) => (
                                                     <span
                                                         key={idx}
                                                         className="px-2 py-1 bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200/50"

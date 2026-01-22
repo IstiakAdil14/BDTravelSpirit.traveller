@@ -8,7 +8,6 @@ import Link from "next/link";
 
 // Type definitions for type safety
 interface TourOperator {
-    id: number;
     _id: string;
     name: string;
     slug: string;
@@ -126,9 +125,9 @@ interface OperatorCardProps {
 
 const OperatorCard = ({ operator, index }: OperatorCardProps) => {
     const [logoError, setLogoError] = useState(false);
-    const displayName = operator.name.length > 24
+    const displayName = (operator.name || '').length > 24
         ? `${operator.name.substring(0, 24)}...`
-        : operator.name;
+        : (operator.name || 'Unknown Operator');
 
     return (
         <Link href={`/tours?operator=${operator.slug}`}>
@@ -177,7 +176,7 @@ const OperatorCard = ({ operator, index }: OperatorCardProps) => {
 
                         {/* Specialties */}
                         <div className="flex flex-wrap gap-2 my-4">
-                            {operator.specialties.slice(0, 2).map((specialty, idx) => (
+                            {(operator.specialties || []).slice(0, 2).map((specialty, idx) => (
                                 <span
                                     key={idx}
                                     className="px-3 py-1.5 bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-700 text-xs font-semibold rounded-full border border-emerald-200/50"
@@ -291,7 +290,7 @@ const TravelWithBestTourOperatorsUI = ({ operators, showAll = false, hideCTA = f
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20 max-w-7xl mx-auto">
                         {(showAll ? operators : operators.slice(0, 6)).map((operator, index) => (
                             <OperatorCard
-                                key={operator.id}
+                                key={operator._id}
                                 operator={operator}
                                 index={index}
                             />

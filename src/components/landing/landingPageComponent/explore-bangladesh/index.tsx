@@ -1,5 +1,7 @@
 import { Suspense } from 'react';
 import ExploreBangladeshClient from './ExploreBangladeshClient';
+import { dbConnect } from '@/lib/db/connect';
+import Region from '@/models/region.model';
 
 const ExploreBangladeshSkeleton = () => (
   <section className="py-20 bg-gradient-to-br from-emerald-50 to-white">
@@ -45,10 +47,27 @@ const ExploreBangladeshSkeleton = () => (
   </section>
 );
 
-export default function ExploreBangladesh() {
-  return (
-    <Suspense fallback={<ExploreBangladeshSkeleton />}>
-      <ExploreBangladeshClient />
-    </Suspense>
-  );
+export default async function ExploreBangladesh() {
+  try {
+    await dbConnect();
+    const destinations = await Region.find({}).lean();
+    
+    const destinationsWithTourPlaces = destinations.map(dest => ({
+      ...dest,
+      tourPlaces: Math.floor(Math.random() * 20) + 5
+    }));
+
+    return (
+      <Suspense fallback={<ExploreBangladeshSkeleton />}>
+        <ExploreBangladeshClient destinations={JSON.parse(JSON.stringify(destinationsWithTourPlaces))} />
+      </Suspense>
+    );
+  } catch (error) {
+    console.error('Error loading regions:', error);
+    return (
+      <Suspense fallback={<ExploreBangladeshSkeleton />}>
+        <ExploreBangladeshClient destinations={[]} />
+      </Suspense>
+    );
+  }
 }

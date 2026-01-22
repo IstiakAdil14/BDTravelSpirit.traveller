@@ -1,5 +1,7 @@
 import { Suspense } from 'react';
 import OurTourLocationsForYouClient from '../our-tour-locations-for-you/OurTourLocationsForYouClient';
+import { dbConnect } from '@/lib/db/connect';
+import TourLocation from '@/models/tourLocation.model';
 
 const OurTourLocationsForYouSkeleton = () => (
   <section className="py-20 bg-gradient-to-br from-white to-emerald-50">
@@ -49,10 +51,13 @@ const OurTourLocationsForYouSkeleton = () => (
   </section>
 );
 
-export default function OurTourLocationsForYou() {
+export default async function OurTourLocationsForYou() {
+  await dbConnect();
+  const tourLocations = await TourLocation.find({}).lean();
+
   return (
     <Suspense fallback={<OurTourLocationsForYouSkeleton />}>
-      <OurTourLocationsForYouClient />
+      <OurTourLocationsForYouClient tourLocations={JSON.parse(JSON.stringify(tourLocations))} />
     </Suspense>
   );
 }

@@ -5,14 +5,8 @@ import { useEffect, useState } from 'react';
 
 const ExploreBangladeshUI = dynamic(() => import('./ExploreBangladeshUI'), { ssr: false });
 
-export default function ExploreBangladeshClient() {
-  const [destinations, setDestinations] = useState([]);
-
-  useEffect(() => {
-    fetch('/api/bangladesh-destinations')
-      .then(res => res.json())
-      .then(data => setDestinations(data.data || []));
-  }, []);
+export default function ExploreBangladeshClient({ destinations: initialDestinations }: { destinations: any[] }) {
+  const [destinations] = useState(initialDestinations);
 
   return <ExploreBangladeshUI destinations={destinations} />;
 }
