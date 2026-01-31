@@ -12,3 +12,14 @@
 
 # Keep .gitignore itself
 !.gitignore
+
+# Allow essential Next.js files
+!package.json
+!package-lock.json
+!next.config.ts
+!next.config.js
+!tsconfig.json
+!tailwind.config.js
+!postcss.config.mjs
+!eslint.config.mjs
+!components.json
