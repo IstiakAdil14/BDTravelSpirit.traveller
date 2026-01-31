@@ -389,7 +389,7 @@ async function seed() {
     for (const raw of RAW_TOURS) {
         const adminId = admin._id as mongoose.Types.ObjectId;
         const heroAsset = await createAsset(adminId, raw.title, (raw.heroImage as string));
-        const galleryAssets = [];
+        const galleryAssets: any[] = [];
         for (const g of raw.gallery || []) {
             galleryAssets.push(await createAsset(adminId, `${raw.title} Gallery`, g));
         }
@@ -402,7 +402,7 @@ async function seed() {
         const transportModes = (raw.transportModes || []).map(mapTransport);
         const paymentMethods = (raw.paymentMethods || []).map(mapPayment);
         const bestSeason = (raw.bestSeason || []).map(mapSeason);
-        const difficulty = mapDifficulty(raw.difficulty || 'easy');
+        const difficulty = mapDifficulty((raw as any).difficulty || 'easy');
 
         // Create Listing Location
         await Location.create({

@@ -9,10 +9,10 @@ export async function GET() {
     const tours = await TourModel.find({}).lean();
     
     // Show actual tour destinations to see region names
-    const tourDestinations = [];
+    const tourDestinations: any[] = [];
     tours.forEach(tour => {
       if (tour.destinations) {
-        tour.destinations.forEach(dest => {
+        tour.destinations.forEach((dest: any) => {
           tourDestinations.push({
             tourTitle: tour.title,
             city: dest.city,
@@ -37,6 +37,6 @@ export async function GET() {
       regionsInTable: regionTableRegions.map(r => r.name)
     });
   } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
   }
 }

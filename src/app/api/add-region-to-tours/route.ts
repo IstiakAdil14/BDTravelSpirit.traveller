@@ -32,9 +32,9 @@ export async function POST() {
       
       // Update destinations with region
       if (tour.destinations) {
-        tour.destinations = tour.destinations.map(dest => {
+        tour.destinations = tour.destinations.map((dest: any) => {
           if (dest.city && !dest.region) {
-            const region = cityToRegion[dest.city];
+            const region = cityToRegion[dest.city as keyof typeof cityToRegion];
             if (region) {
               dest.region = region;
               hasUpdates = true;

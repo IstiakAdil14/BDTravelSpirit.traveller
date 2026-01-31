@@ -2,7 +2,6 @@ import mongoose, { Document, model, models } from "mongoose";
 import bcrypt from "bcrypt";
 
 export interface User extends Document {
-  _id: string;
   name: string;
   email: string;
   password?: string; // optional for OAuth users

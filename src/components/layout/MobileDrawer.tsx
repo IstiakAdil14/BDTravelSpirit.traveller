@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
-import { Sidebar } from './Sidebar';
+import Sidebar from './Sidebar';
 
 interface MobileDrawerProps {
   isOpen: boolean;
@@ -40,7 +40,7 @@ export function MobileDrawer({ isOpen, onClose, travellerId }: MobileDrawerProps
             </div>
             
             <div className="h-full overflow-y-auto">
-              <Sidebar travellerId={travellerId} />
+              <Sidebar />
             </div>
           </motion.div>
         </>

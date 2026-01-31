@@ -15,6 +15,6 @@ export async function GET() {
     
     return NextResponse.json({ regionCounts });
   } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'An error occurred' }, { status: 500 });
   }
 }

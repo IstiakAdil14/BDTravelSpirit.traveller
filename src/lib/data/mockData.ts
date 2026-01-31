@@ -64,3 +64,14 @@ export const mockTravellerData = {
     },
   ],
 };
+
+// Export individual items for dashboard API
+export const mockUser = {
+  ...mockTravellerData.profile,
+  stats: mockTravellerData.stats,
+};
+
+export const mockActiveTrip = mockTravellerData.activeTrip;
+export const mockUpcomingTrips = mockTravellerData.upcomingTrips;
+export const mockAISuggestions = mockTravellerData.aiSuggestions;
+export const mockActivities = mockTravellerData.activities;

@@ -1,45 +1,46 @@
 import { useQuery } from '@tanstack/react-query';
-import { 
-  mockUser, 
-  mockActiveTrip, 
-  mockUpcomingTrips, 
-  mockAISuggestions, 
-  mockActivities 
-} from '@/lib/data/mockData';
 
-// Simulate API delay
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
-// Mock API functions
+// Dashboard API functions - removed mock data dependencies
 export const dashboardApi = {
   getUser: async () => {
-    await delay(500);
-    return mockUser;
+    // Return empty user data
+    return {
+      name: 'User',
+      avatar: '',
+      location: '',
+      memberSince: '2024',
+      stats: {
+        totalTrips: 0,
+        countriesVisited: 0,
+        upcomingTrips: 0,
+        totalSpent: 0,
+      }
+    };
   },
   
   getActiveTrip: async () => {
-    await delay(300);
-    return mockActiveTrip;
+    return null;
   },
   
   getUpcomingTrips: async () => {
-    await delay(400);
-    return mockUpcomingTrips;
+    return [];
   },
   
   getAISuggestions: async () => {
-    await delay(600);
-    return mockAISuggestions;
+    return [];
   },
   
   getActivities: async () => {
-    await delay(350);
-    return mockActivities;
+    return [];
   },
   
   getStats: async () => {
-    await delay(200);
-    return mockUser.stats;
+    return {
+      totalTrips: 0,
+      countriesVisited: 0,
+      upcomingTrips: 0,
+      totalSpent: 0,
+    };
   },
 };
 

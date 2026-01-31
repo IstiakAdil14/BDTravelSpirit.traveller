@@ -72,5 +72,43 @@ export default function TravelerDashboardPage() {
     );
   }
 
-  return <TravellerDashboard />;
+  const defaultStats = {
+    totalTrips: 0,
+    placesVisited: 0,
+    wishlistItems: 0,
+    reviewsWritten: 0
+  };
+
+  const defaultBookings: Array<{
+    id: string;
+    title: string;
+    location: string;
+    date: string;
+    status: 'upcoming' | 'completed' | 'cancelled';
+    price: string;
+    duration: string;
+  }> = [];
+
+  const defaultWishlistItems: Array<{
+    id: string;
+    name: string;
+    location: string;
+    price: string;
+    image?: string;
+  }> = [];
+
+  const defaultCartItems: Array<{
+    id: string;
+    name: string;
+    location: string;
+    price: string;
+    image?: string;
+  }> = [];
+
+  return <TravellerDashboard 
+    stats={defaultStats}
+    bookings={defaultBookings}
+    wishlistItems={defaultWishlistItems}
+    cartItems={defaultCartItems}
+  />;
 }

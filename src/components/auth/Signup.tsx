@@ -25,7 +25,7 @@ export default function Signup() {
         setError("");
         
         // Start Google OAuth to get email, but don't create session yet
-        window.location.href = `/api/auth/signin/google?callbackUrl=${encodeURIComponent('/auth/signup?verify=true')}`;
+        window.location.href = `/api/auth/signin/google?callbackUrl=${encodeURIComponent('/')}`;
     };
 
     return (
