@@ -14,20 +14,7 @@ export const decodeUserId = (encodedId: string): string => {
 // Route mapping based on user roles
 export const getUserDashboardPath = (userId: string, role: UserRole): string => {
   const encodedId = encodeUserId(userId);
-  
-  switch (role) {
-    case USER_ROLE.ADMIN:
-      return `/dashboard/admin/${encodedId}`;
-    case USER_ROLE.GUIDE:
-      return `/dashboard/guide/${encodedId}`;
-    case USER_ROLE.ASSISTANT:
-      return `/dashboard/assistant/${encodedId}`;
-    case USER_ROLE.SUPPORT:
-      return `/dashboard/support/${encodedId}`;
-    case USER_ROLE.TRAVELER:
-    default:
-      return `/dashboard/traveller/${encodedId}`;
-  }
+  return `/dashboard?role=${role}&id=${encodedId}`;
 };
 
 export const validateUserAccess = (encodedId: string, userRole: UserRole, routeRole: string): boolean => {

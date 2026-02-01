@@ -15,12 +15,13 @@ export default withAuth(
     }
 
     // Redirect old dashboard route to role-based route
-    if (pathname.startsWith("/dashboard/") && pathname.match(/^\/dashboard\/[a-f0-9]{24}$/)) {
-      const userId = pathname.split("/")[2];
-      const userRole = token?.role as any || "traveler";
+    if (pathname.startsWith("/dashboard/") && pathname.match(/^\/dashboard\/[a-z]+\/[a-zA-Z0-9_-]+$/)) {
+      const pathParts = pathname.split("/");
+      const role = pathParts[2];
+      const encodedId = pathParts[3];
       
-      if (token?.id === userId) {
-        const newPath = getUserDashboardPath(userId, userRole);
+      if (token?.id) {
+        const newPath = `/dashboard?role=${role}&id=${encodedId}`;
         return NextResponse.redirect(new URL(newPath, req.url));
       }
     }

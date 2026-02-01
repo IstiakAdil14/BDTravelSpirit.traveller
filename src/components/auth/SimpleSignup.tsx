@@ -6,7 +6,7 @@ import Link from "next/link";
 
 export default function SimpleSignup() {
   const handleGoogleSignIn = () => {
-    signIn("google", { callbackUrl: "/dashboard" });
+    signIn("google", { callbackUrl: "/" });
   };
 
   return (

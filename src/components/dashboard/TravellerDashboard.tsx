@@ -46,7 +46,11 @@ interface TravellerDashboardProps {
   }>;
 }
 
-export default function TravellerDashboard({ stats, bookings, wishlistItems }: TravellerDashboardProps) {
+export default function TravellerDashboard({ 
+  stats = { totalTrips: 0, placesVisited: 0, wishlistItems: 0, reviewsWritten: 0 }, 
+  bookings = [], 
+  wishlistItems = [] 
+}: Partial<TravellerDashboardProps> = {}) {
   const { data: session } = useSession();
   const user = session?.user;
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
