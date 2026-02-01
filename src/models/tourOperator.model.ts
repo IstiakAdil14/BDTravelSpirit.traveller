@@ -66,9 +66,4 @@ const TourOperatorSchema: Schema = new Schema({
   tours: [{ type: TourSchema, required: true }]
 }, { timestamps: true });
 
-// Force delete cached model to ensure schema updates
-if (mongoose.models.TourOperator) {
-  delete mongoose.models.TourOperator;
-}
-
-export default mongoose.model<ITourOperator>('TourOperator', TourOperatorSchema);
+export default mongoose.models.TourOperator || mongoose.model<ITourOperator>('TourOperator', TourOperatorSchema);
