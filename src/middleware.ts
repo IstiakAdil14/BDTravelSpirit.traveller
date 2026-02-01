@@ -35,6 +35,10 @@ export default withAuth(
         if (req.nextUrl.pathname.startsWith("/auth/")) {
           return true;
         }
+        // Allow access to main dashboard page (let component handle auth)
+        if (req.nextUrl.pathname === "/dashboard") {
+          return true;
+        }
         return !!token;
       },
     },
