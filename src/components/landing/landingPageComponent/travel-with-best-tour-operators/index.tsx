@@ -25,7 +25,14 @@ const TravelWithBestTourOperatorsSkeleton = () => (
 const TravelWithBestTourOperatorsServer = async () => {
   try {
     await dbConnect();
-    const operators = await TourOperator.find({}).limit(6).lean();
+    let operators = await TourOperator.find({}).limit(6).lean();
+    
+    // Auto-seed if empty
+    if (operators.length === 0) {
+      const { tourOperators } = await import('@/data/tourOperators');
+      await TourOperator.insertMany(tourOperators);
+      operators = await TourOperator.find({}).limit(6).lean();
+    }
 
     const mappedOperators = operators.map((op: any) => ({
       _id: op._id.toString(),
