@@ -6,7 +6,14 @@ export async function GET() {
   try {
     await dbConnect();
 
-    const operators = await TourOperator.find({}).sort({ rating: -1 });
+    let operators = await TourOperator.find({}).sort({ rating: -1 });
+    
+    // Auto-seed if empty
+    if (operators.length === 0) {
+      const { tourOperators } = await import('@/data/tourOperators');
+      await TourOperator.insertMany(tourOperators);
+      operators = await TourOperator.find({}).sort({ rating: -1 });
+    }
 
     // Map database fields to frontend expected format
     const mappedOperators = operators.map(op => ({
