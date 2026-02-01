@@ -22,7 +22,7 @@ const getOperatorBySlug = async (slug: string) => {
     if (idPart && idPart.length === 6) {
       // Find operator where _id ends with this ID part
       const operators = await TourOperator.find({}).lean();
-      operator = operators.find(op => op._id.toString().slice(-6) === idPart);
+      operator = operators.find((op: any) => op._id.toString().slice(-6) === idPart);
     }
 
     // Fallback to slug-based search if ID search fails
