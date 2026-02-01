@@ -8,13 +8,8 @@ async function seedTourOperators() {
   try {
     await mongoose.connect(MONGODB_URI);
     
-    const existingCount = await TourOperator.countDocuments();
-    if (existingCount > 0) {
-      console.log(`Tour operators already exist (${existingCount} found). Skipping seed.`);
-      await mongoose.disconnect();
-      process.exit(0);
-    }
-    
+    // Force delete and re-insert to ensure fresh data
+    await TourOperator.deleteMany({});
     const result = await TourOperator.insertMany(tourOperators);
     
     console.log(`Successfully seeded ${result.length} tour operators`);

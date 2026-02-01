@@ -7,14 +7,8 @@ export async function POST() {
   try {
     await dbConnect();
     
-    const existingCount = await TourOperator.countDocuments();
-    if (existingCount > 0) {
-      return NextResponse.json({
-        success: true,
-        message: `Tour operators already exist (${existingCount} found). Skipping seed.`
-      });
-    }
-    
+    // Force delete and re-insert to ensure fresh data
+    await TourOperator.deleteMany({});
     const result = await TourOperator.insertMany(tourOperators);
     
     return NextResponse.json({
