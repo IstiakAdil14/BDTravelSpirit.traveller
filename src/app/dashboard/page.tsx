@@ -6,6 +6,13 @@ import { useEffect, useState, Suspense } from "react";
 import { getUserDashboardPath } from "@/lib/utils/userRouting";
 import { UserRole } from "@/constants/user.const";
 import TravellerDashboard from "@/components/dashboard/TravellerDashboard";
+import TripsContent from "@/components/dashboard/trips/TripsContent";
+import FavoritesContent from "@/components/dashboard/favorites/FavoritesContent";
+import BookingsContent from "@/components/dashboard/bookings/BookingsContent";
+import PaymentsContent from "@/components/dashboard/payments/PaymentsContent";
+import ReviewsContent from "@/components/dashboard/reviews/ReviewsContent";
+import SettingsContent from "@/components/dashboard/settings/SettingsContent";
+import DashboardLayout from "@/components/layout/DashboardLayout";
 
 function DashboardContent() {
   const { data: session, status } = useSession();
@@ -15,6 +22,7 @@ function DashboardContent() {
 
   const role = searchParams.get('role');
   const id = searchParams.get('id');
+  const page = searchParams.get('page');
 
   useEffect(() => {
     if (redirected) return;
@@ -47,7 +55,38 @@ function DashboardContent() {
 
   // Show dashboard if authenticated and has query params
   if (status === "authenticated" && role && id) {
-    return <TravellerDashboard />;
+    // Render different content based on page parameter
+    const renderPageContent = () => {
+      switch (page) {
+        case 'chat':
+          return <div className="p-8 text-center"><p className="text-gray-600">Chat feature coming soon...</p></div>;
+        case 'trips':
+          return <TripsContent userId={id} />;
+        case 'favorites':
+          return <FavoritesContent userId={id} />;
+        case 'bookings':
+          return <BookingsContent userId={id} />;
+        case 'payments':
+          return <PaymentsContent userId={id} />;
+        case 'reviews':
+          return <ReviewsContent userId={id} />;
+        case 'settings':
+          return <SettingsContent userId={id} />;
+        default:
+          return <TravellerDashboard />;
+      }
+    };
+
+    // Only wrap with DashboardLayout if it's not the main dashboard
+    if (page) {
+      return (
+        <DashboardLayout>
+          {renderPageContent()}
+        </DashboardLayout>
+      );
+    } else {
+      return renderPageContent();
+    }
   }
 
   return (

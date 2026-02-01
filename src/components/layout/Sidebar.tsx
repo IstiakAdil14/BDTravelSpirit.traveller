@@ -2,47 +2,40 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useState, Suspense } from "react";
 import { 
   Home, 
   MapPin, 
-  Compass, 
   Heart, 
   Calendar, 
   MessageCircle, 
   CreditCard, 
   Star, 
-  HelpCircle, 
   Settings,
   LogOut,
   ChevronRight
 } from "lucide-react";
 import SignOutDialog from "@/components/layout/header/SignOutDialog";
 
-const navigation = [
-  { name: "Overview", href: "/dashboard/traveller", icon: Home, color: "from-blue-500 to-indigo-500" },
-  { name: "My Trips", href: "/dashboard/traveller/trips", icon: MapPin, color: "from-emerald-500 to-teal-500" },
-  { name: "Favorites", href: "/dashboard/traveller/favorites", icon: Heart, color: "from-rose-500 to-pink-500" },
-  { name: "Bookings", href: "/dashboard/traveller/bookings", icon: Calendar, color: "from-purple-500 to-violet-500" },
-  { name: "Messages", href: "/dashboard/traveller/messages", icon: MessageCircle, color: "from-cyan-500 to-blue-500" },
-  { name: "Payments", href: "/dashboard/traveller/payments", icon: CreditCard, color: "from-green-500 to-emerald-500" },
-  { name: "Reviews", href: "/dashboard/traveller/reviews", icon: Star, color: "from-amber-500 to-orange-500" },
-  { name: "Settings", href: "/dashboard/traveller/settings", icon: Settings, color: "from-slate-500 to-gray-500" },
-];
-
-export default function Sidebar() {
+function SidebarContent() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const userId = searchParams.get('id');
+  const role = searchParams.get('role') || 'traveller';
   const [showSignOutDialog, setShowSignOutDialog] = useState(false);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
 
-  const handleSignOutClick = () => {
-    setShowSignOutDialog(true);
-  };
-
-  const handleCloseDialog = () => {
-    setShowSignOutDialog(false);
-  };
+  const navigation = [
+    { name: "Overview", href: `/dashboard?role=${role}&id=${userId}`, icon: Home, color: "from-blue-500 to-indigo-500" },
+    { name: "My Trips", href: `/dashboard?role=${role}&id=${userId}&page=trips`, icon: MapPin, color: "from-emerald-500 to-teal-500" },
+    { name: "Favorites", href: `/dashboard?role=${role}&id=${userId}&page=favorites`, icon: Heart, color: "from-rose-500 to-pink-500" },
+    { name: "Bookings", href: `/dashboard?role=${role}&id=${userId}&page=bookings`, icon: Calendar, color: "from-purple-500 to-violet-500" },
+    { name: "Chat", href: `/dashboard?role=${role}&id=${userId}&page=chat`, icon: MessageCircle, color: "from-indigo-500 to-blue-500" },
+    { name: "Payments", href: `/dashboard?role=${role}&id=${userId}&page=payments`, icon: CreditCard, color: "from-green-500 to-emerald-500" },
+    { name: "Reviews", href: `/dashboard?role=${role}&id=${userId}&page=reviews`, icon: Star, color: "from-amber-500 to-orange-500" },
+    { name: "Settings", href: `/dashboard?role=${role}&id=${userId}&page=settings`, icon: Settings, color: "from-slate-500 to-gray-500" },
+  ];
 
   return (
     <motion.aside
@@ -51,14 +44,12 @@ export default function Sidebar() {
       transition={{ duration: 0.3, ease: "easeOut" }}
       className="w-80 bg-white/90 backdrop-blur-2xl border-r border-white/20 shadow-2xl h-full flex flex-col relative overflow-hidden"
     >
-      {/* Background Pattern */}
       <div className="absolute inset-0 opacity-5">
         <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 transform translate-x-32 -translate-y-32"></div>
         <div className="absolute bottom-0 left-0 w-48 h-48 rounded-full bg-gradient-to-tr from-blue-400 to-indigo-500 transform -translate-x-24 translate-y-24"></div>
       </div>
       
       <div className="relative z-10 p-8 flex-1">
-        {/* Logo */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -82,8 +73,7 @@ export default function Sidebar() {
           </Link>
         </motion.div>
 
-        {/* Navigation */}
-        <nav >
+        <nav>
           {navigation.map((item, index) => {
             const isActive = pathname === item.href;
             const isHovered = hoveredItem === item.name;
@@ -105,7 +95,6 @@ export default function Sidebar() {
                       : "text-gray-600 hover:bg-white/60 hover:text-gray-900 hover:shadow-lg"
                   }`}
                 >
-                  {/* Background Effect */}
                   {!isActive && (
                     <div className={`absolute inset-0 bg-gradient-to-r ${item.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300 rounded-2xl`}></div>
                   )}
@@ -131,7 +120,6 @@ export default function Sidebar() {
                     <ChevronRight className="w-4 h-4" />
                   </motion.div>
                   
-                  {/* Active Indicator */}
                   {isActive && (
                     <motion.div
                       layoutId="activeIndicator"
@@ -146,14 +134,11 @@ export default function Sidebar() {
         </nav>
       </div>
       
-      {/* User Profile Section */}
       <div className="relative z-10 p-8 border-t border-white/20">
-        
-        {/* Logout Button */}
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          onClick={handleSignOutClick}
+          onClick={() => setShowSignOutDialog(true)}
           className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-gray-600 hover:bg-red-50 hover:text-red-600 transition-all duration-300 group"
         >
           <div className="w-6 h-6 flex items-center justify-center">
@@ -163,8 +148,15 @@ export default function Sidebar() {
         </motion.button>
       </div>
       
-      {/* Sign Out Dialog */}
-      <SignOutDialog isOpen={showSignOutDialog} onClose={handleCloseDialog} />
+      <SignOutDialog isOpen={showSignOutDialog} onClose={() => setShowSignOutDialog(false)} />
     </motion.aside>
+  );
+}
+
+export default function Sidebar() {
+  return (
+    <Suspense fallback={<div className="w-80 h-full bg-white/90 animate-pulse" />}>
+      <SidebarContent />
+    </Suspense>
   );
 }

@@ -5,6 +5,7 @@ import { SessionProvider } from "next-auth/react";
 import { QueryProvider } from "@/lib/providers/QueryProvider";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
+import FloatingAIButton from "@/components/layout/FloatingAIButton";
 
 export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -20,6 +21,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
         {!hideLayout && <Header />}
         <main>{children}</main>
         {!hideLayout && <Footer />}
+        {!hideLayoutForAuth && <FloatingAIButton />}
       </QueryProvider>
     </SessionProvider>
   );

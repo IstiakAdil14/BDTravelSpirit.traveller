@@ -147,7 +147,6 @@ export default function TravellerDashboard({
                     { name: "My Trips", icon: MapPin },
                     { name: "Favorites", icon: Heart },
                     { name: "Bookings", icon: Calendar },
-                    { name: "Messages", icon: MessageCircle },
                     { name: "Payments", icon: CreditCard },
                     { name: "Reviews", icon: Star },
                     { name: "Settings", icon: Settings },

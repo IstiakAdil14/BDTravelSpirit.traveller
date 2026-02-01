@@ -64,14 +64,6 @@ export default function BookingHistory({ bookings }: BookingHistoryProps) {
             <p className="text-gray-600">Manage your travel experiences</p>
           </div>
         </div>
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-2xl hover:shadow-lg transition-all duration-300 flex items-center space-x-2 font-medium"
-        >
-          <Plane className="w-4 h-4" />
-          <span>Book New Trip</span>
-        </motion.button>
       </div>
 
       <div className="space-y-4">
