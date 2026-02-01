@@ -12,7 +12,7 @@ import BookingsContent from "@/components/dashboard/bookings/BookingsContent";
 import PaymentsContent from "@/components/dashboard/payments/PaymentsContent";
 import ReviewsContent from "@/components/dashboard/reviews/ReviewsContent";
 import SettingsContent from "@/components/dashboard/settings/SettingsContent";
-import DashboardLayout from "@/components/layout/DashboardLayout";
+import Sidebar from "@/components/layout/Sidebar";
 
 function DashboardContent() {
   const { data: session, status } = useSession();
@@ -58,35 +58,90 @@ function DashboardContent() {
     // Render different content based on page parameter
     const renderPageContent = () => {
       switch (page) {
-        case 'chat':
-          return <div className="p-8 text-center"><p className="text-gray-600">Chat feature coming soon...</p></div>;
         case 'trips':
-          return <TripsContent userId={id} />;
+          return (
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20">
+              <div className="hidden lg:flex">
+                <div className="sticky top-0 h-screen">
+                  <Sidebar />
+                </div>
+                <div className="flex-1 p-6">
+                  <TripsContent userId={id} />
+                </div>
+              </div>
+            </div>
+          );
         case 'favorites':
-          return <FavoritesContent userId={id} />;
+          return (
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20">
+              <div className="hidden lg:flex">
+                <div className="sticky top-0 h-screen">
+                  <Sidebar />
+                </div>
+                <div className="flex-1 p-6">
+                  <FavoritesContent userId={id} />
+                </div>
+              </div>
+            </div>
+          );
         case 'bookings':
-          return <BookingsContent userId={id} />;
+          return (
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20">
+              <div className="hidden lg:flex">
+                <div className="sticky top-0 h-screen">
+                  <Sidebar />
+                </div>
+                <div className="flex-1 p-6">
+                  <BookingsContent userId={id} />
+                </div>
+              </div>
+            </div>
+          );
         case 'payments':
-          return <PaymentsContent userId={id} />;
+          return (
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20">
+              <div className="hidden lg:flex">
+                <div className="sticky top-0 h-screen">
+                  <Sidebar />
+                </div>
+                <div className="flex-1 p-6">
+                  <PaymentsContent userId={id} />
+                </div>
+              </div>
+            </div>
+          );
         case 'reviews':
-          return <ReviewsContent userId={id} />;
+          return (
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20">
+              <div className="hidden lg:flex">
+                <div className="sticky top-0 h-screen">
+                  <Sidebar />
+                </div>
+                <div className="flex-1 p-6">
+                  <ReviewsContent userId={id} />
+                </div>
+              </div>
+            </div>
+          );
         case 'settings':
-          return <SettingsContent userId={id} />;
+          return (
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20">
+              <div className="hidden lg:flex">
+                <div className="sticky top-0 h-screen">
+                  <Sidebar />
+                </div>
+                <div className="flex-1 p-6">
+                  <SettingsContent userId={id} />
+                </div>
+              </div>
+            </div>
+          );
         default:
           return <TravellerDashboard />;
       }
     };
 
-    // Only wrap with DashboardLayout if it's not the main dashboard
-    if (page) {
-      return (
-        <DashboardLayout>
-          {renderPageContent()}
-        </DashboardLayout>
-      );
-    } else {
-      return renderPageContent();
-    }
+    return renderPageContent();
   }
 
   return (

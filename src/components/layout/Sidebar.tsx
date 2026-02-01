@@ -31,7 +31,6 @@ function SidebarContent() {
     { name: "My Trips", href: `/dashboard?role=${role}&id=${userId}&page=trips`, icon: MapPin, color: "from-emerald-500 to-teal-500" },
     { name: "Favorites", href: `/dashboard?role=${role}&id=${userId}&page=favorites`, icon: Heart, color: "from-rose-500 to-pink-500" },
     { name: "Bookings", href: `/dashboard?role=${role}&id=${userId}&page=bookings`, icon: Calendar, color: "from-purple-500 to-violet-500" },
-    { name: "Chat", href: `/dashboard?role=${role}&id=${userId}&page=chat`, icon: MessageCircle, color: "from-indigo-500 to-blue-500" },
     { name: "Payments", href: `/dashboard?role=${role}&id=${userId}&page=payments`, icon: CreditCard, color: "from-green-500 to-emerald-500" },
     { name: "Reviews", href: `/dashboard?role=${role}&id=${userId}&page=reviews`, icon: Star, color: "from-amber-500 to-orange-500" },
     { name: "Settings", href: `/dashboard?role=${role}&id=${userId}&page=settings`, icon: Settings, color: "from-slate-500 to-gray-500" },
