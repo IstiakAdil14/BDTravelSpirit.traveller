@@ -286,7 +286,7 @@ const TravelWithBestTourOperatorsUI = ({ operators, showAll = false, hideCTA = f
                 </motion.div>
 
                 {/* Tour Operators Grid with enhanced spacing */}
-                {operators && operators.length > 0 && (
+                {operators && operators.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20 max-w-7xl mx-auto">
                         {(showAll ? operators : operators.slice(0, 6)).map((operator, index) => (
                             <OperatorCard
@@ -295,6 +295,10 @@ const TravelWithBestTourOperatorsUI = ({ operators, showAll = false, hideCTA = f
                                 index={index}
                             />
                         ))}
+                    </div>
+                ) : (
+                    <div className="text-center py-20">
+                        <p className="text-gray-500 text-lg">No tour operators found. Please check back later.</p>
                     </div>
                 )}
 

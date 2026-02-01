@@ -223,7 +223,7 @@ export default function QuickLinks() {
     <>
       <nav
         ref={navRef}
-        className="w-full bg-white relative shadow-sm border-b border-gray-100"
+        className="w-full bg-white relative shadow-sm border-b border-gray-100 max-[524px]:hidden"
         onMouseLeave={() => setActiveCategory(null)}
       >
         <ul className="flex max-w-7xl mx-auto relative">

@@ -2,6 +2,7 @@
 
 import { motion, MotionValue } from 'framer-motion';
 import { useSession } from 'next-auth/react';
+import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import Logo from '@/components/shared/Logo';
 import SearchBar from './SearchBar';
@@ -25,6 +26,14 @@ export default function HeaderUI({
     scrollYProgress,
 }: HeaderUIProps) {
     const { status } = useSession();
+    const [windowWidth, setWindowWidth] = useState(0);
+
+    useEffect(() => {
+        const handleResize = () => setWindowWidth(window.innerWidth);
+        setWindowWidth(window.innerWidth);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     return (
         <>
@@ -79,7 +88,7 @@ export default function HeaderUI({
                         <SearchBar />
                     </div>
                 </div>
-                    <QuickLinks />
+                {windowWidth >= 525 && <QuickLinks />}
 
             </motion.header>
 
