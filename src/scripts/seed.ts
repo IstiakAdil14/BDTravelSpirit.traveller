@@ -82,7 +82,7 @@ async function seed() {
     await mongoose.connect(MONGODB_URI!);
     console.log("Connected.");
 
-    console.log("Clearing existing data...");
+    console.log("Clearing existing data (except TourOperators)...");
     await TourModel.deleteMany({});
     await GuideModel.deleteMany({});
     await AssetModel.deleteMany({});

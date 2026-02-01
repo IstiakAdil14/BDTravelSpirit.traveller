@@ -26,9 +26,11 @@ export default function HeaderUI({
     scrollYProgress,
 }: HeaderUIProps) {
     const { status } = useSession();
-    const [windowWidth, setWindowWidth] = useState(0);
+    const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 0);
+    const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
+        setMounted(true);
         const handleResize = () => setWindowWidth(window.innerWidth);
         setWindowWidth(window.innerWidth);
         window.addEventListener('resize', handleResize);
@@ -88,7 +90,7 @@ export default function HeaderUI({
                         <SearchBar />
                     </div>
                 </div>
-                {windowWidth >= 525 && <QuickLinks />}
+                {mounted && windowWidth >= 525 && <QuickLinks />}
                 {/* Force deployment update */}
 
             </motion.header>
