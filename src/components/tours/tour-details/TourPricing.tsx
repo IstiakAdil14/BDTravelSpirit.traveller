@@ -51,50 +51,93 @@ export default function TourPricing({ tour }: TourPricingProps) {
   const totalPrice = pricing.discounted * travelers;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
+      {/* Premium Header */}
       <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Pricing & Availability</h2>
-        <p className="text-gray-600">
+        <div className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-500/10 to-purple-500/10 px-4 py-2 rounded-full mb-4">
+          <span className="text-2xl">💰</span>
+          <span className="font-semibold text-gray-700">Premium Pricing</span>
+        </div>
+        <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-blue-900 bg-clip-text text-transparent mb-3">
+          Pricing & Availability
+        </h2>
+        <p className="text-gray-600 max-w-md mx-auto">
           Choose your preferred departure date and number of travelers
         </p>
       </div>
 
-      {/* Base Price Card */}
+      {/* Price Display Card */}
+      <div className="relative">
+        <div className="absolute -inset-2 bg-gradient-to-r from-green-400 via-blue-400 to-purple-400 rounded-2xl blur opacity-20 animate-pulse"></div>
+        <div className="relative bg-gradient-to-br from-white via-blue-50/30 to-purple-50/30 backdrop-blur-xl border border-white/50 rounded-2xl p-8 shadow-2xl">
+          <div className="text-center">
+            <div className="flex items-center justify-center gap-4 mb-6">
+              {pricing.discountPercent > 0 && (
+                <div className="text-2xl text-gray-400 line-through">
+                  {basePrice.currency} {pricing.original.toLocaleString()}
+                </div>
+              )}
+              <div className="text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                {basePrice.currency} {pricing.discounted.toLocaleString()}
+              </div>
+            </div>
+            <div className="text-gray-600 mb-4">per person</div>
+            
+            {pricing.discountPercent > 0 && (
+              <div className="inline-flex items-center gap-2 bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-2 rounded-full text-sm font-semibold shadow-lg">
+                <span>🎉</span>
+                <span>Save {pricing.discountPercent}% • {basePrice.currency} {pricing.savings.toLocaleString()} OFF</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
 
       {/* Active Discounts */}
       {discounts.length > 0 && (
-        <Card className="border-green-200">
-          <CardHeader className="bg-green-50">
-            <CardTitle className="flex items-center gap-2 text-green-800">
-              <Tag className="h-5 w-5" />
-              Active Discounts
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="py-4">
-            <div className="space-y-3">
-              {discounts.map((discount: any, index: number) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                  <div>
-                    <div className="font-medium text-green-800 capitalize">
-                      {discount.type.replace('_', ' ')} Discount
-                    </div>
-                    {discount.code && (
-                      <div className="text-sm text-green-600">Code: {discount.code}</div>
-                    )}
-                    {discount.validUntil && (
-                      <div className="text-xs text-green-600">
-                        Valid until: {new Date(discount.validUntil).toLocaleDateString()}
-                      </div>
-                    )}
-                  </div>
-                  <Badge variant="default" className="bg-green-600">
-                    {discount.value}% OFF
-                  </Badge>
+        <div className="relative">
+          <div className="absolute -inset-1 bg-gradient-to-r from-green-400 to-emerald-400 rounded-xl blur opacity-30"></div>
+          <div className="relative bg-gradient-to-br from-green-50 to-emerald-50 backdrop-blur-sm border border-green-200/50 rounded-xl overflow-hidden">
+            <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                  <Tag className="h-5 w-5" />
                 </div>
-              ))}
+                <div>
+                  <h3 className="font-bold text-lg">Active Discounts</h3>
+                  <p className="text-green-100 text-sm">Limited time offers</p>
+                </div>
+              </div>
             </div>
-          </CardContent>
-        </Card>
+            <div className="p-6">
+              <div className="space-y-4">
+                {discounts.map((discount: any, index: number) => (
+                  <div key={index} className="flex items-center justify-between p-4 bg-white/80 backdrop-blur-sm rounded-xl border border-green-200/30 shadow-sm">
+                    <div>
+                      <div className="font-semibold text-green-800 capitalize flex items-center gap-2">
+                        <span className="text-lg">🎁</span>
+                        {discount.type.replace('_', ' ')} Discount
+                      </div>
+                      {discount.code && (
+                        <div className="text-sm text-green-600 font-mono bg-green-100 px-2 py-1 rounded mt-1 inline-block">
+                          Code: {discount.code}
+                        </div>
+                      )}
+                      {discount.validUntil && (
+                        <div className="text-xs text-green-600 mt-1">
+                          ⏰ Valid until: {new Date(discount.validUntil).toLocaleDateString()}
+                        </div>
+                      )}
+                    </div>
+                    <div className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-2 rounded-full font-bold text-sm shadow-lg">
+                      {discount.value}% OFF
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Departure Dates */}

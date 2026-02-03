@@ -1,16 +1,20 @@
-// app/api/regions/[region]/route.ts
-import { NextRequest, NextResponse } from "next/server";
-import { getToursByRegion } from "@/lib/regionService";
+import { NextResponse } from 'next/server';
+import { dbConnect } from '@/lib/db/connect';
+import Region from '@/models/region.model';
 
-export async function GET(req: NextRequest, { params }: { params: Promise<{ region: string }> }) {
-  const { region } = await params;
-  const url = new URL(req.url);
-  const cursor = url.searchParams.get("cursor") ?? undefined;
-  const limit = Math.min(Number(url.searchParams.get("limit") || "20"), 50);
-
-  const payload = await getToursByRegion(region, limit, cursor);
-
-  return NextResponse.json(payload, {
-    headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120" },
-  });
+export async function GET(request: Request, { params }: { params: Promise<{ region: string }> }) {
+  try {
+    await dbConnect();
+    const { region } = await params;
+    const regionData = await Region.findOne({ name: region }).lean();
+    
+    if (!regionData) {
+      return NextResponse.json({ error: 'Region not found' }, { status: 404 });
+    }
+    
+    return NextResponse.json(regionData);
+  } catch (error) {
+    console.error('Error fetching region:', error);
+    return NextResponse.json({ error: 'Failed to fetch region' }, { status: 500 });
+  }
 }

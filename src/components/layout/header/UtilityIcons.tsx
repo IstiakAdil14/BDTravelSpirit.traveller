@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Heart, Bell, ShoppingCart } from 'lucide-react';
+import { Icon } from '@/components/ui/icons';
 import { useSession } from 'next-auth/react';
 
 export default function UtilityIcons() {
@@ -32,7 +32,7 @@ export default function UtilityIcons() {
         className="relative p-2 rounded-lg hover:bg-gray-50 transition-colors focus:outline-none cursor-pointer"
         aria-label={`Wishlist (${wishlistCount} items)`}
       >
-        <Heart className="w-6 h-6 text-gray-600" />
+        <Icon name="heart" size={24} className="text-gray-600" />
         {wishlistCount > 0 && (
           <motion.span
             initial={{ scale: 0 }}
@@ -51,7 +51,7 @@ export default function UtilityIcons() {
         className="relative p-2 rounded-lg hover:bg-gray-50 transition-colors focus:outline-none cursor-pointer"
         aria-label={`Notifications (${notificationCount} new)`}
       >
-        <Bell className="w-6 h-6 text-gray-600" />
+        <Icon name="bell" size={24} className="text-gray-600" />
         {notificationCount > 0 && (
           <motion.span
             initial={{ scale: 0 }}

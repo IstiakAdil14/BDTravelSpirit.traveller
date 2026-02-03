@@ -34,11 +34,12 @@ export async function GET(req: Request) {
         name: tour.title,
         slug: tour.slug,
         region: displayRegion,
-        image: tour.heroImage?.publicUrl || '/images/default-tour.jpg',
+        image: tour.seo?.ogImage || tour.heroImage?.publicUrl || '/images/default-tour.jpg',
         duration: tour.duration ? `${tour.duration.days} days` : 'Multi-day',
         price: tour.basePrice?.amount || 0,
         shortDescription: tour.summary,
-        rating: tour.ratings?.average || 4.5
+        rating: tour.ratings?.average || 4.5,
+        seo: tour.seo
       }));
       
       return NextResponse.json(locations);

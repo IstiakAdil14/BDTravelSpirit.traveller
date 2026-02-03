@@ -17,7 +17,7 @@ export default function LocationCard({ location }: { location: any }) {
           {/* IMAGE (REDUCED HEIGHT) */}
           <div className="relative w-[400px] h-[230px] overflow-hidden bg-gray-100">
             <img
-              src={location.image}
+              src={location.seo?.ogImage || location.image || '/images/placeholder.jpg'}
               alt={location.name}
               className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
