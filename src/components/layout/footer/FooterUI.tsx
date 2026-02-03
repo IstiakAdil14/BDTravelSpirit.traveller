@@ -41,8 +41,8 @@ interface SocialIcon {
 }
 
 interface PaymentMethod {
-    src: string;
-    alt: string;
+    name: string;
+    imageUrl: string;
 }
 
 interface FooterUIProps {
@@ -203,7 +203,7 @@ const FooterUI: React.FC<FooterUIProps> = ({
                                     whileHover={{ scale: 1.05 }}
                                     transition={{ duration: 0.3 }}
                                 >
-                                    <Image src={method.src} alt={method.alt} width={80} height={80} className="object-contain" />
+                                    <img src={method.imageUrl} alt={method.name} width={80} height={80} className="object-contain" />
                                 </motion.div>
                             ))}
                         </div>

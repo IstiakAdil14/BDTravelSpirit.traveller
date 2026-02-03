@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import {
   FaFacebook,
   FaInstagram,
@@ -78,18 +79,26 @@ const socialIcons = [
   { Icon: FaYoutube, href: 'https://youtube.com/bdtravelspirit', label: 'YouTube' },
 ];
 
-const paymentMethods = [
-  { src: '/images/payments/bkash.png', alt: 'bKash' },
-  { src: '/images/payments/nogod.png', alt: 'Nagad' },
-  { src: '/images/payments/rocket.png', alt: 'Rocket' },
-  { src: '/images/payments/upai.png', alt: 'Upay' },
-  { src: '/images/payments/visa.png', alt: 'Visa' },
-  { src: '/images/payments/mastercard.png', alt: 'Mastercard' },
-  { src: '/images/payments/paypal.png', alt: 'PayPal' },
-  { src: '/images/payments/stripe.png', alt: 'Stripe' },
-];
-
 const Footer = () => {
+  const [paymentMethods, setPaymentMethods] = useState([]);
+
+  useEffect(() => {
+    const fetchPaymentMethods = async () => {
+      try {
+        const response = await fetch('/api/payment-methods');
+        if (response.ok) {
+          const data = await response.json();
+          setPaymentMethods(data);
+        }
+      } catch (error) {
+        console.error('Error fetching payment methods:', error);
+        // Fallback to static images
+        
+      }
+    };
+
+    fetchPaymentMethods();
+  }, []);
   return (
     <FooterUI
       impactStats={impactStats}
