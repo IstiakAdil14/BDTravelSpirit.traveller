@@ -31,11 +31,21 @@ export async function GET() {
     const existingCount = await TourOperator.countDocuments();
     if (existingCount === 0) {
       // Auto-seed if empty
-      const result = await TourOperator.insertMany(tourOperators);
-      return NextResponse.json({
-        success: true,
-        message: `Auto-seeded ${result.length} tour operators`
-      });
+      try {
+        const result = await TourOperator.insertMany(tourOperators, { ordered: false });
+        return NextResponse.json({
+          success: true,
+          message: `Auto-seeded ${result.length} tour operators`
+        });
+      } catch (bulkError: any) {
+        if (bulkError.code === 11000) {
+          return NextResponse.json({
+            success: true,
+            message: 'Some operators already exist, skipping duplicates'
+          });
+        }
+        throw bulkError;
+      }
     }
     
     return NextResponse.json({

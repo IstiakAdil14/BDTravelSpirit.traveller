@@ -10,8 +10,17 @@ export async function GET() {
     
     // Auto-seed if empty
     if (operators.length === 0) {
-      const { tourOperators } = await import('@/data/tourOperators');
-      await TourOperator.insertMany(tourOperators);
+      try {
+        const { tourOperators } = await import('@/data/tourOperators');
+        await TourOperator.insertMany(tourOperators, { ordered: false });
+      } catch (bulkError: any) {
+        // Handle duplicate key errors gracefully
+        if (bulkError.code === 11000) {
+          console.log('Some operators already exist, continuing...');
+        } else {
+          throw bulkError;
+        }
+      }
       operators = await TourOperator.find({}).sort({ rating: -1 });
     }
 
