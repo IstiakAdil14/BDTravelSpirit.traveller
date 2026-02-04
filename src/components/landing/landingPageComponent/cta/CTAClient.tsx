@@ -15,8 +15,8 @@ const CTAClient = () => {
 
   const stats = [
     { icon: MapPin, number: "64", label: "Districts Covered", color: "emerald" },
-    { icon: Users, number: "500+", label: "Expert Guides", color: "blue" },
-    { icon: Award, number: "15", label: "UNESCO Sites", color: "purple" },
+    { icon: Users, number: "50+", label: "Expert Guides", color: "blue" },
+    { icon: Award, number: "5", label: "UNESCO Sites", color: "purple" },
   ];
 
   return <CTAUI benefits={benefits} stats={stats} />;

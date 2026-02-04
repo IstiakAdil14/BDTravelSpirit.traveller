@@ -14,7 +14,7 @@ export default function TopInfoBar() {
         <div className="flex items-center gap-2">
           <Globe className="w-4 h-4 text-emerald-400" />
           <span>
-            Shop <span className="font-medium text-gray-800">2,500 operators</span>
+            Shop <span className="font-medium text-gray-800">20 operators</span>
           </span>
         </div>
 
@@ -24,7 +24,7 @@ export default function TopInfoBar() {
           <span className="font-semibold text-emerald-400 flex items-center gap-1">
             ★ Trustpilot
           </span>
-          <span className="text-gray-500">(9,255 reviews)</span>
+          <span className="text-gray-500">(0 reviews)</span>
         </div>
 
         {/* Item 3: Support */}

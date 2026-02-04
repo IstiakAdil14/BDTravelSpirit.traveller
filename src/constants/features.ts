@@ -19,8 +19,8 @@ export const features = [
       "Traditional Cuisine Experiences"
     ],
     stats: {
-      satisfaction: "95%",
-      travelers: "2.5K+",
+      satisfaction: "50%",
+      travelers: "10+",
       support: "24/7"
     },
   },
@@ -43,8 +43,8 @@ export const features = [
       "Community Development Projects"
     ],
     stats: {
-      satisfaction: "97%",
-      travelers: "3.2K+",
+      satisfaction: "50%",
+      travelers: "10+",
       support: "24/7"
     },
   },
@@ -67,8 +67,8 @@ export const features = [
       "Exclusive Cultural Events"
     ],
     stats: {
-      satisfaction: "99%",
-      travelers: "1.8K+",
+      satisfaction: "50%",
+      travelers: "10+",
       support: "24/7"
     },
   },
@@ -91,8 +91,8 @@ export const features = [
       "24/7 Security Monitoring"
     ],
     stats: {
-      satisfaction: "98%",
-      travelers: "4.1K+",
+      satisfaction: "50%",
+      travelers: "10+",
       support: "24/7"
     },
   },

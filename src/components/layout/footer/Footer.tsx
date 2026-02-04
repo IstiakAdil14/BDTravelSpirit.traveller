@@ -17,10 +17,10 @@ import {
 import FooterUI from './FooterUI';
 
 const impactStats = [
-  { number: '10K+', label: 'Happy Travelers' },
-  { number: '500+', label: 'Expert Guides' },
-  { number: '50+', label: 'Destinations' },
-  { number: '98%', label: 'Satisfaction Rate' },
+  { number: '10+', label: 'Happy Travelers' },
+  { number: '50+', label: 'Expert Guides' },
+  { number: '40+', label: 'Destinations' },
+  { number: '50%', label: 'Satisfaction Rate' },
 ];
 
 const linkColumns = [

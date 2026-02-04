@@ -26,9 +26,9 @@ const HeroClient = ({ slides: initialSlides }: { slides: any[] }) => {
 
   const stats = [
     { number: 64, label: "Districts", suffix: "+" },
-    { number: 15, label: "UNESCO Sites", suffix: "+" },
-    { number: 500, label: "Tour Guides", suffix: "+" },
-    { number: 10000, label: "Happy Travelers", suffix: "+" },
+    { number: 5, label: "UNESCO Sites", suffix: "+" },
+    { number: 50, label: "Tour Guides", suffix: "+" },
+    { number: 10, label: "Happy Travelers", suffix: "+" },
   ];
 
   const handleDotClick = useCallback((index: number) => {

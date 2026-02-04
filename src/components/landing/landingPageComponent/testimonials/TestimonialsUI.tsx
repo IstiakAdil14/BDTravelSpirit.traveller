@@ -224,7 +224,7 @@ const TestimonialsUI = ({ testimonials, stats }: TestimonialsUIProps) => {
                                 <div key={i} className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-teal-400 border-2 border-white" />
                             ))}
                         </div>
-                        <span className="text-gray-700 font-medium">Join 10,000+ happy travelers</span>
+                        <span className="text-gray-700 font-medium">Join 10+ happy travelers</span>
                     </div>
                 </motion.div>
             </div>

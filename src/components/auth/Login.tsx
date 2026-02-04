@@ -68,8 +68,8 @@ export default function Login() {
                         {/* Quick stats */}
                         <div className="mt-8 grid grid-cols-3 gap-4 text-center">
                             {[
-                                { number: "50K+", label: "Travelers" },
-                                { number: "200+", label: "Destinations" },
+                                { number: "10+", label: "Travelers" },
+                                { number: "40+", label: "Destinations" },
                                 { number: "4.9★", label: "Rating" }
                             ].map((stat, i) => (
                                 <div key={i} className="text-teal-200/70 hover:text-white transition-colors">

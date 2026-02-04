@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PopularDestinationsCarousel from "./PopularDestinationsCarousel";
+import { useRouter } from "next/navigation";
 
 interface MostPopularDestinationsUIProps {
     title: string;
@@ -13,6 +14,8 @@ interface MostPopularDestinationsUIProps {
 }
 
 const MostPopularDestinationsUI = ({ title, subtitle, buttonText, destinations }: MostPopularDestinationsUIProps) => {
+    const router = useRouter();
+    
     return (
         <section className="py-4 bg-gradient-to-br from-white to-gray-50">
             <div className="container mx-auto px-4">
@@ -58,7 +61,8 @@ const MostPopularDestinationsUI = ({ title, subtitle, buttonText, destinations }
                     <Button
                         size="lg"
                         className="group inline-flex items-center gap-2 px-8 py-6 bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 rounded-full font-semibold text-white shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95"
-                        onClick={() => window.location.href = '/most-popular-destinations'}
+                        onClick={() => router.push('/most-popular-destinations')}
+                        suppressHydrationWarning={true}
                     >
                         {buttonText}
                     </Button>

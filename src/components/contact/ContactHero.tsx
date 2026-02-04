@@ -2,12 +2,37 @@
 
 import { motion } from 'framer-motion';
 import { MapPin, Clock, Users, Award } from 'lucide-react';
+import { useMemo } from 'react';
 
 const stats = [
-  { icon: Users, value: '10K+', label: 'Happy Travelers' },
+  { icon: Users, value: '10+', label: 'Happy Travelers' },
   { icon: Clock, value: '< 2hrs', label: 'Response Time' },
-  { icon: MapPin, value: '50+', label: 'Destinations' },
-  { icon: Award, value: '98%', label: 'Satisfaction' },
+  { icon: MapPin, value: '40+', label: 'Destinations' },
+  { icon: Award, value: '50%', label: 'Satisfaction' },
+];
+
+// Pre-defined positions to avoid hydration mismatch
+const floatingDots = [
+  { left: 36.83, top: 25.71 },
+  { left: 83.78, top: 91.36 },
+  { left: 26.02, top: 65.66 },
+  { left: 31.05, top: 55.85 },
+  { left: 32.46, top: 86.12 },
+  { left: 5.03, top: 28.52 },
+  { left: 92.56, top: 16.53 },
+  { left: 95.32, top: 79.18 },
+  { left: 67.75, top: 29.42 },
+  { left: 98.37, top: 91.17 },
+  { left: 10.63, top: 20.81 },
+  { left: 54.31, top: 15.11 },
+  { left: 89.94, top: 92.95 },
+  { left: 57.58, top: 2.69 },
+  { left: 32.86, top: 29.96 },
+  { left: 4.36, top: 62.46 },
+  { left: 24.21, top: 69.28 },
+  { left: 69.74, top: 1.90 },
+  { left: 73.68, top: 54.13 },
+  { left: 3.65, top: 13.68 }
 ];
 
 export default function ContactHero() {
@@ -19,22 +44,22 @@ export default function ContactHero() {
       
       {/* Animated background elements */}
       <div className="absolute inset-0">
-        {[...Array(20)].map((_, i) => (
+        {floatingDots.map((dot, i) => (
           <motion.div
             key={i}
             className="absolute w-2 h-2 bg-white/20 rounded-full"
             style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
+              left: `${dot.left}%`,
+              top: `${dot.top}%`,
             }}
             animate={{
               y: [0, -20, 0],
               opacity: [0.2, 0.8, 0.2],
             }}
             transition={{
-              duration: 3 + Math.random() * 2,
+              duration: 3 + (i % 3),
               repeat: Infinity,
-              delay: Math.random() * 2,
+              delay: i * 0.1,
             }}
           />
         ))}

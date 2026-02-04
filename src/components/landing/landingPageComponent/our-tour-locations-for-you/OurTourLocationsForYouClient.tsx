@@ -8,10 +8,10 @@ export default function OurTourLocationsForYouClient({ tourLocations: initialTou
 
 
   const stats = {
-    destinations: '50+',
-    travelers: '10k+',
+    destinations: '40+',
+    travelers: '10+',
     rating: '4.8',
-    successRate: '98%'
+    successRate: '50%'
   };
 
   return (

@@ -146,11 +146,11 @@ const FeaturesUI = ({ features }: FeaturesUIProps) => {
                     className="mt-20 grid grid-cols-2 md:grid-cols-3 gap-8 text-center"
                 >
                     <div className="glass rounded-2xl p-8">
-                        <div className="text-4xl font-bold heading-gradient mb-2">98%</div>
+                        <div className="text-4xl font-bold heading-gradient mb-2">50%</div>
                         <div className="text-gray-700">Satisfaction Rate</div>
                     </div>
                     <div className="glass rounded-2xl p-8">
-                        <div className="text-4xl font-bold heading-gradient mb-2">10K+</div>
+                        <div className="text-4xl font-bold heading-gradient mb-2">10+</div>
                         <div className="text-gray-700">Happy Travelers</div>
                     </div>
                     <div className="glass rounded-2xl p-8 md:col-span-1 col-span-2">

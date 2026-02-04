@@ -67,31 +67,6 @@ export default function TourPricing({ tour }: TourPricingProps) {
       </div>
 
       {/* Price Display Card */}
-      <div className="relative">
-        <div className="absolute -inset-2 bg-gradient-to-r from-green-400 via-blue-400 to-purple-400 rounded-2xl blur opacity-20 animate-pulse"></div>
-        <div className="relative bg-gradient-to-br from-white via-blue-50/30 to-purple-50/30 backdrop-blur-xl border border-white/50 rounded-2xl p-8 shadow-2xl">
-          <div className="text-center">
-            <div className="flex items-center justify-center gap-4 mb-6">
-              {pricing.discountPercent > 0 && (
-                <div className="text-2xl text-gray-400 line-through">
-                  {basePrice.currency} {pricing.original.toLocaleString()}
-                </div>
-              )}
-              <div className="text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-                {basePrice.currency} {pricing.discounted.toLocaleString()}
-              </div>
-            </div>
-            <div className="text-gray-600 mb-4">per person</div>
-            
-            {pricing.discountPercent > 0 && (
-              <div className="inline-flex items-center gap-2 bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-2 rounded-full text-sm font-semibold shadow-lg">
-                <span>🎉</span>
-                <span>Save {pricing.discountPercent}% • {basePrice.currency} {pricing.savings.toLocaleString()} OFF</span>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
 
       {/* Active Discounts */}
       {discounts.length > 0 && (
@@ -201,31 +176,6 @@ export default function TourPricing({ tour }: TourPricingProps) {
       )}
 
       {/* Operating Windows */}
-      {tour.operatingWindows && tour.operatingWindows.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Operating Seasons</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {tour.operatingWindows.map((window: any, index: number) => (
-                <div key={index} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
-                  <div>
-                    <div className="font-medium text-gray-900">
-                      {new Date(window.startDate).toLocaleDateString()} - {new Date(window.endDate).toLocaleDateString()}
-                    </div>
-                  </div>
-                  {window.seatsTotal && (
-                    <div className="text-sm text-gray-600">
-                      Capacity: {window.seatsTotal} travelers
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Payment Methods */}
       {tour.paymentMethods && tour.paymentMethods.length > 0 && (
