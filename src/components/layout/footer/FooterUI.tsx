@@ -10,6 +10,7 @@ import {
     ArrowRight,
     LucideIcon
 } from 'lucide-react';
+import { showProductionNotification } from '@/components/shared/ProductionNotification';
 import Logo from '../shared/Logo';
 
 const fadeUp = {
@@ -141,16 +142,29 @@ const FooterUI: React.FC<FooterUIProps> = ({
                                                 whileHover={{ x: 4 }}
                                                 transition={{ duration: 0.3 }}
                                             >
-                                                <Link
-                                                    href={link.href}
-                                                    className="group flex items-center gap-3 rounded-lg backdrop-blur-md transition-all duration-300 hover:bg-white/5 p-2 -m-2"
-                                                >
-                                                    <div className={`w-2 h-2 rounded-full ${column.color.replace('text-', 'bg-')} opacity-60`} />
-                                                    <span className="text-gray-300 group-hover:text-white transition-colors">
-                                                        {link.name}
-                                                    </span>
-                                                    <ArrowRight className="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 group-hover:text-white transition-all ml-auto" />
-                                                </Link>
+                                                {['About Us', 'Contact', 'Privacy Policy'].includes(link.name) ? (
+                                                    <Link
+                                                        href={link.href}
+                                                        className="group flex items-center gap-3 rounded-lg backdrop-blur-md transition-all duration-300 hover:bg-white/5 p-2 -m-2"
+                                                    >
+                                                        <div className={`w-2 h-2 rounded-full ${column.color.replace('text-', 'bg-')} opacity-60`} />
+                                                        <span className="text-gray-300 group-hover:text-white transition-colors">
+                                                            {link.name}
+                                                        </span>
+                                                        <ArrowRight className="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 group-hover:text-white transition-all ml-auto" />
+                                                    </Link>
+                                                ) : (
+                                                    <button
+                                                        onClick={showProductionNotification}
+                                                        className="group flex items-center gap-3 rounded-lg backdrop-blur-md transition-all duration-300 hover:bg-white/5 p-2 -m-2 w-full text-left"
+                                                    >
+                                                        <div className={`w-2 h-2 rounded-full ${column.color.replace('text-', 'bg-')} opacity-60`} />
+                                                        <span className="text-gray-300 group-hover:text-white transition-colors">
+                                                            {link.name}
+                                                        </span>
+                                                        <ArrowRight className="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 group-hover:text-white transition-all ml-auto" />
+                                                    </button>
+                                                )}
                                             </motion.div>
                                         ))}
                                     </div>
@@ -175,18 +189,16 @@ const FooterUI: React.FC<FooterUIProps> = ({
 
                         <div className="flex justify-center lg:justify-start gap-4">
                             {socialIcons.map(({ Icon, href, label }, index) => (
-                                <motion.a
+                                <motion.button
                                     key={index}
-                                    href={href}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
+                                    onClick={showProductionNotification}
                                     whileHover={{ scale: 1.05, filter: 'brightness(1.25)' }}
                                     transition={{ duration: 0.3 }}
-                                    className="bg-white/5 rounded-2xl p-3 backdrop-blur-lg shadow-lg border border-white/10 hover:shadow-emerald-400/20 transition-all duration-300"
+                                    className="bg-white/5 rounded-2xl p-3 backdrop-blur-lg shadow-lg border border-white/10 hover:shadow-emerald-400/20 transition-all duration-300 cursor-pointer"
                                 >
                                     <Icon className="w-5 h-5 text-white" />
                                     <span className="sr-only">{label}</span>
-                                </motion.a>
+                                </motion.button>
                             ))}
                         </div>
                     </div>
@@ -221,6 +233,7 @@ const FooterUI: React.FC<FooterUIProps> = ({
                             className="flex-1 bg-white/10 backdrop-blur-md text-white placeholder-gray-400 rounded-xl px-4 py-3 border border-white/20 focus:outline-none focus:ring-2 focus:ring-emerald-400/50 focus:border-emerald-400/50 transition-all duration-300"
                         />
                         <motion.button
+                            onClick={showProductionNotification}
                             initial={{ x: 20, opacity: 0 }}
                             whileInView={{ x: 0, opacity: 1 }}
                             viewport={{ once: true }}

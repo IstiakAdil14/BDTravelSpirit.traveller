@@ -5,6 +5,7 @@ import { Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useMemo } from "react";
 import { useIsClient } from "@/hooks/useIsClient";
+import { showProductionNotification } from "@/components/shared/ProductionNotification";
 
 interface Step {
   number: number;
@@ -176,7 +177,9 @@ const HowItWorksUI = ({ steps }: HowItWorksUIProps) => {
             variants={ANIMATION_VARIANTS.cta}
             className="text-center mt-24"
           >
-            <button className="px-8 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-full font-semibold shadow-lg hover:scale-105 transition">
+            <button 
+              onClick={showProductionNotification}
+              className="px-8 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-full font-semibold shadow-lg hover:scale-105 transition">
               Start Planning Your Trip
             </button>
           </motion.div>

@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { Star, MapPin, Calendar, Users, Share2, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { showProductionNotification } from '@/components/shared/ProductionNotification';
 import {
   Carousel,
   CarouselContent,
@@ -45,19 +46,7 @@ export default function TourHero({ tour }: TourHeroProps) {
   }, [api]);
 
   const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: tour.title,
-          text: tour.summary,
-          url: window.location.href,
-        });
-      } catch (error) {
-        console.log('Error sharing:', error);
-      }
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-    }
+    showProductionNotification();
   };
 
   return (

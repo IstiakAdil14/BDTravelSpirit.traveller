@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Calendar05 } from './RangeCalender';
 import { useDateFormat } from '@/hooks/useDateFormat';
 import { type DateRange } from "react-day-picker";
+import { showProductionNotification } from '@/components/shared/ProductionNotification';
 
 // ✅ Updated hook: prevents SSR/CSR mismatch
 const useIsMobile = () => {
@@ -85,8 +86,7 @@ export default function SearchBar({ className = '', isLoading = false }: SearchB
   }
 
   const handleSearch = () => {
-    console.log('Search:', { query, selectedDateRange, passengers });
-    // router.push(`/search?q=${encodeURIComponent(query)}&date=${selectedDateRange}&adults=${passengers.adults}&children=${passengers.children}`);
+    showProductionNotification();
   };
 
   return (

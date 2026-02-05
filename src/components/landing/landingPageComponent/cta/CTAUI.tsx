@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { Check, ArrowRight, MapPin, Users, Award, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { showProductionNotification } from "@/components/shared/ProductionNotification";
 
 interface Stat {
     icon: typeof MapPin;
@@ -128,7 +129,9 @@ const CTAUI = ({ benefits, stats }: CTAUIProps) => {
                                 transition={{ duration: 0.8, delay: 1.4 }}
                                 className="pt-4"
                             >
-                                <button className="group relative px-8 py-4 bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 rounded-full font-semibold text-white shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95 inline-flex items-center gap-2 cursor-pointer overflow-hidden" suppressHydrationWarning={true}>
+                                <button 
+                                    onClick={showProductionNotification}
+                                    className="group relative px-8 py-4 bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 rounded-full font-semibold text-white shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95 inline-flex items-center gap-2 cursor-pointer overflow-hidden" suppressHydrationWarning={true}>
                                     {/* Animated shine effect */}
                                     <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-teal-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 

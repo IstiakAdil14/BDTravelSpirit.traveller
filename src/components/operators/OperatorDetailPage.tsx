@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { showProductionNotification } from '@/components/shared/ProductionNotification';
 import OperatorStats from './OperatorStats';
 import ServiceCards from './ServiceCards';
 import SpecializationCards from './SpecializationCards';
@@ -126,10 +127,16 @@ export default function OperatorDetailPage({ operator }: OperatorDetailPageProps
                 transition={{ duration: 0.6, delay: 0.6 }}
                 className="flex flex-wrap gap-4"
               >
-                <Button size="lg" className="bg-emerald-600 hover:bg-emerald-700">
+                <Button 
+                  onClick={showProductionNotification}
+                  size="lg" 
+                  className="bg-emerald-600 hover:bg-emerald-700">
                   View Tours
                 </Button>
-                <Button variant="outline" size="lg">
+                <Button 
+                  onClick={showProductionNotification}
+                  variant="outline" 
+                  size="lg">
                   Contact Operator
                 </Button>
               </motion.div>

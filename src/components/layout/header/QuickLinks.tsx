@@ -5,6 +5,7 @@ import { ChevronDown, MapPin, Sparkles } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { showProductionNotification } from "@/components/shared/ProductionNotification";
 
 type TourItem = {
   name: string;
@@ -320,7 +321,9 @@ export default function QuickLinks() {
                   {selectedSubData?.tours.map((tour, idx) => (
                 <Tooltip key={tour.name}>
                   <TooltipTrigger asChild>
-                    <Link href={tour.url} className="group flex items-center gap-4 p-3 rounded-xl hover:bg-gradient-to-br hover:from-emerald-50 hover:to-teal-50 transition-all duration-200 hover:shadow-md border border-transparent hover:border-emerald-100"
+                    <button 
+                      onClick={showProductionNotification}
+                      className="group flex items-center gap-4 p-3 rounded-xl hover:bg-gradient-to-br hover:from-emerald-50 hover:to-teal-50 transition-all duration-200 hover:shadow-md border border-transparent hover:border-emerald-100 w-full text-left"
                       style={{ animation: `fadeInUp 0.3s ease-out ${idx * 0.03}s both` }}
                     >
                       <div className="relative flex-shrink-0">
@@ -340,7 +343,7 @@ export default function QuickLinks() {
                           {tour.region}
                         </p>
                       </div>
-                    </Link>
+                    </button>
                   </TooltipTrigger>
                   <TooltipContent side="top">
                     {tour.name}

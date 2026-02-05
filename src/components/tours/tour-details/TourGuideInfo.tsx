@@ -4,6 +4,7 @@ import { Star, Phone, Mail, Globe, Shield, Award, MessageCircle } from 'lucide-r
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { showProductionNotification } from '@/components/shared/ProductionNotification';
 
 export default function TourGuideInfo({ tour }: { tour: any }) {
   // Static guide data
@@ -90,19 +91,19 @@ export default function TourGuideInfo({ tour }: { tour: any }) {
               key={index}
               variant="outline"
               size="sm"
+              onClick={showProductionNotification}
               className="w-full justify-start bg-white/60 backdrop-blur-sm border-gray-200/50 hover:bg-white/80 hover:border-gray-300/50 transition-all duration-200"
-              asChild
             >
-              <a href={social.url} target="_blank" rel="noopener noreferrer">
-                <Globe className="h-4 w-4 mr-2" />
-                Visit {social.platform}
-              </a>
+              <Globe className="h-4 w-4 mr-2" />
+              Visit {social.platform}
             </Button>
           ))}
         </div>
 
         {/* Action Button */}
-        <Button className="w-full bg-gradient-to-r from-emerald-500 to-blue-500 hover:from-emerald-600 hover:to-blue-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200 font-semibold py-3">
+        <Button 
+          onClick={showProductionNotification}
+          className="w-full bg-gradient-to-r from-emerald-500 to-blue-500 hover:from-emerald-600 hover:to-blue-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200 font-semibold py-3">
           <MessageCircle className="h-4 w-4 mr-2" />
           Contact Operator
         </Button>

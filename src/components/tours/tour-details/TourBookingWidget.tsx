@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Calendar, Users, Phone, CreditCard, Shield, CheckCircle2, Zap } from 'lucide-react';
+import { showProductionNotification } from '@/components/shared/ProductionNotification';
 
 interface Departure {
   date: string;
@@ -39,9 +40,7 @@ export default function TourBookingWidget({ tour }: TourBookingWidgetProps) {
   };
 
   const handleQuickInquiry = () => {
-    const message = `Hi! I'm interested in a tour. Could you please provide more information?`;
-    const whatsappUrl = `https://wa.me/8801234567890?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
+    showProductionNotification();
   };
 
   const totalPrice = basePrice.amount * travelers;

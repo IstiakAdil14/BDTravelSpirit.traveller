@@ -6,6 +6,7 @@ import { QueryProvider } from "@/lib/providers/QueryProvider";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import FloatingAIButton from "@/components/layout/FloatingAIButton";
+import { Toaster } from "sonner";
 
 export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -22,6 +23,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
         <main>{children}</main>
         {!hideLayout && <Footer />}
         {!hideLayoutForAuth && <FloatingAIButton />}
+        <Toaster position="bottom-center" />
       </QueryProvider>
     </SessionProvider>
   );

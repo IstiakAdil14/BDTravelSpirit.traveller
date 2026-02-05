@@ -24,8 +24,8 @@ export default function SettingsPage() {
   const [formData, setFormData] = useState({
     name: 'Ahmed Rahman',
     email: 'ahmed.rahman@email.com',
-    phone: '+880 1712-345678',
-    location: 'Dhaka, Bangladesh',
+    phone: '+880 1704080389',
+    location: 'Sylhet, Bangladesh',
     bio: 'Travel enthusiast exploring Bangladesh\'s hidden gems',
     dateOfBirth: '1990-05-15',
     gender: 'male',

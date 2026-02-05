@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { showProductionNotification } from '@/components/shared/ProductionNotification';
 
 
 export default function ContactForm() {
@@ -18,8 +19,7 @@ export default function ContactForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission
-    console.log('Form submitted:', formData);
+    showProductionNotification();
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -104,7 +104,10 @@ export default function ContactForm() {
                   <p className="text-gray-600">Get instant answers to your questions</p>
                 </div>
               </div>
-              <Button variant="outline" className="w-full">
+              <Button 
+                onClick={showProductionNotification}
+                variant="outline" 
+                className="w-full">
                 <Phone className="w-4 h-4 mr-2" />
                 +880 1234-567890
               </Button>
@@ -122,7 +125,10 @@ export default function ContactForm() {
                   <p className="text-gray-600">Quick responses via WhatsApp</p>
                 </div>
               </div>
-              <Button variant="outline" className="w-full bg-green-50 border-green-200 hover:bg-green-100">
+              <Button 
+                onClick={showProductionNotification}
+                variant="outline" 
+                className="w-full bg-green-50 border-green-200 hover:bg-green-100">
                 <MessageCircle className="w-4 h-4 mr-2" />
                 Chat on WhatsApp
               </Button>

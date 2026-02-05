@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { ChevronDown, HelpCircle, MessageCircle, Phone } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { showProductionNotification } from '@/components/shared/ProductionNotification';
 
 const faqs = [
   {
@@ -145,6 +146,7 @@ export default function ContactFAQ() {
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button 
+                  onClick={showProductionNotification}
                   size="lg"
                   className="bg-white text-emerald-600 hover:bg-gray-100 font-semibold"
                 >
@@ -152,6 +154,7 @@ export default function ContactFAQ() {
                   Start Live Chat
                 </Button>
                 <Button 
+                  onClick={showProductionNotification}
                   size="lg"
                   variant="outline"
                   className="border-white/30 text-white hover:bg-white/10 font-semibold"

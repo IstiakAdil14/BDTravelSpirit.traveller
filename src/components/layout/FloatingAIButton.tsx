@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, X, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { showProductionNotification } from "@/components/shared/ProductionNotification";
 
 export default function FloatingAIButton() {
   const [isOpen, setIsOpen] = useState(false);
@@ -106,7 +107,10 @@ export default function FloatingAIButton() {
                     placeholder="Ask me anything about travel..."
                     className="flex-1 px-3 py-2 bg-gray-50 rounded-lg border-0 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20"
                   />
-                  <Button size="sm" className="bg-gradient-to-r from-purple-500 to-indigo-600">
+                  <Button 
+                    onClick={showProductionNotification}
+                    size="sm" 
+                    className="bg-gradient-to-r from-purple-500 to-indigo-600">
                     <MessageCircle className="w-4 h-4" />
                   </Button>
                 </div>

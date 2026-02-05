@@ -5,6 +5,7 @@ import CountUp from "react-countup";
 import { ChevronDown, Play } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { showProductionNotification } from "@/components/shared/ProductionNotification";
 
 interface Slide {
     image: string;
@@ -119,6 +120,7 @@ const HeroUI = ({ slides, stats, currentSlide, isVisible, isPaused, onDotClick }
                         >
                             <Button
                                 size="lg"
+                                onClick={showProductionNotification}
                                 className="flex group relative px-8 sm:px-12 py-4 sm:py-6 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full font-semibold text-white shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95 outline-none focus:ring-4 focus:ring-emerald-300 cursor-pointer "
                                 aria-label="Plan your trip to Bangladesh"
                                 suppressHydrationWarning={true}
@@ -129,6 +131,7 @@ const HeroUI = ({ slides, stats, currentSlide, isVisible, isPaused, onDotClick }
 
                             <Button
                                 size="lg"
+                                onClick={showProductionNotification}
                                 className="flex group flex items-center justify-center gap-2 px-8 sm:px-12 py-4 sm:py-6 bg-white/90 backdrop-blur-sm border-2 border-emerald-500/30 rounded-full font-semibold text-emerald-700 hover:bg-emerald-50 shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105 active:scale-95 outline-none focus:ring-4 focus:ring-emerald-300 cursor-pointer "
                                 aria-label="Watch promotional video"
                                 suppressHydrationWarning={true}

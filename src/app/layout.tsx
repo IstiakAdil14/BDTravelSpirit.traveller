@@ -40,7 +40,7 @@ const structuredData = {
   ],
   contactPoint: {
     "@type": "ContactPoint",
-    telephone: "+880-123-456-7890",
+    telephone: "+880-1704080389",
     contactType: "customer service",
     areaServed: "BD",
     availableLanguage: "en",

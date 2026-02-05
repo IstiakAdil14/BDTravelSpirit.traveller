@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { MapPin, Clock, Phone, Navigation } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { showProductionNotification } from '@/components/shared/ProductionNotification';
 
 const offices = [
   {
@@ -124,6 +125,7 @@ export default function OfficeLocations() {
                 {/* Actions */}
                 <div className="flex gap-2">
                   <Button
+                    onClick={showProductionNotification}
                     size="sm"
                     className="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white"
                   >
@@ -131,6 +133,7 @@ export default function OfficeLocations() {
                     Get Directions
                   </Button>
                   <Button
+                    onClick={showProductionNotification}
                     size="sm"
                     variant="outline"
                     className="border-emerald-200 text-emerald-700 hover:bg-emerald-50"
@@ -158,7 +161,9 @@ export default function OfficeLocations() {
               <MapPin className="w-12 h-12 text-emerald-600 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Interactive Map</h3>
               <p className="text-gray-600">Find our offices and get directions</p>
-              <Button className="mt-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white">
+              <Button 
+                onClick={showProductionNotification}
+                className="mt-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white">
                 View Full Map
               </Button>
             </div>

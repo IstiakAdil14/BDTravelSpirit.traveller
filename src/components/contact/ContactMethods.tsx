@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Phone, MessageCircle, Mail, Clock, Headphones, Zap } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { showProductionNotification } from '@/components/shared/ProductionNotification';
 
 const contactMethods = [
   {
@@ -90,6 +91,7 @@ export default function ContactMethods() {
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium text-gray-800">{method.value}</span>
                       <Button 
+                        onClick={showProductionNotification}
                         size="sm" 
                         className={`bg-gradient-to-r ${method.color} hover:opacity-90 text-white shadow-md`}
                       >
@@ -115,7 +117,9 @@ export default function ContactMethods() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.4 + index * 0.1 }}
           >
-            <Card className="professional-card border-0 hover:shadow-professional transition-all duration-300 group cursor-pointer">
+            <Card 
+              onClick={showProductionNotification}
+              className="professional-card border-0 hover:shadow-professional transition-all duration-300 group cursor-pointer">
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
                   <div className={`w-10 h-10 rounded-lg bg-gradient-to-r ${action.color} flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300`}>

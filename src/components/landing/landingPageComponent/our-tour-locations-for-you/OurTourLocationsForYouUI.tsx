@@ -5,6 +5,7 @@ import { MapPin, Clock, ArrowRight, Star, Users, TrendingUp } from 'lucide-react
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { motion } from "framer-motion";
 import Image from 'next/image';
+import { showProductionNotification } from '@/components/shared/ProductionNotification';
 
 import Autoplay from 'embla-carousel-autoplay';
 
@@ -170,7 +171,10 @@ const OurTourLocationsForYouUI = ({ tourLocations, stats }: OurTourLocationsForY
 
                 {/* CTA Button */}
                 <div className="text-center animate-fade-in">
-                    <button suppressHydrationWarning={true} className="bg-gradient-to-r from-emerald-500 via-teal-600 to-cyan-600 hover:from-emerald-600 hover:via-teal-700 hover:to-cyan-700 text-white px-10 py-2 rounded-full text-lg font-bold inline-flex items-center gap-3 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 border-2 border-white/20 cursor-pointer">
+                    <button 
+                        onClick={showProductionNotification}
+                        suppressHydrationWarning={true} 
+                        className="bg-gradient-to-r from-emerald-500 via-teal-600 to-cyan-600 hover:from-emerald-600 hover:via-teal-700 hover:to-cyan-700 text-white px-10 py-2 rounded-full text-lg font-bold inline-flex items-center gap-3 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 border-2 border-white/20 cursor-pointer">
                         View All Tour Locations
                         <ArrowRight className="w-6 h-6" />
                     </button>
