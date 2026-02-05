@@ -80,13 +80,34 @@ export default function ToursContent() {
         const displayRegion = regionMap[region] || region;
 
         try {
-          const [regionRes, locationsRes] = await Promise.all([
+          const [regionRes, locationsRes, regionLocationsRes] = await Promise.all([
             fetch(`/api/regions?name=${displayRegion}`),
-            fetch(`/api/locations?region=${region}&location=${location || ''}&category=${category || ''}`)
+            fetch(`/api/locations?region=${region}&location=${location || ''}&category=${category || ''}`),
+            fetch(`/api/regions/${region}/locations`)
           ]);
 
           const regionData = regionRes.ok ? await regionRes.json() : null;
-          const locationsData = locationsRes.ok ? await locationsRes.json() : [];
+          let locationsData = locationsRes.ok ? await locationsRes.json() : [];
+          
+          // If no locations found, try the region locations service
+          if (locationsData.length === 0) {
+            const regionLocationsData = regionLocationsRes.ok ? await regionLocationsRes.json() : { data: [] };
+            if (regionLocationsData.data && regionLocationsData.data.length > 0) {
+              // Convert region locations to the expected format
+              locationsData = regionLocationsData.data.map((loc: any) => ({
+                _id: loc.sampleTourId || `location-${loc.location}`,
+                name: loc.location,
+                slug: loc.sampleSlug || loc.location.toLowerCase().replace(/\s+/g, '-'),
+                region: displayRegion,
+                image: loc.sampleImage || '/images/default-tour.jpg',
+                duration: 'Multi-day',
+                price: 0,
+                shortDescription: `Explore ${loc.location} with ${loc.count} available tours`,
+                rating: 4.5,
+                count: loc.count
+              }));
+            }
+          }
 
           setRegionData(regionData);
           setLocations(locationsData);

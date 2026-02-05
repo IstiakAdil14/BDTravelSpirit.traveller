@@ -24,13 +24,14 @@ export async function getLocationsForRegion(region: string): Promise<LocationSum
     {
       $match: {
         "destinations.region": { $regex: new RegExp(`^${region}$`, "i") },
-        "destinations.city": { $exists: true, $ne: "" },
         status: "published"
       },
     },
     {
       $group: {
-        _id: "$destinations.city",
+        _id: {
+          $ifNull: ["$destinations.city", "$destinations.region"]
+        },
         count: { $sum: 1 },
         sampleId: { $first: "$_id" },
         sampleSlug: { $first: "$slug" },

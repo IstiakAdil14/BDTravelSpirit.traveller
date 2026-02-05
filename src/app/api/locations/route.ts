@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { dbConnect } from "@/lib/db/connect";
+import dbConnect from "@/lib/db/connect";
 import { TourModel } from "@/models/tour.model";
 import { AssetModel } from "@/models/asset.model";
 
@@ -24,10 +24,24 @@ export async function GET(req: Request) {
     if (region) {
       const displayRegion = regionMap[region] || region;
       
-      const tours = await TourModel.find({
+      console.log('[Locations API] Searching for region:', displayRegion);
+      
+      // First try exact match
+      let tours = await TourModel.find({
         'destinations.region': { $regex: new RegExp(`^${displayRegion}$`, 'i') },
         status: 'published'
       }).populate('heroImage').lean();
+      
+      console.log('[Locations API] Found tours (exact):', tours.length);
+      
+      // If no tours found, try loose match
+      if (tours.length === 0) {
+        tours = await TourModel.find({
+          'destinations.region': { $regex: new RegExp(displayRegion, 'i') },
+          status: 'published'
+        }).populate('heroImage').lean();
+        console.log('[Locations API] Found tours (loose):', tours.length);
+      }
       
       const locations = tours.map(tour => ({
         _id: tour._id,
@@ -42,12 +56,13 @@ export async function GET(req: Request) {
         seo: tour.seo
       }));
       
+      console.log('[Locations API] Returning locations:', locations.length);
       return NextResponse.json(locations);
     }
     
     return NextResponse.json([]);
   } catch (error) {
-    console.error('API Error:', error);
-    return NextResponse.json({ error: 'Failed to fetch locations' }, { status: 500 });
+    console.error('[Locations API] Error:', error);
+    return NextResponse.json({ error: 'Failed to fetch locations', details: error.message }, { status: 500 });
   }
 }
