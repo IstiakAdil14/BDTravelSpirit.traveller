@@ -70,8 +70,8 @@ const TestimonialsClient = () => {
 
   const stats = [
     { number: "4.9", label: "Average Rating", suffix: "/5", icon: "⭐" },
-    { number: "500", label: "Happy Travelers", suffix: "+", icon: "💬" },
-    { number: "98", label: "Satisfaction Rate", suffix: "%", icon: "❤️" },
+    { number: "10", label: "Happy Travelers", suffix: "+", icon: "💬" },
+    { number: "50%", label: "Satisfaction Rate", suffix: "%", icon: "❤️" },
   ];
 
   return <TestimonialsUI testimonials={testimonials} stats={stats} />;
