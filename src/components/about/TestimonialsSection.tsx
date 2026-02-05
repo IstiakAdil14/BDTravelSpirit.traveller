@@ -163,40 +163,6 @@ export default function TestimonialsSection() {
         </div>
 
         {/* Additional Testimonials Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {testimonials.slice(0, 3).map((testimonial, index) => (
-            <motion.div
-              key={`grid-${index}`}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              viewport={{ once: true }}
-              className="professional-card p-6 hover:scale-105 transition-transform duration-300"
-            >
-              <div className="flex mb-4">
-                {[...Array(testimonial.rating)].map((_, i) => (
-                  <Star key={i} className="w-4 h-4 text-yellow-400 fill-current" />
-                ))}
-              </div>
-              <p className="text-slate-600 text-sm mb-4 line-clamp-3">
-                "{testimonial.text}"
-              </p>
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-emerald-400 to-teal-400 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                  {testimonial.name.split(' ').map(n => n[0]).join('')}
-                </div>
-                <div>
-                  <div className="font-semibold text-slate-800 text-sm">
-                    {testimonial.name}
-                  </div>
-                  <div className="text-slate-500 text-xs">
-                    {testimonial.country}
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
 
         {/* CTA */}
         <motion.div

@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
+import { showProductionNotification } from '@/components/shared/ProductionNotification';
 
 export default function TableOfContents() {
   const [activeSection, setActiveSection] = useState('');
@@ -105,14 +106,18 @@ export default function TableOfContents() {
 
         {/* Quick Actions */}
         <div className="mt-6 pt-6 border-t border-slate-200 space-y-3">
-          <button className="w-full px-4 py-2 text-sm text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors duration-200">
+          <button 
+            onClick={showProductionNotification}
+            className="w-full px-4 py-2 text-sm text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors duration-200">
             Download PDF
           </button>
-          <button className="w-full px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg transition-colors duration-200">
+          <button 
+            onClick={showProductionNotification}
+            className="w-full px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg transition-colors duration-200">
             Print Policy
           </button>
           <button 
-            onClick={() => scrollToSection('contact-us')}
+            onClick={showProductionNotification}
             className="w-full px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200"
           >
             Contact Us
