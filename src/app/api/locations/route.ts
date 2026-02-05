@@ -63,6 +63,9 @@ export async function GET(req: Request) {
     return NextResponse.json([]);
   } catch (error) {
     console.error('[Locations API] Error:', error);
-    return NextResponse.json({ error: 'Failed to fetch locations', details: error.message }, { status: 500 });
+    return NextResponse.json({ 
+      error: 'Failed to fetch locations', 
+      details: error instanceof Error ? error.message : 'Unknown error' 
+    }, { status: 500 });
   }
 }
