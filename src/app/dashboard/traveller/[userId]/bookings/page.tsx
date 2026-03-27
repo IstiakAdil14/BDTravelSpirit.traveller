@@ -1,16 +1,21 @@
-import BookingsContent from '@/components/dashboard/bookings/BookingsContent';
-import DashboardLayout from '@/components/layout/DashboardLayout';
+"use client";
 
-interface BookingsPageProps {
-  params: {
-    userId: string;
-  };
-}
+import { useParams } from "next/navigation";
+import DashboardShell from "@/components/dashboard/DashboardShell";
+import BookingsPage from "@/components/dashboard/bookings/BookingsPage";
 
-export default function BookingsPage({ params }: BookingsPageProps) {
+export default function BookingsRoute() {
+  const params = useParams();
+  const encodedUserId = params.userId as string;
+
+  const buildPageHref = (segment: string) =>
+    segment
+      ? `/dashboard/traveller/${encodedUserId}/${segment}`
+      : `/dashboard/traveller/${encodedUserId}`;
+
   return (
-    <DashboardLayout>
-      <BookingsContent userId={params.userId} />
-    </DashboardLayout>
+    <DashboardShell currentPage="bookings" buildPageHref={buildPageHref}>
+      <BookingsPage />
+    </DashboardShell>
   );
 }

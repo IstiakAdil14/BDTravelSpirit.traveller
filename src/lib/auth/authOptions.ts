@@ -112,12 +112,25 @@ export const authOptions: NextAuthOptions = {
     async signIn({ user, account, profile }: any) {
       if (account?.provider === "google") {
         try {
+          // Ensure profile picture is on user (Google uses profile.picture)
+          const picture = profile?.picture ?? user?.image;
+          if (picture) user.image = picture;
+
           await connectToDatabase();
           const existingUser = await UserModel.findOne({ email: user.email });
 
           if (existingUser) {
             user.id = existingUser._id?.toString();
             user.role = existingUser.role;
+            // Use DB image if no Google picture, else prefer Google (keeps profile fresh)
+            user.image = user.image ?? existingUser.image;
+            // Update DB with latest Google image if we have it
+            if (picture && !existingUser.image) {
+              await UserModel.updateOne(
+                { _id: existingUser._id },
+                { $set: { image: picture } }
+              );
+            }
             return true;
           }
 
@@ -125,11 +138,11 @@ export const authOptions: NextAuthOptions = {
           const newUser = await UserModel.create({
             name: user.name,
             email: user.email,
-            image: user.image, // Use 'image' field to match schema
-            isVerified: true, // Google users are pre-verified
-            accountStatus: 'active'
+            image: user.image,
+            isVerified: true,
+            accountStatus: "active",
           });
-          
+
           user.id = newUser._id.toString();
           user.role = newUser.role;
           return true;

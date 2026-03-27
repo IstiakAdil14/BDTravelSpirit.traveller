@@ -1,361 +1,380 @@
-'use client';
+"use client";
 
-import { useSession } from 'next-auth/react';
-import { motion } from 'framer-motion';
-import { 
-  User, MapPin, Heart, ShoppingCart, CreditCard, Settings, 
-  Bell, Search, Calendar, TrendingUp, Award, Globe,
-  Plane, Camera, Star, Clock, Menu, X, Home, MessageCircle, LogOut
-} from 'lucide-react';
-import Sidebar from '@/components/layout/Sidebar';
-import DashboardStats from './DashboardStats';
-import BookingHistory from './BookingHistory';
-import WishlistSection from './WishlistSection';
-import SignOutDialog from '@/components/layout/header/SignOutDialog';
-import { useState } from 'react';
+import React, { useState } from "react";
+import Link from "next/link";
+import { useSession } from "next-auth/react";
+import { motion, type Variants } from "framer-motion";
+import {
+  Plane, Globe, Heart, Award, Star, CalendarDays,
+  Compass, TrendingUp, CheckCircle2, Circle, Clock, ArrowRight,
+  Sun, Mountain, MapPin,
+} from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import BookingsTable, { type Booking } from "./BookingsTable";
 
-interface TravellerDashboardProps {
-  stats: {
-    totalTrips: number;
-    placesVisited: number;
-    wishlistItems: number;
-    reviewsWritten: number;
-  };
-  bookings: Array<{
-    id: string;
-    title: string;
-    location: string;
-    date: string;
-    status: 'upcoming' | 'completed' | 'cancelled';
-    price: string;
-    duration: string;
-  }>;
-  wishlistItems: Array<{
-    id: string;
-    name: string;
-    location: string;
-    price: string;
-    image?: string;
-  }>;
-  cartItems: Array<{
-    id: string;
-    name: string;
-    location: string;
-    price: string;
-    image?: string;
-  }>;
+interface Stats {
+  totalTrips: number;
+  placesVisited: number;
+  wishlistItems: number;
+  reviewsWritten: number;
 }
 
-export default function TravellerDashboard({ 
-  stats = { totalTrips: 0, placesVisited: 0, wishlistItems: 0, reviewsWritten: 0 }, 
-  bookings = [], 
-  wishlistItems = [] 
-}: Partial<TravellerDashboardProps> = {}) {
+interface WeekDay { day: string; val: number; count: number; }
+interface ProgressItem { label: string; val: number; }
+interface TravelTime { travelled: string; remaining: string; pct: number; }
+interface OnboardingTask { label: string; done: boolean; }
+interface ScheduleEvent { time: string; title: string; tag: string; color: string; }
+
+interface TravellerDashboardProps {
+  stats?: Stats;
+  bookings?: Booking[];
+  wishlistItems?: Array<{ id: string; name: string; location: string; price: string }>;
+  cartItems?: Array<{ id: string; name: string; location: string; price: string }>;
+  isLoading?: boolean;
+  buildPageHref?: (page: string) => string;
+  weeklyActivity?: WeekDay[];
+  progress?: ProgressItem[];
+  travelTime?: TravelTime;
+  onboarding?: OnboardingTask[];
+  schedule?: ScheduleEvent[];
+}
+
+const PROGRESS_COLORS = [
+  "bg-gradient-to-r from-emerald-500 to-teal-500",
+  "bg-gradient-to-r from-teal-500 to-emerald-600",
+  "bg-gradient-to-r from-emerald-400 to-teal-400",
+  "bg-gradient-to-r from-teal-600 to-emerald-500",
+];
+
+const DEFAULT_WEEK: WeekDay[] = [
+  { day: "Sun", val: 0, count: 0 }, { day: "Mon", val: 0, count: 0 },
+  { day: "Tue", val: 0, count: 0 }, { day: "Wed", val: 0, count: 0 },
+  { day: "Thu", val: 0, count: 0 }, { day: "Fri", val: 0, count: 0 },
+  { day: "Sat", val: 0, count: 0 },
+];
+
+const DEFAULT_PROGRESS: ProgressItem[] = [
+  { label: "Destinations Explored", val: 0 },
+  { label: "Bookings Completed", val: 0 },
+  { label: "Reviews Written", val: 0 },
+];
+
+const QUICK_LINKS = [
+  { label: "Explore Tours",  href: "/tours",        icon: Compass,     bg: "bg-emerald-50", text: "text-emerald-600", border: "border-emerald-200" },
+  { label: "My Bookings",   href: "bookings",       icon: CalendarDays, bg: "bg-sky-50",    text: "text-sky-600",    border: "border-sky-200" },
+  { label: "Write Review",  href: "reviews",        icon: Star,         bg: "bg-violet-50", text: "text-violet-600", border: "border-violet-200" },
+  { label: "Destinations",  href: "/destinations",  icon: Mountain,     bg: "bg-teal-50",   text: "text-teal-600",   border: "border-teal-200" },
+];
+
+const container: Variants = { hidden: {}, show: { transition: { staggerChildren: 0.07 } } };
+const fadeUp: Variants = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] } },
+};
+
+function getGreeting() {
+  const h = new Date().getHours();
+  if (h < 12) return "Good morning";
+  if (h < 17) return "Good afternoon";
+  return "Good evening";
+}
+
+function getGreetingIcon() {
+  const h = new Date().getHours();
+  if (h < 12) return Sun;
+  if (h < 17) return Compass;
+  return MapPin;
+}
+
+export default function TravellerDashboard({
+  stats = { totalTrips: 0, placesVisited: 0, wishlistItems: 0, reviewsWritten: 0 },
+  bookings = [],
+  isLoading = false,
+  buildPageHref = (seg: string) => (seg ? `#${seg}` : "#"),
+  weeklyActivity = DEFAULT_WEEK,
+  progress = DEFAULT_PROGRESS,
+  travelTime = { travelled: "0d", remaining: "30d", pct: 0 },
+  onboarding = [],
+  schedule = [],
+}: TravellerDashboardProps) {
   const { data: session } = useSession();
   const user = session?.user;
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [showSignOutDialog, setShowSignOutDialog] = useState(false);
+  const firstName = user?.name?.split(" ")[0] ?? "Traveller";
+  const [activeDay, setActiveDay] = useState(() => new Date().getDay());
+  const GreetingIcon = getGreetingIcon();
 
-  const quickActions = [
-    { icon: MapPin, label: 'Browse Tours', color: 'from-emerald-500 to-teal-500', bgColor: 'bg-emerald-50' },
-    { icon: Heart, label: 'My Wishlist', color: 'from-rose-500 to-pink-500', bgColor: 'bg-rose-50' },
-    { icon: ShoppingCart, label: 'Shopping Cart', color: 'from-blue-500 to-indigo-500', bgColor: 'bg-blue-50' },
-    { icon: Calendar, label: 'My Bookings', color: 'from-purple-500 to-violet-500', bgColor: 'bg-purple-50' },
-    { icon: CreditCard, label: 'Payments', color: 'from-green-500 to-emerald-500', bgColor: 'bg-green-50' },
-    { icon: Settings, label: 'Settings', color: 'from-gray-500 to-slate-500', bgColor: 'bg-gray-50' }
-  ];
+  const onboardingDone = onboarding.filter((t) => t.done).length;
+  const onboardingPct = onboarding.length > 0
+    ? Math.round((onboardingDone / onboarding.length) * 100)
+    : 0;
 
-  const achievements = [
-    { icon: Award, title: 'Explorer Badge', description: 'Visited 5+ destinations', earned: true },
-    { icon: Star, title: 'Top Reviewer', description: 'Written 10+ reviews', earned: stats.reviewsWritten >= 10 },
-    { icon: Globe, title: 'World Traveler', description: 'Visited 3+ countries', earned: false },
-    { icon: Camera, title: 'Memory Keeper', description: 'Shared 20+ photos', earned: false }
-  ];
+  const peakDay = weeklyActivity.reduce((max, d) => d.val > max.val ? d : max, weeklyActivity[0]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20">
-      {/* Mobile Layout */}
-      <div className="lg:hidden">
-        {/* Mobile Header */}
-        <motion.div 
-          initial={{ y: -20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          className="sticky top-0 z-20 bg-white/90 backdrop-blur-xl shadow-lg border-b border-white/20"
-        >
-          <div className="px-4 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <button 
-                  onClick={() => setIsMobileMenuOpen(true)}
-                  className="p-2 rounded-xl bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors"
-                >
-                  <Menu className="w-5 h-5" />
-                </button>
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 p-0.5">
-                  {user?.image ? (
-                    <img src={user.image} alt={user.name || 'User'} className="w-full h-full rounded-lg object-cover" />
-                  ) : (
-                    <div className="w-full h-full rounded-lg bg-white flex items-center justify-center">
-                      <User className="w-6 h-6 text-teal-600" />
-                    </div>
-                  )}
-                </div>
-                <div>
-                  <h1 className="text-lg font-bold text-gray-900">Hi, {user?.name?.split(' ')[0] || 'Traveller'}!</h1>
-                  <p className="text-sm text-gray-600">Level 3 Explorer</p>
-                </div>
-              </div>
-              <Bell className="w-6 h-6 text-gray-600" />
+    <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 pb-10">
+
+      {/* ── GREETING BANNER ── */}
+      <motion.div
+        variants={fadeUp}
+        className="relative overflow-hidden rounded-3xl p-7 text-white bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600"
+      >
+        <div className="absolute -top-20 -right-20 h-72 w-72 rounded-full bg-white/20 blur-3xl" />
+        <div className="absolute -bottom-12 -left-12 h-48 w-48 rounded-full bg-teal-300/20 blur-3xl" />
+        <div className="absolute right-8 top-6 opacity-[0.07]">
+          <Plane className="h-40 w-40 rotate-12" strokeWidth={0.8} />
+        </div>
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+          <div>
+            <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-white/20 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm">
+              <GreetingIcon className="h-3 w-3" /> {getGreeting()}
+            </div>
+            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl flex items-center gap-3">
+              <Plane className="h-8 w-8 text-white/80" />
+              Welcome in, <span className="text-white drop-shadow">{firstName}</span>
+            </h1>
+            <p className="mt-2 max-w-md text-sm text-white/80">
+              You have{" "}
+              <span className="font-semibold text-white">{stats.totalTrips} trips</span> booked and{" "}
+              <span className="font-semibold text-white">{stats.reviewsWritten} reviews</span> shared.
+              Keep exploring Bangladesh!
+            </p>
+          </div>
+        </div>
+      </motion.div>
+
+
+      {/* ── MIDDLE ROW: Profile | Weekly Chart | Time Tracker ── */}
+      <motion.div variants={fadeUp} className="grid gap-4 lg:grid-cols-3">
+
+        {/* Profile Card */}
+        <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-slate-200/70 bg-white p-6 shadow-sm text-center">
+          <div className="relative">
+            <div className="h-28 w-28 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 p-0.5 shadow-lg shadow-emerald-500/30">
+              <Avatar className="h-full w-full rounded-[14px]">
+                <AvatarImage
+                  src={user?.image ? `/api/user/avatar?u=${user?.id ?? ""}` : ""}
+                  alt={user?.name ?? "Traveller"}
+                  className="rounded-[14px] object-cover"
+                />
+                <AvatarFallback className="rounded-[14px] bg-slate-900 text-2xl font-bold text-white">
+                  {user?.name?.[0]?.toUpperCase() ?? "T"}
+                </AvatarFallback>
+              </Avatar>
+            </div>
+            <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-emerald-400 ring-2 ring-white">
+              <span className="h-2 w-2 rounded-full bg-white" />
+            </span>
+          </div>
+          <div>
+            <p className="text-base font-bold text-slate-900">{user?.name ?? "Traveller"}</p>
+            <p className="text-xs text-slate-500">{user?.email ?? ""}</p>
+          </div>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-200">
+            <Star className="h-3 w-3 fill-emerald-500 text-emerald-500" /> Explorer Member
+          </span>
+          <div className="grid w-full grid-cols-2 gap-2 pt-1">
+            <div className="rounded-xl bg-slate-50 p-3">
+              <p className="text-lg font-bold text-slate-900">{stats.totalTrips}</p>
+              <p className="text-xs text-slate-500">Trips</p>
+            </div>
+            <div className="rounded-xl bg-slate-50 p-3">
+              <p className="text-lg font-bold text-slate-900">{stats.placesVisited}</p>
+              <p className="text-xs text-slate-500">Places</p>
             </div>
           </div>
-        </motion.div>
+        </div>
 
-        {/* Mobile Menu Overlay */}
-        {isMobileMenuOpen && (
-          <div className="fixed inset-0 z-50 lg:hidden">
-            <div className="fixed inset-0 bg-black/50" onClick={() => setIsMobileMenuOpen(false)} />
-            <motion.div
-              initial={{ x: -300 }}
-              animate={{ x: 0 }}
-              exit={{ x: -300 }}
-              className="fixed left-0 top-0 h-full w-80 bg-white/95 backdrop-blur-xl shadow-2xl"
-            >
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-8">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 p-0.5">
-                      <div className="w-full h-full rounded-lg bg-teal-900 flex items-center justify-center">
-                        <span className="text-white font-bold text-sm">BD</span>
-                      </div>
-                    </div>
-                    <div>
-                      <h1 className="font-bold text-gray-900">BD Travel Spirit</h1>
-                      <p className="text-xs text-gray-500">Your Travel Companion</p>
-                    </div>
-                  </div>
-                  <button 
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="p-2 rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-                
-                <nav className="space-y-2">
-                  {[
-                    { name: "Overview", icon: Home },
-                    { name: "My Trips", icon: MapPin },
-                    { name: "Favorites", icon: Heart },
-                    { name: "Bookings", icon: Calendar },
-                    { name: "Payments", icon: CreditCard },
-                    { name: "Reviews", icon: Star },
-                    { name: "Settings", icon: Settings },
-                  ].map((item) => (
-                    <button
-                      key={item.name}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-emerald-50 hover:text-emerald-600 transition-all"
-                    >
-                      <item.icon className="w-5 h-5" />
-                      <span className="font-medium">{item.name}</span>
-                    </button>
-                  ))}
-                </nav>
-                
-                <div className="mt-8 pt-6 border-t border-gray-200">
-                  <button
-                    onClick={() => {
-                      setIsMobileMenuOpen(false);
-                      setShowSignOutDialog(true);
-                    }}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-red-50 hover:text-red-600 transition-all"
-                  >
-                    <LogOut className="w-5 h-5" />
-                    <span className="font-medium">Logout</span>
-                  </button>
-                </div>
-              </div>
-            </motion.div>
+        {/* Weekly Bar Chart */}
+        <div className="rounded-2xl border border-slate-200/70 bg-white p-6 shadow-sm">
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-slate-800">Weekly Activity</h3>
+            <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700">This week</span>
           </div>
-        )}
+          <div className="flex h-32 items-end gap-2">
+            {weeklyActivity.map((d, i) => (
+              <button
+                key={d.day}
+                onClick={() => setActiveDay(i)}
+                className="group flex flex-1 flex-col items-center gap-1.5"
+              >
+                <motion.div
+                  initial={{ height: 0 }}
+                  animate={{ height: `${Math.max(d.val, 4)}%` }}
+                  transition={{ duration: 0.6, delay: i * 0.06, ease: "easeOut" }}
+                  className={`w-full rounded-t-lg transition-colors ${
+                    activeDay === i
+                      ? "bg-gradient-to-t from-emerald-600 to-teal-400 shadow-md shadow-emerald-400/30"
+                      : "bg-slate-100 group-hover:bg-emerald-100"
+                  }`}
+                />
+                <span className={`text-[10px] font-medium ${activeDay === i ? "text-emerald-600" : "text-slate-400"}`}>
+                  {d.day}
+                </span>
+              </button>
+            ))}
+          </div>
+          <p className="mt-3 text-xs text-slate-400">
+            {peakDay?.count > 0
+              ? <>Peak: <span className="font-semibold text-slate-700">{peakDay.day} ({peakDay.count} bookings)</span></>
+              : <span>No bookings this week yet</span>
+            }
+          </p>
+        </div>
 
-        {/* Mobile Content */}
-        <div className="px-4 py-6 space-y-6">
-          <DashboardStats stats={stats} />
-          
-          {/* Mobile Quick Actions */}
-          <div className="bg-white/60 backdrop-blur-xl rounded-2xl p-6 border border-white/20 shadow-xl">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h2>
-            <div className="grid grid-cols-2 gap-3">
-              {quickActions.slice(0, 4).map((action, index) => (
-                <button key={action.label} className={`${action.bgColor} p-4 rounded-xl border border-white/20 hover:shadow-lg transition-all`}>
-                  <div className={`w-8 h-8 rounded-lg bg-gradient-to-r ${action.color} flex items-center justify-center text-white mb-2`}>
-                    <action.icon className="w-4 h-4" />
+        {/* Circular Time Tracker */}
+        <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-slate-200/70 bg-white p-6 shadow-sm">
+          <h3 className="self-start text-sm font-semibold text-slate-800">Travel Time</h3>
+          <div className="relative flex h-32 w-32 items-center justify-center">
+            <svg className="absolute inset-0 -rotate-90" viewBox="0 0 120 120">
+              <circle cx="60" cy="60" r="50" fill="none" stroke="#f1f5f9" strokeWidth="10" />
+              <motion.circle
+                cx="60" cy="60" r="50" fill="none"
+                stroke="#10b981" strokeWidth="10"
+                strokeLinecap="round"
+                strokeDasharray="314"
+                initial={{ strokeDashoffset: 314 }}
+                animate={{ strokeDashoffset: 314 * (1 - travelTime.pct / 100) }}
+                transition={{ duration: 1.2, ease: "easeOut", delay: 0.4 }}
+              />
+            </svg>
+            <div className="text-center">
+              <p className="text-2xl font-bold text-slate-900">{travelTime.pct}%</p>
+              <p className="text-[10px] text-slate-500">of goal</p>
+            </div>
+          </div>
+          <div className="grid w-full grid-cols-2 gap-2 text-center">
+            <div className="rounded-xl bg-emerald-50 p-2.5">
+              <p className="text-sm font-bold text-emerald-700">{travelTime.travelled}</p>
+              <p className="text-[10px] text-slate-500">Travelled</p>
+            </div>
+            <div className="rounded-xl bg-slate-50 p-2.5">
+              <p className="text-sm font-bold text-slate-700">{travelTime.remaining}</p>
+              <p className="text-[10px] text-slate-500">Remaining</p>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* ── PROGRESS OVERVIEW ── */}
+      <motion.div variants={fadeUp} className="rounded-2xl border border-slate-200/70 bg-white p-6 shadow-sm">
+        <h2 className="mb-5 text-sm font-semibold uppercase tracking-wider text-slate-500">Travel Progress</h2>
+        <div className="grid gap-4 sm:grid-cols-2">
+          {progress.map((p, i) => (
+            <div key={p.label}>
+              <div className="mb-1.5 flex items-center justify-between">
+                <span className="text-sm font-medium text-slate-700">{p.label}</span>
+                <span className="text-sm font-bold text-slate-900">{p.val}%</span>
+              </div>
+              <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-100">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${p.val}%` }}
+                  transition={{ duration: 1, ease: "easeOut", delay: 0.3 }}
+                  className={`h-full rounded-full ${PROGRESS_COLORS[i % PROGRESS_COLORS.length]}`}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      </motion.div>
+
+      {/* ── BOTTOM ROW: Onboarding + Schedule ── */}
+      <motion.div variants={fadeUp} className="grid gap-4 lg:grid-cols-5">
+
+        {/* Onboarding + Tasks */}
+        <div className="lg:col-span-2 rounded-2xl border border-slate-200/70 bg-white p-6 shadow-sm">
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-slate-800">Getting Started</h3>
+            <span className="text-xs font-bold text-emerald-600">{onboardingPct}%</span>
+          </div>
+          <div className="mb-5 flex gap-1">
+            {onboarding.map((t, i) => (
+              <div
+                key={i}
+                className={`h-1.5 flex-1 rounded-full transition-colors ${t.done ? "bg-gradient-to-r from-emerald-500 to-teal-500" : "bg-slate-100"}`}
+              />
+            ))}
+          </div>
+          <div className="space-y-2.5">
+            {onboarding.map((t) => (
+              <div key={t.label} className="flex items-center gap-3">
+                {t.done ? (
+                  <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />
+                ) : (
+                  <Circle className="h-4 w-4 shrink-0 text-slate-300" />
+                )}
+                <span className={`text-sm ${t.done ? "text-slate-400 line-through" : "text-slate-700 font-medium"}`}>
+                  {t.label}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Schedule / Events */}
+        <div className="lg:col-span-3 rounded-2xl border border-slate-200/70 bg-white p-6 shadow-sm">
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-slate-800">Upcoming Schedule</h3>
+            <Link
+              href={buildPageHref("bookings")}
+              className="flex items-center gap-1 text-xs font-medium text-emerald-600 hover:text-emerald-700"
+            >
+              View all <ArrowRight className="h-3 w-3" />
+            </Link>
+          </div>
+
+          {schedule.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-8 text-center">
+              <CalendarDays className="h-10 w-10 text-slate-200 mb-3" />
+              <p className="text-sm font-medium text-slate-500">No upcoming trips</p>
+              <p className="text-xs text-slate-400 mt-1">Book a tour to see your schedule here</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {schedule.map((ev) => (
+                <div
+                  key={ev.title}
+                  className="flex items-center gap-4 rounded-xl border border-slate-100 bg-slate-50/60 p-3.5 transition-colors hover:bg-slate-50"
+                >
+                  <div className={`h-10 w-1 shrink-0 rounded-full ${ev.color}`} />
+                  <div className="flex-1 min-w-0">
+                    <p className="truncate text-sm font-semibold text-slate-800">{ev.title}</p>
+                    <div className="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500">
+                      <Clock className="h-3 w-3" /> {ev.time}
+                    </div>
                   </div>
-                  <h3 className="font-semibold text-gray-900 text-xs">{action.label}</h3>
-                </button>
+                  <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${
+                    ev.tag === "Upcoming"  ? "bg-emerald-50 text-emerald-700" :
+                    ev.tag === "Confirmed" ? "bg-sky-50 text-sky-700" :
+                    "bg-slate-100 text-slate-600"
+                  }`}>
+                    {ev.tag}
+                  </span>
+                </div>
               ))}
             </div>
-          </div>
+          )}
 
-          <BookingHistory bookings={bookings} />
-          <WishlistSection wishlistItems={wishlistItems} />
-        </div>
-      </div>
-
-      {/* Desktop Layout */}
-      <div className="hidden lg:flex">
-        <div className="sticky top-0 h-screen">
-          <Sidebar />
-        </div>
-        
-        <div className="flex-1">
-          {/* Desktop Header */}
-          <motion.div 
-            initial={{ y: -20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            className="sticky top-0 z-20 bg-white/80 backdrop-blur-xl shadow-lg border-b border-white/20"
-          >
-            <div className="max-w-7xl mx-auto px-6 py-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-6">
-                  <div className="relative">
-                    <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 p-1 shadow-lg">
-                      {user?.image ? (
-                        <img src={user.image} alt={user.name || 'User'} className="w-full h-full rounded-xl object-cover" />
-                      ) : (
-                        <div className="w-full h-full rounded-xl bg-white flex items-center justify-center">
-                          <User className="w-8 h-8 text-teal-600" />
-                        </div>
-                      )}
-                    </div>
-                    <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-white flex items-center justify-center">
-                      <div className="w-2 h-2 bg-white rounded-full"></div>
-                    </div>
-                  </div>
-                  <div>
-                    <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-                      Welcome back, {user?.name || 'Traveller'}!
-                    </h1>
-                    <p className="text-gray-600 text-lg">Ready for your next adventure?</p>
-                    <div className="flex items-center space-x-4 mt-2">
-                      <span className="flex items-center text-sm text-emerald-600 font-medium">
-                        <TrendingUp className="w-4 h-4 mr-1" />
-                        Level 3 Explorer
-                      </span>
-                      <span className="text-gray-300">•</span>
-                      <span className="text-sm text-gray-500">Member since 2024</span>
-                    </div>
-                  </div>
-                </div>
-                
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Desktop Content */}
-          <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
-            <DashboardStats stats={stats} />
-            
-            <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
-              <div className="xl:col-span-3 space-y-8">
-
-                <BookingHistory bookings={bookings} />
-              </div>
-
-              <div className="space-y-6">
-                <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3 }}
-                  className="bg-white/60 backdrop-blur-xl rounded-2xl p-6 border border-white/20 shadow-xl"
-                >
-                  <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
-                    <Award className="w-5 h-5 mr-2 text-amber-500" />
-                    Achievements
-                  </h3>
-                  <div className="space-y-3">
-                    {achievements.map((achievement) => (
-                      <div key={achievement.title} className={`flex items-center space-x-3 p-3 rounded-xl transition-all ${
-                        achievement.earned ? 'bg-amber-50 border border-amber-200' : 'bg-gray-50 border border-gray-200'
-                      }`}>
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                          achievement.earned ? 'bg-amber-500 text-white' : 'bg-gray-300 text-gray-500'
-                        }`}>
-                          <achievement.icon className="w-4 h-4" />
-                        </div>
-                        <div className="flex-1">
-                          <h4 className={`text-sm font-medium ${
-                            achievement.earned ? 'text-gray-900' : 'text-gray-500'
-                          }`}>{achievement.title}</h4>
-                          <p className="text-xs text-gray-500">{achievement.description}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.4 }}
-                  className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-6 text-white shadow-xl"
-                >
-                  <h3 className="text-lg font-bold mb-4 flex items-center">
-                    <Globe className="w-5 h-5 mr-2" />
-                    Travel Progress
-                  </h3>
-                  <div className="space-y-4">
-                    <div>
-                      <div className="flex justify-between text-sm mb-2">
-                        <span>Next Level</span>
-                        <span>75%</span>
-                      </div>
-                      <div className="w-full bg-white/20 rounded-full h-2">
-                        <div className="bg-white h-2 rounded-full" style={{ width: '75%' }}></div>
-                      </div>
-                    </div>
-                    <div className="text-sm opacity-90">
-                      Complete 2 more trips to reach Level 4!
-                    </div>
-                  </div>
-                </motion.div>
-
-                <WishlistSection wishlistItems={wishlistItems} />
-
-                <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.5 }}
-                  className="bg-white/60 backdrop-blur-xl rounded-2xl p-6 border border-white/20 shadow-xl"
-                >
-                  <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
-                    <Clock className="w-5 h-5 mr-2 text-blue-500" />
-                    Recent Activity
-                  </h3>
-                  <div className="space-y-3">
-                    <div className="flex items-center space-x-3 text-sm">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span className="text-gray-600">Booked Cox's Bazar Beach Tour</span>
-                    </div>
-                    <div className="flex items-center space-x-3 text-sm">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                      <span className="text-gray-600">Added Sundarbans to wishlist</span>
-                    </div>
-                    <div className="flex items-center space-x-3 text-sm">
-                      <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                      <span className="text-gray-600">Reviewed Sylhet Tea Gardens</span>
-                    </div>
-                  </div>
-                </motion.div>
-              </div>
-            </div>
+          {/* Quick links */}
+          <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {QUICK_LINKS.map((ql) => (
+              <Link
+                key={ql.label}
+                href={ql.href.startsWith("/") ? ql.href : buildPageHref(ql.href)}
+                className={`flex flex-col items-center gap-1.5 rounded-xl border ${ql.border} ${ql.bg} p-3 text-center transition-all hover:shadow-sm`}
+              >
+                <ql.icon className={`h-4 w-4 ${ql.text}`} />
+                <span className={`text-[10px] font-semibold ${ql.text}`}>{ql.label}</span>
+              </Link>
+            ))}
           </div>
         </div>
-      </div>
-      
-      {/* Sign Out Dialog */}
-      <SignOutDialog isOpen={showSignOutDialog} onClose={() => setShowSignOutDialog(false)} />
-    </div>
+      </motion.div>
+
+      {/* ── BOOKINGS TABLE ── */}
+      <motion.div variants={fadeUp}>
+        <BookingsTable bookings={bookings} isLoading={isLoading} />
+      </motion.div>
+    </motion.div>
   );
 }

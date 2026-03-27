@@ -2,9 +2,8 @@
 
 import { useParams } from "next/navigation";
 import DashboardShell from "@/components/dashboard/DashboardShell";
-import ReviewsPage from "@/components/dashboard/reviews/ReviewsPage";
-
-export default function ReviewsRoute() {
+import InboxPage from "@/components/dashboard/inbox/InboxPage";
+export default function InboxRoute() {
   const params = useParams();
   const encodedUserId = params.userId as string;
 
@@ -14,8 +13,8 @@ export default function ReviewsRoute() {
       : `/dashboard/traveller/${encodedUserId}`;
 
   return (
-    <DashboardShell currentPage="reviews" buildPageHref={buildPageHref}>
-      <ReviewsPage />
+    <DashboardShell currentPage="inbox" buildPageHref={buildPageHref}>
+      <InboxPage />
     </DashboardShell>
   );
 }
