@@ -26,7 +26,7 @@ export async function GET(_req: NextRequest) {
 
     if (!imageUrl) {
       await connectToDatabase();
-      const dbUser = await UserModel.findById(session.user.id).select("image").lean();
+      const dbUser = await UserModel.findById(session.user.id).select("image").lean() as { image?: string } | null;
       imageUrl = dbUser?.image;
     }
 
