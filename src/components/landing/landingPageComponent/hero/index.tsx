@@ -46,13 +46,17 @@ const HeroSkeleton = () => (
   </section>
 );
 
-export default async function HeroSection() {
+const HeroSectionServer = async () => {
   await dbConnect();
   const slides = await HeroSlideModel.find({ isActive: true }).sort({ order: 1 }).lean();
 
+  return <HeroClient slides={JSON.parse(JSON.stringify(slides))} />;
+};
+
+export default function HeroSection() {
   return (
     <Suspense fallback={<HeroSkeleton />}>
-      <HeroClient slides={JSON.parse(JSON.stringify(slides))} />
+      <HeroSectionServer />
     </Suspense>
   );
 }

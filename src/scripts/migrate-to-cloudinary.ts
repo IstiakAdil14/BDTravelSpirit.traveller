@@ -52,21 +52,25 @@ async function uploadToCloudinary(url: string, folder: string) {
 async function migrateAssets() {
     console.log("Migrating Assets...");
     const assets = await AssetModel.find({
-        storageProvider: { $ne: STORAGE_PROVIDER.CLOUDINARY },
         deletedAt: null,
-    });
+    }).populate("file");
 
-    console.log(`Found ${assets.length} assets to migrate.`);
+    console.log(`Found ${assets.length} assets to check for migration.`);
 
     for (const asset of assets) {
-        console.log(`Migrating asset: ${asset.publicUrl}`);
-        const result = await uploadToCloudinary(asset.publicUrl, "bd-travel-spirit/assets");
-        if (result) {
-            asset.storageProvider = STORAGE_PROVIDER.CLOUDINARY;
-            asset.objectKey = result.public_id;
-            asset.publicUrl = result.secure_url;
-            await asset.save();
-            console.log(`Successfully migrated to: ${result.secure_url}`);
+        const fileDoc = (asset as any).file;
+        if (!fileDoc) continue;
+
+        if (fileDoc.storageProvider !== STORAGE_PROVIDER.CLOUDINARY) {
+            console.log(`Migrating asset file: ${fileDoc.publicUrl}`);
+            const result = await uploadToCloudinary(fileDoc.publicUrl, "bd-travel-spirit/assets");
+            if (result) {
+                fileDoc.storageProvider = STORAGE_PROVIDER.CLOUDINARY;
+                fileDoc.objectKey = result.public_id;
+                fileDoc.publicUrl = result.secure_url;
+                await fileDoc.save();
+                console.log(`Successfully migrated to: ${result.secure_url}`);
+            }
         }
     }
 }

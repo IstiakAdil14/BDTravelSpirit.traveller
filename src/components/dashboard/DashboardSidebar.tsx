@@ -52,16 +52,17 @@ export default function DashboardSidebar({
       <Sidebar collapsible="icon">
         {/* ── HEADER ── */}
         <SidebarHeader className="border-b border-sidebar-border px-4 py-5">
-          <div className="flex items-center gap-3 px-1 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
-            
-            {/* Logo */}
+          <Link
+            href="/"
+            aria-label="Back to BD Travel Spirit home"
+            className="flex items-center gap-3 rounded-xl px-1 transition-colors hover:bg-white/5 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+          >
             <div className="h-11 w-11 shrink-0 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 p-[2px] shadow-lg shadow-emerald-500/30">
               <div className="flex h-full w-full items-center justify-center rounded-lg bg-teal-900">
                 <span className="text-sm font-bold text-white">BD</span>
               </div>
             </div>
 
-            {/* Text */}
             <div className="min-w-0 group-data-[collapsible=icon]:hidden">
               <p className="text-sm font-bold uppercase tracking-widest text-emerald-300">
                 BD Travel Spirit
@@ -70,7 +71,7 @@ export default function DashboardSidebar({
                 Traveller Dashboard
               </p>
             </div>
-          </div>
+          </Link>
         </SidebarHeader>
 
         {/* ── CONTENT ── */}

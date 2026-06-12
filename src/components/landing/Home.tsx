@@ -10,7 +10,7 @@ import FinalCTA from "@/components/landing/landingPageComponent/cta";
 
 export default function Home() {
   return (
-    <main className="min-h-screen mt-16">
+    <>
       <HeroSection />
       <ExploreBangladesh />
       <MostPopularDestinations />
@@ -20,6 +20,6 @@ export default function Home() {
       <WhyPartner />
       <Testimonials />
       <FinalCTA />
-    </main>
+    </>
   );
 }

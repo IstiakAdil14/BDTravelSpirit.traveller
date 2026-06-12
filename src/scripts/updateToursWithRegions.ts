@@ -156,7 +156,7 @@ async function updateToursWithRegions() {
         const region = getRegionFromLocation(
           tour.mainLocation.address.city,
           tour.mainLocation.address.district,
-          tour.mainLocation.address.country
+          (tour.mainLocation.address as any).country
         );
         
         if (region) {

@@ -155,15 +155,16 @@ async function updateTours() {
         }
 
         // Enrich basic info
-        tour.tags = Array.from(new Set([...(tour.tags || []), ...data.tags]));
-        tour.viewCount = Math.floor(Math.random() * 5000) + 1000;
-        tour.likeCount = Math.floor(tour.viewCount * 0.1);
-        tour.shareCount = Math.floor(tour.likeCount * 0.2);
-        tour.wordCount = Math.floor(Math.random() * 1000) + 500;
-        tour.readingTime = Math.ceil(tour.wordCount / 200);
+        const anyTour = tour as any;
+        anyTour.tags = Array.from(new Set([...(tour.tags || []), ...data.tags]));
+        anyTour.viewCount = Math.floor(Math.random() * 5000) + 1000;
+        anyTour.likeCount = Math.floor(anyTour.viewCount * 0.1);
+        anyTour.shareCount = Math.floor(anyTour.likeCount * 0.2);
+        anyTour.wordCount = Math.floor(Math.random() * 1000) + 500;
+        anyTour.readingTime = Math.ceil(anyTour.wordCount / 200);
 
         // Pickup options
-        tour.pickupOptions = [{ city: "Dhaka", price: 0, currency: "BDT" }, { city: tour.mainLocation.address.city, price: 500, currency: "BDT" }];
+        anyTour.pickupOptions = [{ city: "Dhaka", price: 0, currency: "BDT" }, { city: tour.mainLocation?.address?.city, price: 500, currency: "BDT" }];
 
         // Inclusions/Exclusions
         tour.inclusions = [

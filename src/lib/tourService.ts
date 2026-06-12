@@ -1,26 +1,38 @@
 import { dbConnect } from "@/lib/db/connect";
-import { TourModel, ITour } from "@/models/tour.model";
-import { AssetModel, IAsset } from "@/models/asset.model";
+import { TourModel } from "@/models/tour.model";
+import { AssetModel } from "@/models/asset.model";
+import AssetFileModel from "@/models/assets/asset-file.model";
 import { ReviewModel } from "@/models/review.model";
 import { TourFAQModel } from "@/models/tourFAQ.model";
 import { GuideModel } from "@/models/guide.model";
-import { UserModel } from "@/models/user.model"; // Ensure User model is registered for population
+import { UserModel } from "@/models/user.model";
+import { TravelerModel } from "@/models/travelers/traveler.model";
+import { TOUR_STATUS } from "@/constants/tour.const";
 import mongoose from "mongoose";
-import { Tour, Review, Faq, Guide, Media } from "@/types/tour";
+import { Review, Faq, Guide, Media } from "@/types/tour";
+
+const assetFilePopulate = { path: "file", select: "publicUrl contentType" };
+
+const getAssetUrl = (asset: { file?: { publicUrl?: string }; publicUrl?: string } | null) =>
+    asset?.file?.publicUrl ?? asset?.publicUrl ?? "";
+
+const getAssetContentType = (asset: { file?: { contentType?: string }; contentType?: string } | null) =>
+    asset?.file?.contentType ?? asset?.contentType ?? "";
 
 export async function getFullTourBySlug(slug: string) {
     if (!slug) return null;
     await dbConnect();
     // Ensure models are registered
     if (!mongoose.models.User) mongoose.model("User", UserModel.schema);
+    if (!mongoose.models.Traveler) mongoose.model("Traveler", TravelerModel.schema);
     if (!mongoose.models.Asset) mongoose.model("Asset", AssetModel.schema);
+    if (!mongoose.models.AssetFile) mongoose.model("AssetFile", AssetFileModel.schema);
 
     const tourDoc = await TourModel.findOne({ slug })
-        .populate("heroImage")
-        .populate("gallery")
-        .populate("destinations.images")
-        .populate("itinerary.images")
-        .populate("destinations.attractions.images")
+        .populate({ path: "heroImage", populate: assetFilePopulate })
+        .populate({ path: "gallery", populate: assetFilePopulate })
+        .populate({ path: "destinations.images", populate: assetFilePopulate })
+        .populate({ path: "destinations.attractions.images", populate: assetFilePopulate })
         .lean() as any;
 
     if (!tourDoc) return null;
@@ -36,13 +48,16 @@ export async function getFullTourBySlug(slug: string) {
             .populate("user", "name avatar")
             .lean(),
         TourFAQModel.find({ tour: tourId }).sort({ createdAt: -1 }).limit(10).lean(),
-        GuideModel.find({ _id: { $in: tourDoc.guideIds || [] } }).lean(),
+        tourDoc.companyId
+            ? GuideModel.find({ _id: tourDoc.companyId }).lean()
+            : Promise.resolve([]),
         TourModel.find({
-            "destinations.country": tourDoc.destinations?.[0]?.country,
+            division: tourDoc.division,
             _id: { $ne: tourId },
-            status: "published"
+            status: { $in: [TOUR_STATUS.ACTIVE, TOUR_STATUS.PUBLISHED] },
+            deletedAt: null,
         })
-            .populate("heroImage")
+            .populate({ path: "heroImage", populate: assetFilePopulate })
             .limit(6)
             .lean(),
     ]);
@@ -50,13 +65,42 @@ export async function getFullTourBySlug(slug: string) {
     // --- MAPPERS ---
 
     const mapTour = (t: any): any => {
+        const heroImage = t.heroImage
+            ? {
+                ...t.heroImage,
+                publicUrl: getAssetUrl(t.heroImage),
+                contentType: getAssetContentType(t.heroImage),
+            }
+            : t.heroImage;
+
+        const mapAsset = (asset: any) =>
+            asset
+                ? {
+                    ...asset,
+                    publicUrl: getAssetUrl(asset),
+                    contentType: getAssetContentType(asset),
+                }
+                : asset;
+
         return {
             ...t,
             _id: t._id.toString(),
-            heroImage: t.heroImage, // Now populated
+            heroImage,
+            gallery: (t.gallery || []).map(mapAsset),
+            destinations: (t.destinations || []).map((destination: any) => ({
+                ...destination,
+                images: (destination.images || []).map(mapAsset),
+                attractions: (destination.attractions || []).map((attraction: any) => ({
+                    ...attraction,
+                    images: (attraction.images || []).map(mapAsset),
+                })),
+            })),
             priceFrom: t.basePrice?.amount,
             durationDays: t.duration?.days,
-            location: t.mainLocation?.address ? `${t.mainLocation.address.city || ""}, ${t.mainLocation.address.country || ""}` : t.destinations?.[0]?.country || "",
+            location: t.mainLocation?.address?.city
+                ? `${t.mainLocation.address.city}${t.mainLocation.address.district ? `, ${t.mainLocation.address.district}` : ""}`
+                : t.district || t.division || "",
+            region: t.mainLocation?.address?.region || t.division || "",
             rating: t.ratings?.average || 0,
             stats: {
                 travelers: t.popularityScore || 0,
@@ -70,8 +114,8 @@ export async function getFullTourBySlug(slug: string) {
     const mapMedia = (a: any, index: number): Media => ({
         _id: a._id.toString(),
         tourId: tourIdStr,
-        url: a.publicUrl,
-        type: a.contentType?.startsWith("video") ? "video" : "image",
+        url: getAssetUrl(a),
+        type: getAssetContentType(a).startsWith("video") ? "video" : "image",
         order: index,
     });
 
@@ -120,7 +164,7 @@ export async function getTours(options: { limit?: number; status?: string; isFea
 
     const tourDocs = await TourModel.find(query)
         .limit(options.limit || 10)
-        .populate("heroImage")
+        .populate({ path: "heroImage", populate: assetFilePopulate })
         .lean();
 
     return tourDocs.map((t: any) => ({
@@ -128,11 +172,11 @@ export async function getTours(options: { limit?: number; status?: string; isFea
         slug: t.slug,
         title: t.title,
         description: t.summary || t.description || "",
-        heroImage: (t.heroImage as any)?.publicUrl || "",
+        heroImage: getAssetUrl(t.heroImage),
         priceFrom: t.basePrice?.amount,
         durationDays: t.duration?.days,
-        location: t.destinations?.[0]?.city || t.destinations?.[0]?.country || "",
-        region: t.destinations?.[0]?.region || t.mainLocation?.address?.region || "",
+        location: t.mainLocation?.address?.city || t.district || t.division || "",
+        region: t.mainLocation?.address?.region || t.division || "",
         rating: t.ratings?.average || 0,
         stats: {
             travelers: t.popularityScore || 0,

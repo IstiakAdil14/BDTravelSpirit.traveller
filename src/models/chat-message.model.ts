@@ -1,17 +1,6 @@
-import mongoose, { Schema, Document, models, model } from 'mongoose';
-
-/**
- * Enum for moderation status of a message.
- * Keeps values consistent across schema, code, and queries.
- */
-export const MODERATION_STATUS = {
-  CLEAN: 'clean',
-  FLAGGED: 'flagged',
-  REMOVED: 'removed',
-} as const;
-
-export type ModerationStatusType =
-  typeof MODERATION_STATUS[keyof typeof MODERATION_STATUS];
+import { MODERATION_STATUS, ModerationStatusType } from '@/constants/chatmessage.const';
+import { defineModel } from '@/lib/helpers/defineModel';
+import mongoose, { Schema, Document } from 'mongoose';
 
 /**
  * Chat message document interface.
@@ -113,5 +102,4 @@ ChatMessageSchema.index(
  * Export the ChatMessage model.
  * Uses existing model if already compiled (avoids hot-reload issues).
  */
-export const ChatMessageModel =
-  models.ChatMessage || model<IChatMessage>('ChatMessage', ChatMessageSchema);
+export const ChatMessageModel = defineModel("ChatMessage", ChatMessageSchema);

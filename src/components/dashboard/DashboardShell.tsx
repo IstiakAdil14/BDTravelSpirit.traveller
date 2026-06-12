@@ -29,7 +29,7 @@ export default function DashboardShell({
           currentPage={currentPage}
           buildPageHref={buildPageHref}
         />
-        <main className="flex-1 overflow-y-auto px-5 lg:px-8 py-6">
+        <main className="flex-1 overflow-y-auto px-5 lg:px-8 py-6 pb-14 md:pb-6">
           {children}
         </main>
       </SidebarInset>

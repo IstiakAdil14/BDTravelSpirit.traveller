@@ -51,13 +51,19 @@ const OurTourLocationsForYouSkeleton = () => (
   </section>
 );
 
-export default async function OurTourLocationsForYou() {
+const OurTourLocationsForYouServer = async () => {
   await dbConnect();
   const tourLocations = await TourLocation.find({}).lean();
 
   return (
+    <OurTourLocationsForYouClient tourLocations={JSON.parse(JSON.stringify(tourLocations))} />
+  );
+};
+
+export default function OurTourLocationsForYou() {
+  return (
     <Suspense fallback={<OurTourLocationsForYouSkeleton />}>
-      <OurTourLocationsForYouClient tourLocations={JSON.parse(JSON.stringify(tourLocations))} />
+      <OurTourLocationsForYouServer />
     </Suspense>
   );
 }

@@ -4,7 +4,6 @@ import { ReactNode } from "react";
 import { motion } from "framer-motion";
 import Sidebar from "@/components/layout/Sidebar";
 import Topbar from "@/components/layout/Topbar";
-import BottomNav from "@/components/layout/BottomNav";
 import FloatingAIButton from "@/components/layout/FloatingAIButton";
 
 interface DashboardLayoutProps {
@@ -33,7 +32,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       </div>
 
       {/* Mobile Layout */}
-      <div className="lg:hidden min-h-screen pb-20">
+      <div className="lg:hidden min-h-screen pb-14">
         <Topbar />
         <main className="px-4 py-6">
           <motion.div
@@ -44,7 +43,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             {children}
           </motion.div>
         </main>
-        <BottomNav />
       </div>
 
       <FloatingAIButton />

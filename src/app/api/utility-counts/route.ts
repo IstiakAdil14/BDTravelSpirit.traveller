@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/authOptions';
 import { UserModel } from '@/models/user.model';
-import { UserNotificationModel } from '@/models/userNotification.model';
+import { UserNotificationModel } from '@/models/notifications/user-notification.model';
 import { getDbClient } from '@/lib/db';
 import { Types } from 'mongoose';
 

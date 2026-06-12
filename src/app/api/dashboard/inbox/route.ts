@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/authOptions";
 import { dbConnect } from "@/lib/db/connect";
-import { UserNotificationModel } from "@/models/userNotification.model";
+import { UserNotificationModel, IUserNotification } from "@/models/notifications/user-notification.model";
 import { Types } from "mongoose";
 
 /**
@@ -28,7 +28,7 @@ export async function GET(_req: NextRequest) {
       .sort({ createdAt: -1 })
       .lean();
 
-    const mapped = notifications.map((n) => ({
+    const mapped = notifications.map((n: IUserNotification & { _id: Types.ObjectId }) => ({
       id: (n._id as Types.ObjectId).toString(),
       type: n.type,
       title: n.title,

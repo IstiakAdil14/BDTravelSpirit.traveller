@@ -13,7 +13,7 @@ export default function FloatingAIButton() {
     <>
       {/* Floating Button */}
       <motion.div
-        className="fixed bottom-24 lg:bottom-8 right-6 z-50"
+        className="fixed bottom-14 md:bottom-24 lg:bottom-8 right-4 z-50"
         initial={{ scale: 0, rotate: -180 }}
         animate={{ scale: 1, rotate: 0 }}
         transition={{ delay: 1, duration: 0.5, ease: "easeOut" }}
