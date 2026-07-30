@@ -18,6 +18,7 @@ interface TourLocation {
     description: string;
     highlights: string[];
     duration: string;
+    region?: string;
 }
 
 interface OurTourLocationsForYouUIProps {
@@ -80,7 +81,7 @@ const OurTourLocationsForYouUI = ({ tourLocations, stats }: OurTourLocationsForY
                         <CarouselContent className="-ml-2 sm:-ml-4 md:-ml-4 mb-4">
                             {tourLocations.map((location) => (
                                 <CarouselItem key={location.id || location._id} className="pl-2 sm:pl-4 md:pl-4 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
-                                    <Link href={`/tours/${location.slug || location.id || location._id}`} className="block h-full">
+                                    <Link href={`/tours?region=${location.region?.toLowerCase() || 'dhaka'}&tour=${location.slug || location.id || location._id}`} className="block h-full">
                                         <div
                                             className="bg-white rounded-3xl overflow-hidden shadow-lg transition-all duration-500 border border-gray-100 group cursor-pointer hover:shadow-xl hover:-translate-y-1 h-full flex flex-col"
                                         >

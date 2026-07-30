@@ -170,12 +170,22 @@ export async function POST(req: NextRequest) {
       // 4. Send Email Confirmation
       if (session.user.email) {
         try {
-          await sendBookingConfirmationEmail(session.user.email, booking.bookingReference, tour.title);
+          await sendBookingConfirmationEmail(
+            session.user.email,
+            booking.bookingReference,
+            tour.title,
+            {
+              totalParticipants,
+              totalPaid,
+              currency: tour.basePrice?.currency || '৳',
+            }
+          );
         } catch (emailErr) {
           console.error('[POST /api/bookings] Failed to send confirmation email', emailErr);
           // Non-blocking error, so we continue to return success
         }
       }
+
 
       return NextResponse.json(
         {

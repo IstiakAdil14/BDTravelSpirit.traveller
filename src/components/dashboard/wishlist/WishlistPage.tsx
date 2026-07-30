@@ -14,6 +14,7 @@ interface WishlistItem {
   location: string;
   price: string;
   image?: string;
+  region?: string;
 }
 
 interface WishlistPageProps {
@@ -29,8 +30,8 @@ export default function WishlistPage({ wishlistItems = [] }: WishlistPageProps) 
           <Heart className="w-12 h-12 text-rose-300" />
         </div>
         <h2 className="text-2xl font-bold text-slate-800 mb-3">Your wishlist is empty</h2>
-        <p className="text-slate-500 max-w-md mx-auto mb-8 leading-relaxed">
-          You haven't saved any tours yet. Start exploring our beautiful destinations in Bangladesh and click the heart icon to save your favorites for later!
+          <p className="text-slate-500 max-w-md mx-auto mb-8 leading-relaxed">
+          You have not saved any tours yet. Start exploring our beautiful destinations in Bangladesh and click the heart icon to save your favorites for later!
         </p>
         <Link href="/all-tours">
           <Button className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-6 rounded-xl font-semibold shadow-lg shadow-emerald-600/20 group transition-all duration-300">

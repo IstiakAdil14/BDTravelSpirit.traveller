@@ -23,6 +23,8 @@ interface Tour {
   price: number;
   rating: number;
   image: string | null;
+  division?: string;
+  region?: string;
 }
 
 interface Operator {
@@ -155,7 +157,7 @@ export default function OperatorDetailPage({ operator }: OperatorDetailPageProps
                 {paginatedTours.map((tour, index) => (
                   <Link
                     key={String(tour.id)}
-                    href={`/tours/${tour.slug}`}
+                    href={`/tours?region=${(tour.division || tour.region || 'dhaka').toLowerCase()}&tour=${tour.slug}`}
                     className="block group bg-white rounded-3xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-500 border border-gray-100 flex flex-col cursor-pointer"
                   >
                   <motion.div
@@ -255,7 +257,7 @@ export default function OperatorDetailPage({ operator }: OperatorDetailPageProps
             <div className="text-center py-24 bg-gradient-to-br from-gray-50 to-emerald-50/30 rounded-3xl border border-dashed border-gray-200">
               <div className="text-7xl mb-4">🏕️</div>
               <h3 className="text-2xl font-bold text-gray-700 mb-2">No Tours Listed Yet</h3>
-              <p className="text-gray-500 max-w-sm mx-auto">This operator hasn't added any tours yet. Check back soon for exciting new packages!</p>
+              <p className="text-gray-500 max-w-sm mx-auto">This operator has not added any tours yet. Check back soon for exciting new packages!</p>
             </div>
           )}
         </motion.section>
