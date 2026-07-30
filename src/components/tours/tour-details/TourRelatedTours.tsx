@@ -3,15 +3,16 @@
 import { Sparkles, MapPin, Star, Users } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import type { TourWithRecommendations, RelatedTourData } from '@/types/tour-components';
 
 interface TourRelatedToursProps {
-  currentTour: any;
+  currentTour: TourWithRecommendations;
 }
 
 export default function TourRelatedTours({ currentTour }: TourRelatedToursProps) {
   // Use recommendations from the currentTour data, and ensure we don't show the current tour
   const relatedTours = currentTour?.recommendations?.filter(
-    (tour: any) => tour._id !== currentTour._id
+    (tour: RelatedTourData) => tour._id !== currentTour._id
   ) || [];
 
   if (relatedTours.length === 0) return null;
@@ -30,8 +31,8 @@ export default function TourRelatedTours({ currentTour }: TourRelatedToursProps)
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-        {relatedTours.map((tour: any) => (
-          <Link href={`/tours/${tour.slug}`} key={tour._id} className="group relative bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col h-full hover:-translate-y-2">
+        {relatedTours.map((tour: RelatedTourData) => (
+          <Link href={`/tours?region=${(tour.division || tour.region || 'dhaka').toLowerCase()}&tour=${tour.slug}`} key={tour._id} className="group relative bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col h-full hover:-translate-y-2">
             
             <div className="relative h-56 overflow-hidden">
               <Image 

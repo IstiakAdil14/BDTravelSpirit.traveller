@@ -2,8 +2,9 @@ import { motion } from "framer-motion";
 import { Clock, Star } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
+import type { LocationCardData } from "@/types/tour-components";
 
-export default function LocationCard({ location }: { location: any }) {
+export default function LocationCard({ location }: { location: LocationCardData }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -11,7 +12,7 @@ export default function LocationCard({ location }: { location: any }) {
       transition={{ duration: 0.3 }}
       viewport={{ once: true }}
     >
-      <Link href={`/tours/${location.slug}`}>
+      <Link href={`/tours?region=${location.region.toLowerCase()}&tour=${location.slug}`}>
         <Card className="group cursor-pointer overflow-hidden rounded-xl border border-gray-200 hover:border-blue-400/50 hover:shadow-md transition-all">
 
           {/* IMAGE (REDUCED HEIGHT) */}
