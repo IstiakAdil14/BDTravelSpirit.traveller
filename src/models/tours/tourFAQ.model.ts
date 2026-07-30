@@ -4,9 +4,11 @@ import {
     Types,
     Query,
 } from "mongoose";
-import { MODERATION_STATUS, ModerationStatus } from "@/constants/tour.const";
+import { MODERATION_STATUS, ModerationStatus } from "@/constants/tour/tour.const";
 import { defineModel } from "@/lib/helpers/defineModel";
-import { FAQ_REPORT_REASON, FaqReportReason } from "@/constants/faq-report.const";
+import { FAQ_REPORT_REASON, FaqReportReason } from "@/constants/tour/faq-report.const";
+import "@/models/tours/tourFAQVote.model"
+import "@/models/travelers/traveler.model"
 
 /* ------------------------------------------------------------------ */
 /* Report Types */
@@ -101,7 +103,7 @@ const TourFAQSchema = new Schema<ITourFAQ>(
             index: true,
         },
         askedBy: { type: Schema.Types.ObjectId, ref: "Traveler", required: true },
-        answeredBy: { type: Schema.Types.ObjectId, ref: "Traveler" },
+        answeredBy: { type: Schema.Types.ObjectId, ref: "User" },
 
         question: { type: String, required: true, trim: true, maxlength: 1000 },
         answer: { type: String, trim: true, maxlength: 5000 },
@@ -119,7 +121,7 @@ const TourFAQSchema = new Schema<ITourFAQ>(
 
         answeredAt: { type: Date },
         editedAt: { type: Date },
-        editedBy: { type: Schema.Types.ObjectId, ref: "Traveler" },
+        editedBy: { type: Schema.Types.ObjectId, ref: "User" },
 
         likes: { type: [LikeSchema], default: [] },
         dislikes: { type: [LikeSchema], default: [] },

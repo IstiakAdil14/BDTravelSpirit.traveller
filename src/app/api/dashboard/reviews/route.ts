@@ -3,9 +3,11 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/authOptions';
 import { dbConnect } from '@/lib/db/connect';
 import UserModel from '@/lib/db/models/User';
-import { ReviewModel } from '@/models/review.model';
-import { TourModel } from '@/models/tour.model';
+import { ReviewModel } from '@/models/tours/review.model';
+import TourModel from '@/models/tours/tour.model';
 import mongoose from 'mongoose';
+
+import { READ_ONLY_EMAILS } from '@/constants/user/user.const';
 
 export async function GET(_req: NextRequest) {
   try {
@@ -53,10 +55,10 @@ export async function GET(_req: NextRequest) {
 
     const total = reviews.length;
     const avgRating = total > 0
-      ? Math.round((reviews.reduce((s, r) => s + r.rating, 0) / total) * 10) / 10
+      ? Math.round((reviews.reduce((s: number, r: any) => s + r.rating, 0) / total) * 10) / 10
       : 0;
-    const helpful = reviews.reduce((s, r) => s + r.helpful, 0);
-    const pending = reviews.filter((r) => r.status === 'pending').length;
+    const helpful = reviews.reduce((s: number, r: any) => s + r.helpful, 0);
+    const pending = reviews.filter((r: any) => r.status === 'pending').length;
 
     return NextResponse.json({ reviews, stats: { total, avgRating, helpful, pending } });
   } catch (err) {
@@ -70,6 +72,10 @@ export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (session.user.email && READ_ONLY_EMAILS.includes(session.user.email)) {
+      return NextResponse.json({ error: 'Read-only users cannot perform this action.' }, { status: 403 });
     }
 
     await dbConnect();
@@ -93,7 +99,7 @@ export async function POST(req: NextRequest) {
       { upsert: true, new: true, setDefaultsOnInsert: true }
     );
 
-    return NextResponse.json({ success: true, reviewId: review._id.toString() }, { status: 201 });
+    return NextResponse.json({ success: true, reviewId: (review as any)._id.toString() }, { status: 201 });
   } catch (err) {
     console.error('Reviews POST error:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
@@ -105,6 +111,10 @@ export async function DELETE(req: NextRequest) {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (session.user.email && READ_ONLY_EMAILS.includes(session.user.email)) {
+      return NextResponse.json({ error: 'Read-only users cannot perform this action.' }, { status: 403 });
     }
 
     await dbConnect();

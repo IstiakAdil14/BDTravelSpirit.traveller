@@ -1,10 +1,37 @@
-import { ITourOperator } from "../models/tourOperator.model";
+export interface ITourOperator {
+  name: string;
+  slug: string;
+  logo: string;
+  rating: number;
+  reviewCount: number;
+  tagline: string;
+  regions: string[];
+  stats: {
+    toursCompleted: number;
+    travelersServed: number;
+    regionsCovered: number;
+    experienceYears: number;
+  };
+  services: string[];
+  specializations: string[];
+  verified: boolean;
+  about: string;
+  gallery: string[];
+  tours: {
+    id: number;
+    name: string;
+    duration: string;
+    price: number;
+    rating: number;
+    image: string;
+  }[];
+}
 
 export const tourOperators: Partial<ITourOperator>[] = [
   {
     name: "Bangladesh Eco Tours",
     slug: "bangladesh-eco-tours",
-    logo: "/logos/bd-eco.png",
+    logo: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=100&h=100&fit=crop",
     rating: 4.7,
     reviewCount: 1280,
     tagline: "Explore Bangladesh responsibly",
@@ -22,7 +49,7 @@ export const tourOperators: Partial<ITourOperator>[] = [
   {
     name: "Dhaka Heritage Walks",
     slug: "dhaka-heritage-walks",
-    logo: "/logos/dhaka.png",
+    logo: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=100&h=100&fit=crop",
     rating: 4.6,
     reviewCount: 950,
     tagline: "Stories hidden in Old Dhaka",
@@ -40,7 +67,7 @@ export const tourOperators: Partial<ITourOperator>[] = [
   {
     name: "Hill Tracks Explorer",
     slug: "hill-tracks-explorer",
-    logo: "/logos/hill.png",
+    logo: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=100&h=100&fit=crop",
     rating: 4.8,
     reviewCount: 740,
     tagline: "Into the heart of the hills",
@@ -58,7 +85,7 @@ export const tourOperators: Partial<ITourOperator>[] = [
   {
     name: "Sundarbans Cruise Co.",
     slug: "sundarbans-cruise-co",
-    logo: "/logos/cruise.png",
+    logo: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=100&h=100&fit=crop",
     rating: 4.5,
     reviewCount: 1100,
     tagline: "Luxury in the mangroves",
@@ -76,7 +103,7 @@ export const tourOperators: Partial<ITourOperator>[] = [
   {
     name: "Sylhet Tea Trails",
     slug: "sylhet-tea-trails",
-    logo: "/logos/sylhet.png",
+    logo: "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=100&h=100&fit=crop",
     rating: 4.4,
     reviewCount: 520,
     tagline: "Where green meets serenity",
@@ -94,7 +121,7 @@ export const tourOperators: Partial<ITourOperator>[] = [
   {
     name: "Cox's Bazar Beach Tours",
     slug: "coxs-bazar-beach-tours",
-    logo: "/logos/coxs.png",
+    logo: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=100&h=100&fit=crop",
     rating: 4.6,
     reviewCount: 2100,
     tagline: "Longest beach, best memories",
@@ -112,7 +139,7 @@ export const tourOperators: Partial<ITourOperator>[] = [
   {
     name: "Saint Martin Island Trips",
     slug: "saint-martin-island-trips",
-    logo: "/logos/saint.png",
+    logo: "https://images.unsplash.com/photo-1559494007-9f5847c49d94?w=100&h=100&fit=crop",
     rating: 4.5,
     reviewCount: 870,
     tagline: "Bangladesh's coral paradise",
@@ -130,7 +157,7 @@ export const tourOperators: Partial<ITourOperator>[] = [
   {
     name: "Rajshahi Heritage Tours",
     slug: "rajshahi-heritage-tours",
-    logo: "/logos/rajshahi.png",
+    logo: "https://images.unsplash.com/photo-1548013146-72479768bada?w=100&h=100&fit=crop",
     rating: 4.3,
     reviewCount: 410,
     tagline: "History of ancient Bengal",
@@ -148,7 +175,7 @@ export const tourOperators: Partial<ITourOperator>[] = [
   {
     name: "Barisal River Life",
     slug: "barisal-river-life",
-    logo: "/logos/barisal.png",
+    logo: "https://images.unsplash.com/photo-1506953823976-52e1fdc0149a?w=100&h=100&fit=crop",
     rating: 4.4,
     reviewCount: 360,
     tagline: "Life along the rivers",
@@ -166,7 +193,7 @@ export const tourOperators: Partial<ITourOperator>[] = [
   {
     name: "Kuakata Sunrise Tours",
     slug: "kuakata-sunrise-tours",
-    logo: "/logos/kuakata.png",
+    logo: "https://images.unsplash.com/photo-1519046904884-53103b34b206?w=100&h=100&fit=crop",
     rating: 4.2,
     reviewCount: 290,
     tagline: "Sunrise & sunset together",
@@ -184,7 +211,7 @@ export const tourOperators: Partial<ITourOperator>[] = [
   {
     name: "Bangla Adventure Club",
     slug: "bangla-adventure-club",
-    logo: "/logos/adventure.png",
+    logo: "https://images.unsplash.com/photo-1551632811-561732d1e306?w=100&h=100&fit=crop",
     rating: 4.7,
     reviewCount: 1020,
     tagline: "Adventure starts here",
@@ -202,7 +229,7 @@ export const tourOperators: Partial<ITourOperator>[] = [
   {
     name: "Rural Bengal Experiences",
     slug: "rural-bengal-experiences",
-    logo: "/logos/rural.png",
+    logo: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=100&h=100&fit=crop",
     rating: 4.6,
     reviewCount: 540,
     tagline: "Village life, real stories",
@@ -220,7 +247,7 @@ export const tourOperators: Partial<ITourOperator>[] = [
   {
     name: "Padma River Cruises",
     slug: "padma-river-cruises",
-    logo: "/logos/padma.png",
+    logo: "https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=100&h=100&fit=crop",
     rating: 4.3,
     reviewCount: 410,
     tagline: "Cruising the mighty Padma",
@@ -238,7 +265,7 @@ export const tourOperators: Partial<ITourOperator>[] = [
   {
     name: "Bangladesh Photo Tours",
     slug: "bangladesh-photo-tours",
-    logo: "/logos/photo.png",
+    logo: "https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=100&h=100&fit=crop",
     rating: 4.8,
     reviewCount: 620,
     tagline: "Frame the beauty of Bengal",
@@ -256,7 +283,7 @@ export const tourOperators: Partial<ITourOperator>[] = [
   {
     name: "Islamic Heritage Bangladesh",
     slug: "islamic-heritage-bangladesh",
-    logo: "/logos/islamic.png",
+    logo: "https://images.unsplash.com/photo-1564769662533-4f00a87b4056?w=100&h=100&fit=crop",
     rating: 4.5,
     reviewCount: 380,
     tagline: "Sacred sites of Bengal",
@@ -274,7 +301,7 @@ export const tourOperators: Partial<ITourOperator>[] = [
   {
     name: "Delta Backpackers",
     slug: "delta-backpackers",
-    logo: "/logos/backpack.png",
+    logo: "https://images.unsplash.com/photo-1501555088652-021faa106b9b?w=100&h=100&fit=crop",
     rating: 4.4,
     reviewCount: 690,
     tagline: "Budget-friendly adventures",
@@ -292,7 +319,7 @@ export const tourOperators: Partial<ITourOperator>[] = [
   {
     name: "Nature Bengal",
     slug: "nature-bengal",
-    logo: "/logos/nature.png",
+    logo: "https://images.unsplash.com/photo-1448375240586-882707db888b?w=100&h=100&fit=crop",
     rating: 4.6,
     reviewCount: 480,
     tagline: "Into nature's lap",
@@ -310,7 +337,7 @@ export const tourOperators: Partial<ITourOperator>[] = [
   {
     name: "Bangladesh Family Tours",
     slug: "bangladesh-family-tours",
-    logo: "/logos/family.png",
+    logo: "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=100&h=100&fit=crop",
     rating: 4.5,
     reviewCount: 560,
     tagline: "Safe trips for all ages",
@@ -328,7 +355,7 @@ export const tourOperators: Partial<ITourOperator>[] = [
   {
     name: "Green Delta Travels",
     slug: "green-delta-travels",
-    logo: "/logos/green.png",
+    logo: "https://images.unsplash.com/photo-1518173946687-a4c8892bbd9f?w=100&h=100&fit=crop",
     rating: 4.3,
     reviewCount: 340,
     tagline: "Travel green, travel smart",
@@ -346,7 +373,7 @@ export const tourOperators: Partial<ITourOperator>[] = [
   {
     name: "Urban Bengal Tours",
     slug: "urban-bengal-tours",
-    logo: "/logos/urban.png",
+    logo: "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=100&h=100&fit=crop",
     rating: 4.2,
     reviewCount: 300,
     tagline: "Cities beyond the surface",

@@ -4,18 +4,25 @@ import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, Suspense } from "react";
 import { getUserDashboardPath } from "@/lib/utils/userRouting";
-import { UserRole } from "@/constants/user.const";
+import { UserRole } from "@/constants/user";
 import DashboardShell from "@/components/dashboard/DashboardShell";
 import TravellerDashboard from "@/components/dashboard/TravellerDashboard";
 import BookingsPage from "@/components/dashboard/bookings/BookingsPage";
 import ReviewsPage from "@/components/dashboard/reviews/ReviewsPage";
 import InboxPage from "@/components/dashboard/inbox/InboxPage";
+import WishlistPage from "@/components/dashboard/wishlist/WishlistPage";
 
 interface DashboardData {
   stats: { totalTrips: number; placesVisited: number; wishlistItems: number; reviewsWritten: number };
   bookings: Array<{ id: string; title: string; location: string; date: string; status: "upcoming" | "completed" | "cancelled"; price: string; duration: string }>;
   wishlistItems: Array<{ id: string; name: string; location: string; price: string }>;
   cartItems: Array<{ id: string; name: string; location: string; price: string }>;
+  weeklyActivity: any[];
+  progress: any[];
+  travelTime: any;
+  onboarding: any[];
+  schedule: any[];
+  stripeAccounts: any[];
 }
 
 const LoadingScreen = () => (
@@ -31,7 +38,6 @@ function DashboardContent() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [redirected, setRedirected] = useState(false);
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -40,10 +46,7 @@ function DashboardContent() {
   const page = searchParams.get("page") ?? "";
 
   useEffect(() => {
-    if (redirected) return;
-
     if (status === "unauthenticated") {
-      setRedirected(true);
       router.replace("/auth/signin");
       return;
     }
@@ -51,8 +54,9 @@ function DashboardContent() {
     if (status === "authenticated" && session?.user?.id) {
       if (!role || !id) {
         const userRole = ((session.user as any)?.role as UserRole) || "traveler";
-        setRedirected(true);
-        router.replace(getUserDashboardPath(session.user.id, userRole));
+        const basePath = getUserDashboardPath(session.user.id, userRole);
+        const targetPath = page ? `${basePath}&page=${page}` : basePath;
+        router.replace(targetPath);
         return;
       }
 
@@ -61,7 +65,7 @@ function DashboardContent() {
         .then((data) => { setDashboardData(data); setLoading(false); })
         .catch(() => setLoading(false));
     }
-  }, [status, session, router, redirected, role, id]);
+  }, [status, session, router, role, id, page]);
 
   if (status === "loading" || loading) return <LoadingScreen />;
   if (!session || !role || !id) return <LoadingScreen />;
@@ -74,11 +78,20 @@ function DashboardContent() {
       case "bookings": return <BookingsPage />;
       case "reviews":  return <ReviewsPage />;
       case "inbox":    return <InboxPage />;
+      case "wishlist": return <WishlistPage wishlistItems={dashboardData?.wishlistItems} />;
       default:
         return (
           <TravellerDashboard
             stats={dashboardData?.stats}
             bookings={dashboardData?.bookings ?? []}
+            wishlistItems={dashboardData?.wishlistItems}
+            cartItems={dashboardData?.cartItems}
+            weeklyActivity={dashboardData?.weeklyActivity}
+            progress={dashboardData?.progress}
+            travelTime={dashboardData?.travelTime}
+            onboarding={dashboardData?.onboarding}
+            schedule={dashboardData?.schedule}
+            stripeAccounts={dashboardData?.stripeAccounts}
             isLoading={loading}
             buildPageHref={buildPageHref}
           />

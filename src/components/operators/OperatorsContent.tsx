@@ -24,6 +24,7 @@ interface Operator {
 }
 
 export default function OperatorsContent() {
+  const [isMounted, setIsMounted] = useState(false);
   const [operators, setOperators] = useState<Operator[]>([]);
   const [filteredOperators, setFilteredOperators] = useState<Operator[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,6 +37,7 @@ export default function OperatorsContent() {
   });
 
   useEffect(() => {
+    setIsMounted(true);
     fetchOperators();
   }, []);
 
@@ -106,6 +108,10 @@ export default function OperatorsContent() {
 
     setFilteredOperators(filtered);
   };
+
+  if (!isMounted) {
+    return null; // Prevent SSR hydration errors with Radix UI
+  }
 
   return (
     <motion.div

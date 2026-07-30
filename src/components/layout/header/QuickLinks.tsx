@@ -126,7 +126,7 @@ const categories: Category[] = [
     name: "Things to do",
     subCategories: [
       {
-        name: "Adventure",
+        name: "Articles",
         tours: [
           {
             name: "Skydiving",
@@ -150,34 +150,6 @@ const categories: Category[] = [
       },
     ],
   },
-  {
-    name: "Trip inspiration",
-    subCategories: [
-      {
-        name: "Discover",
-        tours: [
-          {
-            name: "Road Trips",
-            region: "Various locations",
-            img: "https://thumbs.dreamstime.com/b/rear-view-friends-road-trip-driving-convertible-car-67525217.jpg?w=768",
-            url: "/road-trip",
-          },
-          {
-            name: "Family Fun",
-            region: "Various locations",
-            img: "https://img.freepik.com/free-photo/full-shot-family-members-silhouettes-outdoors_23-2150039658.jpg?semt=ais_hybrid&w=740&q=80",
-            url: "/family",
-          },
-          {
-            name: "Romantic Getaways",
-            region: "Various locations",
-            img: "https://media.istockphoto.com/id/536615329/photo/love-sunset.jpg?s=612x612&w=0&k=20&c=_LUhSd41Q_FaMePm_kUZWQm4ZFHQiK47ltiuI5-czyQ=",
-            url: "/romantic",
-          },
-        ],
-      },
-    ],
-  },
 ];
 
 /* =========================
@@ -187,13 +159,109 @@ export default function QuickLinks() {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [selectedSubCategory, setSelectedSubCategory] = useState<string>("North America");
   const [isAnimating, setIsAnimating] = useState(false);
+  const [menuCategories, setMenuCategories] = useState<Category[]>(categories);
   const navRef = useRef<HTMLElement>(null);
   const [topOffset, setTopOffset] = useState(0);
 
-  const activeCatData = categories.find((cat) => cat.name === activeCategory);
-  const selectedSubData = activeCatData?.subCategories.find(
+  const activeCatData = menuCategories.find((cat) => cat.name === activeCategory);
+  let selectedSubData = activeCatData?.subCategories.find(
     (sub) => sub.name === selectedSubCategory
   );
+
+  useEffect(() => {
+    fetch('/api/articles?limit=8')
+      .then(res => res.json())
+      .then(data => {
+        if (data.articles) {
+          const formatCategory = (cat: string) => {
+            if (!cat) return 'Article';
+            return cat.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' & ');
+          };
+
+          const mapped = data.articles.map((article: any) => ({
+            name: article.title,
+            region: formatCategory(article.categories?.[0]),
+            img: article.heroImage?.url || 'https://via.placeholder.com/150',
+            url: `/articles/${article.slug}`
+          }));
+          
+          setMenuCategories(prev => {
+            const next = [...prev];
+            const thingsToDoIdx = next.findIndex(c => c.name === "Things to do");
+            if (thingsToDoIdx !== -1) {
+              const subIdx = next[thingsToDoIdx].subCategories.findIndex(s => s.name === "Articles");
+              if (subIdx !== -1) {
+                next[thingsToDoIdx] = {
+                  ...next[thingsToDoIdx],
+                  subCategories: [...next[thingsToDoIdx].subCategories]
+                };
+                next[thingsToDoIdx].subCategories[subIdx] = {
+                  ...next[thingsToDoIdx].subCategories[subIdx],
+                  tours: mapped.length > 0 ? mapped : next[thingsToDoIdx].subCategories[subIdx].tours
+                };
+              }
+            }
+            return next;
+          });
+        }
+      })
+      .catch(console.error);
+  }, []);
+
+  // Dynamically load Top Attractions from featured / top-rated tours
+  useEffect(() => {
+    fetch('/api/featured-tours')
+      .then(res => res.json())
+      .then(data => {
+        if (data.tours && data.tours.length > 0) {
+          setMenuCategories(prev => {
+            const next = [...prev];
+            const placesIdx = next.findIndex(c => c.name === 'Places to see');
+            if (placesIdx !== -1) {
+              const existing = next[placesIdx].subCategories.filter(s => s.name !== 'Top Attractions');
+              next[placesIdx] = {
+                ...next[placesIdx],
+                subCategories: [
+                  { name: 'Top Attractions', tours: data.tours },
+                  ...existing
+                ]
+              };
+            }
+            return next;
+          });
+          // If user is already hovering Places to see, update selection
+          setSelectedSubCategory(prev => prev === 'Top Attractions' || prev === 'Barishal' ? 'Top Attractions' : prev);
+        }
+      })
+      .catch(console.error);
+  }, []);
+
+  // Dynamically replace each division sub-category with real tours from DB
+  useEffect(() => {
+    fetch('/api/tours-by-division')
+      .then(res => res.json())
+      .then(data => {
+        if (!data.grouped) return;
+        setMenuCategories(prev => {
+          const next = [...prev];
+          const placesIdx = next.findIndex(c => c.name === 'Places to see');
+          if (placesIdx === -1) return prev;
+
+          const updatedSubs = next[placesIdx].subCategories.map(sub => {
+            const dynamicTours = data.grouped[sub.name];
+            if (dynamicTours && dynamicTours.length > 0) {
+              return { ...sub, tours: dynamicTours };
+            }
+            return sub; // keep static if no DB data for this division
+          });
+
+          next[placesIdx] = { ...next[placesIdx], subCategories: updatedSubs };
+          return next;
+        });
+      })
+      .catch(console.error);
+  }, []);
+
 
   useEffect(() => {
     if (navRef.current && activeCategory) {
@@ -206,7 +274,7 @@ export default function QuickLinks() {
     if (activeCategory !== catName) {
       setIsAnimating(true);
       setActiveCategory(catName);
-      const newCat = categories.find((cat) => cat.name === catName);
+      const newCat = menuCategories.find((cat) => cat.name === catName);
       if (newCat && newCat.subCategories.length > 0) {
         setSelectedSubCategory(newCat.subCategories[0].name);
       }
@@ -228,7 +296,7 @@ export default function QuickLinks() {
         onMouseLeave={() => setActiveCategory(null)}
       >
         <ul className="flex max-w-7xl mx-auto relative">
-          {categories.map((cat) => {
+          {menuCategories.map((cat) => {
             const isActive = activeCategory === cat.name;
             return (
               <li
@@ -244,20 +312,19 @@ export default function QuickLinks() {
                     text-sm tracking-wide
                     border border-transparent
                     transition-colors transition-shadow transition-transform duration-200 cursor-pointer
-                  ${
-                  isActive
-                  ? "text-emerald-600 bg-emerald-50 border-emerald-200"
-                  : "text-gray-700 hover:text-emerald-600 hover:bg-emerald-50 hover:border-emerald-200"
-                  }
+                  ${isActive
+                      ? "text-emerald-600 bg-emerald-50 border-emerald-200"
+                      : "text-gray-700 hover:text-emerald-600 hover:bg-emerald-50 hover:border-emerald-200"
+                    }
                 `}
                 >
                   {cat.name}
-                <ChevronDown
-                className={`w-4 h-4 transition-transform duration-200 ${isActive ? "rotate-180" : ""}`}
-                />
+                  <ChevronDown
+                    className={`w-4 h-4 transition-transform duration-200 ${isActive ? "rotate-180" : ""}`}
+                  />
 
-                {/* underline always mounted */}
-              </Button>
+                  {/* underline always mounted */}
+                </Button>
 
               </li>
             );
@@ -316,42 +383,56 @@ export default function QuickLinks() {
               <div className="w-px bg-gradient-to-b from-transparent via-gray-200 to-transparent"></div>
 
               {/* RIGHT TOURS GRID - Enhanced */}
-              <div className={`transition-opacity duration-200 ${isAnimating ? "opacity-0" : "opacity-100"}`}>
+              <div className={`transition-opacity duration-200 ${isAnimating ? "opacity-0" : "opacity-100"} max-h-[50vh] overflow-y-auto overflow-x-hidden pr-2 custom-scrollbar`}>
                 <div className="grid grid-cols-3 gap-4">
                   {selectedSubData?.tours.map((tour, idx) => (
-                <Tooltip key={tour.name}>
-                  <TooltipTrigger asChild>
-                    <button 
-                      onClick={showProductionNotification}
-                      className="group flex items-center gap-4 p-3 rounded-xl hover:bg-gradient-to-br hover:from-emerald-50 hover:to-teal-50 transition-all duration-200 hover:shadow-md border border-transparent hover:border-emerald-100 w-full text-left"
-                      style={{ animation: `fadeInUp 0.3s ease-out ${idx * 0.03}s both` }}
-                    >
-                      <div className="relative flex-shrink-0">
-                        <img
-                          src={tour.img}
-                          alt={tour.name}
-                          className="w-14 h-14 object-cover rounded-xl shadow-sm group-hover:shadow-md transition-shadow duration-200"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/0 to-teal-500/0 group-hover:from-emerald-500/10 group-hover:to-teal-500/10 rounded-xl transition-all duration-200"></div>
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="tour-title font-semibold text-gray-900 text-sm truncate group-hover:text-emerald-600 transition-colors">
-                          {tour.name}
-                        </p>
-                        <p className="text-xs text-gray-500 truncate flex items-center gap-1 mt-0.5">
-                          <MapPin className="w-3 h-3" />
-                          {tour.region}
-                        </p>
-                      </div>
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="top">
-                    {tour.name}
-                  </TooltipContent>
-                </Tooltip>
+                    <Tooltip key={`${selectedSubCategory}-${idx}-${tour.url}`}>
+                      <TooltipTrigger asChild>
+                        <Link
+                          href={tour.url}
+                          onClick={() => setActiveCategory(null)}
+                          className="group flex items-center gap-4 p-3 rounded-xl hover:bg-gradient-to-br hover:from-emerald-50 hover:to-teal-50 transition-all duration-200 hover:shadow-md border border-transparent hover:border-emerald-100 w-full text-left"
+                          style={{ animation: `fadeInUp 0.3s ease-out ${idx * 0.03}s both` }}
+                        >
+                          <div className="relative flex-shrink-0">
+                            <img
+                              src={tour.img}
+                              alt={tour.name}
+                              className="w-14 h-14 object-cover rounded-xl shadow-sm group-hover:shadow-md transition-shadow duration-200"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/0 to-teal-500/0 group-hover:from-emerald-500/10 group-hover:to-teal-500/10 rounded-xl transition-all duration-200"></div>
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="tour-title font-semibold text-gray-900 text-sm truncate group-hover:text-emerald-600 transition-colors">
+                              {tour.name}
+                            </p>
+                            <p className="text-xs text-gray-500 truncate flex items-center gap-1 mt-0.5">
+                              <MapPin className="w-3 h-3" />
+                              {tour.region}
+                            </p>
+                          </div>
+                        </Link>
+                      </TooltipTrigger>
+                      <TooltipContent side="top">
+                        {tour.name}
+                      </TooltipContent>
+                    </Tooltip>
 
                   ))}
                 </div>
+                
+                {selectedSubCategory === "Articles" && (
+                  <div className="mt-6 flex justify-center border-t border-gray-100 pt-6 mb-2">
+                    <Link 
+                      href="/articles"
+                      onClick={() => setActiveCategory(null)}
+                      className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-emerald-50 text-emerald-600 font-semibold text-sm hover:bg-emerald-100 hover:text-emerald-700 transition-colors shadow-sm"
+                    >
+                      View All Articles
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+                    </Link>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -380,7 +461,22 @@ export default function QuickLinks() {
             transform: translateY(0);
           }
         }
-          @media (max-width: 804px) {
+
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background-color: rgba(16, 185, 129, 0.3);
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background-color: rgba(16, 185, 129, 0.6);
+        }
+
+        @media (max-width: 804px) {
           .tour-title {
             display: none;
           }

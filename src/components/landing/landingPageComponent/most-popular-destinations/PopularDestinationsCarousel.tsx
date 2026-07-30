@@ -6,7 +6,18 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 import { encodeTourIdClient } from '@/lib/utils/encodeTourId.client';
 
-export default function PopularDestinationsCarousel({ destinations: initialDestinations }: { destinations: any[] }) {
+interface Destination {
+  _id: string;
+  title: string;
+  slug: string;
+  destination?: string;
+  heroImage?: string;
+  rating?: number;
+  price?: number;
+  currency?: string;
+}
+
+export default function PopularDestinationsCarousel({ destinations: initialDestinations }: { destinations: Destination[] }) {
   const [destinations] = useState(initialDestinations);
   const [currentIndex, setCurrentIndex] = useState(0);
   const router = useRouter();
@@ -24,7 +35,7 @@ export default function PopularDestinationsCarousel({ destinations: initialDesti
     setCurrentIndex(index);
   }, []);
 
-  const handleDestinationClick = useCallback((destination: any) => {
+  const handleDestinationClick = useCallback((destination: Destination) => {
     const region = destination.destination?.toLowerCase().replace(/\s+/g, '-') || 'bangladesh';
     router.push(`/tours?region=${region}&tour=${destination.slug}&most-popular-destination=true`);
   }, [router]);
@@ -78,7 +89,7 @@ export default function PopularDestinationsCarousel({ destinations: initialDesti
         className="relative h-96 flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 rounded-3xl overflow-hidden"
         style={{ perspective: '1000px' }}
       >
-        {destinations.map((destination: any, index: number) => (
+        {destinations.map((destination: Destination, index: number) => (
           <div
             key={destination._id}
             className="absolute w-80 h-96 rounded-3xl shadow-xl overflow-hidden transition-all duration-700 ease-in-out cursor-pointer hover:shadow-2xl"

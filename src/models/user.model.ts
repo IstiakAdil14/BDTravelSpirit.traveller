@@ -1,16 +1,17 @@
 // user.model.ts
-import mongoose, { Schema, Document, Types } from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
 import bcrypt from "bcryptjs";
 import validator from 'validator';
-import { USER_ROLE, UserRole } from "@/constants/user.const";
 import { defineModel } from "@/lib/helpers/defineModel";
+import { USER_ROLE, UserRole } from "@/constants/current-user/user.const";
+import { Types } from "mongoose";
 
 const passwordRegex = /^(?=.{6,}$)(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).+$/
 
 export interface IUser {
     name: string;
-    avatar?: Types.ObjectId;
     email: string;
+    avatar?: Types.ObjectId;
     password: string;
     role: UserRole;
     createdAt?: Date;
@@ -59,7 +60,7 @@ const UserSchema = new Schema<IUserDoc, IUserModel>(
                     'Password must be at least 6 characters and include uppercase, lowercase, number, and special character'
             }
         },
-        role: { type: String, enum: Object.values(USER_ROLE), required: true, default: "traveler" },
+        role: { type: String, enum: Object.values(USER_ROLE), required: true, default: USER_ROLE.TRAVELER },
     },
     {
         timestamps: true,

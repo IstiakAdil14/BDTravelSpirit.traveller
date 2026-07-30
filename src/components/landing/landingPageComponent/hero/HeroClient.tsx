@@ -3,12 +3,21 @@
 import { useState, useEffect, useCallback } from "react";
 import HeroUI from './HeroUI';
 
-const HeroClient = ({ slides: initialSlides }: { slides: any[] }) => {
+interface Slide {
+  image: string;
+  title: string;
+  subtitle: string;
+  alt: string;
+  _id?: string;
+  isActive?: boolean;
+  order?: number;
+}
+
+const HeroClient = ({ slides: initialSlides }: { slides: Slide[] }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  const [slides] = useState<any[]>(initialSlides);
-
+  const [slides, setSlides] = useState<Slide[]>(initialSlides);
 
   useEffect(() => {
     if (isPaused || slides.length === 0) return;
@@ -21,8 +30,24 @@ const HeroClient = ({ slides: initialSlides }: { slides: any[] }) => {
   }, [slides.length, isPaused]);
 
   useEffect(() => {
-    setIsVisible(true);
+    const timer = setTimeout(() => setIsVisible(true), 50);
+    return () => clearTimeout(timer);
   }, []);
+
+  const defaultSlides: Slide[] = [
+    {
+      image: "https://images.unsplash.com/photo-1583212292454-1fe6229603b7?q=80&w=1920",
+      title: "Discover The Beauty of Bangladesh",
+      subtitle: "Experience ancient temples, pristine beaches, lush tea gardens, and vibrant culture in the land of rivers.",
+      alt: "Bangladesh landscape with rivers and greenery"
+    },
+    {
+      image: "https://images.unsplash.com/photo-1629904853716-f0bc54eea481?q=80&w=1920",
+      title: "Adventure Awaits You",
+      subtitle: "From the Sundarbans to Cox's Bazar, explore nature's wonders and create memories that last a lifetime.",
+      alt: "Sundarbans mangrove forest wildlife"
+    }
+  ];
 
   const stats = [
     { number: 64, label: "Districts", suffix: "+" },
@@ -37,11 +62,11 @@ const HeroClient = ({ slides: initialSlides }: { slides: any[] }) => {
     setTimeout(() => setIsPaused(false), 3000);
   }, []);
 
-  if (slides.length === 0) return null;
+  const displaySlides = slides.length > 0 ? slides : defaultSlides;
 
   return (
     <HeroUI
-      slides={slides}
+      slides={displaySlides}
       stats={stats}
       currentSlide={currentSlide}
       isVisible={isVisible}

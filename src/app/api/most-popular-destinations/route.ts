@@ -1,6 +1,6 @@
 import { dbConnect } from "@/lib/db/connect";
-import { TourModel } from "@/models/tour.model";
-import { AssetModel } from "@/models/asset.model";
+import TourModel from "@/models/tours/tour.model";
+import { AssetModel } from "@/models/assets/asset.model";
 import mongoose from "mongoose";
 import { NextResponse } from "next/server";
 

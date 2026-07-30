@@ -1,7 +1,7 @@
 // app/api/tours/[tourId]/faqs/route.ts
 import { NextResponse } from "next/server";
 import { dbConnect } from "@/lib/db/connect";
-import { TourFAQModel as Faq } from "@/models/tourFAQ.model";
+import { TourFAQModel as Faq } from "@/models/tours/tourFAQ.model";
 import mongoose from "mongoose";
 
 function encodeCursor(id: string) {

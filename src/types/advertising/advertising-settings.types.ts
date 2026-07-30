@@ -1,8 +1,8 @@
 // types/advertising-settings.types.ts
 // Types for admin advertising prices management (singleton SiteSettings.advertising)
 
-import { PlacementType } from "@/constants/advertising.const";
-import { Currency } from "@/constants/tour.const";
+import { PlacementType } from "@/constants/common";
+import { Currency } from "@/constants/tour";
 import { ApiResponse } from "../common/api.types";
 
 /* -------------------------

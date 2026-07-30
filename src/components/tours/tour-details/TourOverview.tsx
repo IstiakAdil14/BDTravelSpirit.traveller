@@ -213,6 +213,7 @@ export default function TourOverview({ tour }: TourOverviewProps) {
               </p>
             </div>
             
+            
             {tour.accessibility && (
               <div>
                 <h4 className="font-semibold mb-2">Accessibility Features</h4>
@@ -246,6 +247,74 @@ export default function TourOverview({ tour }: TourOverviewProps) {
           </div>
         </CardContent>
       </Card>
+
+      {/* Health & Cultural Considerations */}
+      {(tour.healthInfo || tour.religiousConsiderations) && (
+        <Card className="border-emerald-100 bg-emerald-50/30">
+          <CardHeader>
+            <CardTitle className="text-emerald-900">Health & Cultural Considerations</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {tour.healthInfo && (
+                <div>
+                  <h4 className="font-semibold mb-3 flex items-center gap-2 text-emerald-800">
+                    <Shield className="w-4 h-4" /> Health & Safety
+                  </h4>
+                  <ul className="space-y-2">
+                    {tour.healthInfo.vaccinationRequired?.length > 0 && (
+                      <li className="text-sm flex items-start gap-2">
+                        <span className="font-medium text-emerald-700 min-w-24">Vaccines:</span>
+                        <span className="text-gray-700">{tour.healthInfo.vaccinationRequired.join(', ')}</span>
+                      </li>
+                    )}
+                    {tour.healthInfo.waterSafety && (
+                      <li className="text-sm flex items-start gap-2">
+                        <span className="font-medium text-emerald-700 min-w-24">Water:</span>
+                        <span className="text-gray-700">{tour.healthInfo.waterSafety}</span>
+                      </li>
+                    )}
+                    {tour.healthInfo.malariaRiskAreas?.length > 0 && (
+                      <li className="text-sm flex items-start gap-2">
+                        <span className="font-medium text-emerald-700 min-w-24">Malaria Risk:</span>
+                        <span className="text-gray-700">{tour.healthInfo.malariaRiskAreas.join(', ')}</span>
+                      </li>
+                    )}
+                  </ul>
+                </div>
+              )}
+
+              {tour.religiousConsiderations && (
+                <div>
+                  <h4 className="font-semibold mb-3 flex items-center gap-2 text-indigo-800">
+                    <span className="w-4 h-4 flex items-center justify-center">🏛️</span> Cultural Etiquette
+                  </h4>
+                  <ul className="space-y-2">
+                    {tour.religiousConsiderations.modestDressRequired && (
+                      <li className="text-sm flex items-start gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 mt-1.5 shrink-0" />
+                        <span className="text-gray-700">Modest dress required in sacred areas</span>
+                      </li>
+                    )}
+                    {tour.religiousConsiderations.prayerFacilities && (
+                      <li className="text-sm flex items-start gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 mt-1.5 shrink-0" />
+                        <span className="text-gray-700">Prayer facilities are available/accessible</span>
+                      </li>
+                    )}
+                    {tour.religiousConsiderations.templeEtiquette?.map((etiquette: string, idx: number) => (
+                      <li key={idx} className="text-sm flex items-start gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 mt-1.5 shrink-0" />
+                        <span className="text-gray-700">{etiquette}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

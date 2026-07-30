@@ -2,10 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/authOptions';
 import { dbConnect } from '@/lib/db/connect';
-import UserModel from '@/lib/db/models/User';
-import { ReviewModel } from '@/models/review.model';
-import { TourModel } from '@/models/tour.model';
+import { UserModel } from '@/models/user.model';
+import { ReviewModel } from '@/models/tours/review.model';
 import mongoose from 'mongoose';
+import BookingModel from '@/models/tours/booking.model';
+import { TravelerModel } from '@/models/travelers/traveler.model';
+import UserTourInteractionModel from '@/models/travelers/traveler-tour-interaction.model';
 
 export async function GET(_req: NextRequest) {
   try {
@@ -21,9 +23,8 @@ export async function GET(_req: NextRequest) {
       user = await UserModel.create({
         name: session.user.name,
         email: session.user.email,
-        image: session.user.image,
-        isVerified: true,
-        accountStatus: 'active',
+        // Provide a complex dummy password to pass strict validation for OAuth users
+        password: Math.random().toString(36).slice(-8) + 'A1!a',
       });
     }
 
@@ -31,28 +32,72 @@ export async function GET(_req: NextRequest) {
 
     // ── Core counts ──────────────────────────────────────────────────────────
     const reviewsCount = await ReviewModel.countDocuments({ user: userId });
-    const wishlistCount = user.wishlist?.length ?? 0;
-    const bookingIds: mongoose.Types.ObjectId[] = (user.bookingHistory ?? []) as mongoose.Types.ObjectId[];
+    
+    const assetFilePopulate = { path: 'file', select: 'publicUrl' };
 
-    const tours = bookingIds.length > 0
-      ? await TourModel.find({ _id: { $in: bookingIds } })
-          .select('title slug mainLocation basePrice duration status createdAt')
-          .lean()
-      : [];
+    const userInteraction = await UserTourInteractionModel.findOne({ user: userId })
+      .populate({
+        path: 'wishlist.tour',
+        select: 'title slug mainLocation basePrice heroImage seo destinations',
+        populate: [
+          { path: 'heroImage', populate: assetFilePopulate },
+          { path: 'destinations.images', populate: assetFilePopulate }
+        ]
+      })
+      .lean();
+
+    const wishlistItemsRaw = (userInteraction?.wishlist || []).map((w: any) => w.tour).filter(Boolean) as any[];
+    const wishlistCount = wishlistItemsRaw.length;
+    
+    const getAssetUrl = (asset: any) => asset?.file?.publicUrl || asset?.publicUrl || '';
+
+    const wishlistItems = wishlistItemsRaw.map(t => {
+      const destImgs = t.destinations?.flatMap((d: any) => d.images?.filter(Boolean) || []) || [];
+      return {
+        id: t._id.toString(),
+        slug: t.slug,
+        name: t.title,
+        location: [t.mainLocation?.address?.city, t.mainLocation?.address?.district].filter(Boolean).join(', ') || 'Bangladesh',
+        price: `৳${(t.basePrice?.amount ?? 0).toLocaleString()}`,
+        image: getAssetUrl(t.heroImage) || t.seo?.ogImage || getAssetUrl(destImgs[0]) || '',
+      };
+    });
+
+    const cartItemsRaw = [] as any[]; // Cart removed since it's not in the schema
+    const cartItems = cartItemsRaw.map(t => {
+      const destImgs = t.destinations?.flatMap((d: any) => d.images?.filter(Boolean) || []) || [];
+      return {
+        id: t._id.toString(),
+        slug: t.slug,
+        name: t.title,
+        location: [t.mainLocation?.address?.city, t.mainLocation?.address?.district].filter(Boolean).join(', ') || 'Bangladesh',
+        price: `৳${(t.basePrice?.amount ?? 0).toLocaleString()}`,
+        image: getAssetUrl(t.heroImage) || t.seo?.ogImage || getAssetUrl(destImgs[0]) || '',
+      };
+    });
+    
+    const traveler = await TravelerModel.findOne({ user: userId });
+    const bookingDocs = traveler ? await BookingModel.find({ traveler: traveler._id }).populate('tour').lean() : [];
+    
+    const tours = bookingDocs.map((b: any) => b.tour).filter(Boolean);
+    const bookingIds = tours.map((t: any) => t._id as mongoose.Types.ObjectId);
 
     const uniqueCities = new Set(tours.map((t: any) => t.mainLocation?.address?.city).filter(Boolean)).size;
 
     // ── Bookings list ─────────────────────────────────────────────────────────
-    const bookings = tours.map((tour: any, i: number) => ({
-      id: tour._id.toString().slice(-6).toUpperCase(),
-      title: tour.title,
-      location: [tour.mainLocation?.address?.city, tour.mainLocation?.address?.district]
-        .filter(Boolean).join(', ') || 'Bangladesh',
-      date: new Date(tour.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
-      status: (['upcoming', 'completed', 'cancelled'] as const)[i % 3],
-      price: `৳${(tour.basePrice?.amount ?? 0).toLocaleString()}`,
-      duration: tour.duration?.days ? `${tour.duration.days}D/${tour.duration.nights ?? 0}N` : '1D',
-    }));
+    const bookings = bookingDocs.map((b: any) => {
+      const tour = b.tour;
+      return {
+        id: b.bookingReference || b._id.toString().slice(-6).toUpperCase(),
+        title: tour?.title || 'Unknown Tour',
+        location: [tour?.mainLocation?.address?.city, tour?.mainLocation?.address?.district]
+          .filter(Boolean).join(', ') || 'Bangladesh',
+        date: new Date(b.bookedAt || tour?.createdAt || Date.now()).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
+        status: b.status || 'upcoming',
+        price: `৳${(b.totalPaid || tour?.basePrice?.amount || 0).toLocaleString()}`,
+        duration: tour?.duration?.days ? `${tour.duration.days}D/${tour.duration.nights ?? 0}N` : '1D',
+      };
+    });
 
     // ── Stats ─────────────────────────────────────────────────────────────────
     const stats = {
@@ -67,13 +112,16 @@ export async function GET(_req: NextRequest) {
     weekStart.setDate(weekStart.getDate() - weekStart.getDay());
     weekStart.setHours(0, 0, 0, 0);
 
-    const weeklyRaw = await TourModel.aggregate([
-      { $match: { _id: { $in: bookingIds }, createdAt: { $gte: weekStart } } },
-      { $group: { _id: { $dayOfWeek: '$createdAt' }, count: { $sum: 1 } } },
-    ]);
+    const weeklyRaw = bookingDocs.filter((b: any) => {
+      const date = new Date(b.bookedAt || Date.now());
+      return date >= weekStart;
+    }).reduce((acc: Record<number, number>, b: any) => {
+      const day = new Date(b.bookedAt || Date.now()).getDay() + 1; // 1 (Sun) to 7 (Sat)
+      acc[day] = (acc[day] || 0) + 1;
+      return acc;
+    }, {});
 
-    const dayMap: Record<number, number> = {};
-    weeklyRaw.forEach((d: any) => { dayMap[d._id] = d.count; });
+    const dayMap: Record<number, number> = weeklyRaw;
 
     const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const maxCount = Math.max(...Object.values(dayMap), 1);
@@ -91,7 +139,7 @@ export async function GET(_req: NextRequest) {
 
     const progress = [
       { label: 'Destinations Explored', val: Math.min(Math.round((uniqueCities / MAX_PLACES) * 100), 100) },
-      { label: 'Bookings Completed',    val: Math.min(Math.round((bookings.filter(b => b.status === 'completed').length / Math.max(bookingIds.length, 1)) * 100), 100) },
+      { label: 'Bookings Completed',    val: Math.min(Math.round((bookings.filter((b: any) => b.status === 'completed').length / Math.max(bookingIds.length, 1)) * 100), 100) },
       { label: 'Wishlist Progress',     val: Math.min(Math.round((wishlistCount / MAX_WISHLIST) * 100), 100) },
       { label: 'Reviews Written',       val: Math.min(Math.round((reviewsCount / MAX_REVIEWS) * 100), 100) },
     ];
@@ -126,16 +174,34 @@ export async function GET(_req: NextRequest) {
       color: COLORS[i % 3],
     }));
 
+    // ── Stripe Accounts ───────────────────────────────────────────────────────
+    const StripePaymentAccountModel = (await import('@/models/payments/payment-account.model')).default;
+    const stripeAccountsRaw = await StripePaymentAccountModel.find({
+      ownerId: userId,
+      isDeleted: false,
+    }).lean();
+
+    const stripeAccounts = stripeAccountsRaw.map((acc: any) => ({
+      id: acc._id.toString(),
+      label: acc.label || `${acc.card?.brand || 'Card'} ending in ${acc.card?.last4 || '****'}`,
+      stripeCustomerId: acc.stripeCustomerId,
+      stripePaymentMethodId: acc.stripePaymentMethodId,
+      card: acc.card,
+      isActive: acc.isActive,
+      isBackup: acc.isBackup,
+    }));
+
     return NextResponse.json({
       stats,
       bookings,
-      wishlistItems: [],
-      cartItems: [],
+      wishlistItems,
+      cartItems,
       weeklyActivity,
       progress,
       travelTime,
       onboarding,
       schedule,
+      stripeAccounts,
     });
   } catch (err) {
     console.error('Dashboard API error:', err);

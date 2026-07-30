@@ -1,6 +1,6 @@
 // traveler.model.ts
-import { DISTRICT, DIVISION } from "@/constants/tour.const";
-import { ACCOUNT_STATUS, AccountStatus } from "@/constants/user.const";
+import { DISTRICT, DIVISION } from "@/constants/tour/tour.const";
+import { ACCOUNT_STATUS, AccountStatus } from "@/constants/current-user/user.const";
 import { defineModel } from "@/lib/helpers/defineModel";
 import mongoose, { Schema, Document, Types, Query } from "mongoose";
 
@@ -72,6 +72,9 @@ export interface ITraveler extends Document {
   // Account status
   isVerified: boolean;
   accountStatus: AccountStatus;
+
+  // --- Single payment account reference ---
+  paymentAccount?: Types.ObjectId;
 
   // Security
   loginAttempts: number;
@@ -152,6 +155,13 @@ const TravelerSchema = new Schema<ITraveler>(
       type: String,
       enum: Object.values(ACCOUNT_STATUS),
       default: ACCOUNT_STATUS.PENDING,
+    },
+
+    // --- Single payment account reference ---
+    paymentAccount: {
+      type: Schema.Types.ObjectId,
+      ref: "StripePaymentAccount",
+      default: null,
     },
 
     // Security

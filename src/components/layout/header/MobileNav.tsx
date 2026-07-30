@@ -119,13 +119,13 @@ export default function MobileNav({ isOpen, onClose }: MobileNavProps) {
                         {/* User Info */}
                         <div className="px-5 py-4 bg-gradient-to-r from-emerald-50 to-teal-50 border-b border-gray-100">
                           <div className="flex items-center space-x-4">
-                            {session.user.image ? (
+                            {session.user.id ? (
                               <Image
-                                src={session.user.image}
+                                src={`/api/user/avatar?u=${session.user.id}`}
                                 alt={session.user.name || 'User'}
                                 width={48}
                                 height={48}
-                                className="w-12 h-12 rounded-full ring-2 ring-white shadow-md"
+                                className="w-12 h-12 rounded-full ring-2 ring-white shadow-md object-cover"
                               />
                             ) : (
                               <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center ring-2 ring-white shadow-md">
@@ -195,13 +195,17 @@ export default function MobileNav({ isOpen, onClose }: MobileNavProps) {
                                 as an accredited BD Travel Spirit guide.
                               </p>
                             </div>
-                            <Link href="/auth/login">
+                            <a
+                              href="https://bd-travel-spirit-guide-system.vercel.app/"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
                               <button className="w-full group flex items-center justify-center space-x-2 px-5 py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-bold hover:shadow-lg hover:shadow-emerald-200 transition-all hover:scale-[1.02] cursor-pointer">
                                 <User className="w-5 h-5" />
                                 <span>Sign In</span>
                                 <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                               </button>
-                            </Link>
+                            </a>
                           </>
                         )}
                       </div>

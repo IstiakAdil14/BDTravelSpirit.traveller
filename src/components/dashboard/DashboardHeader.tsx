@@ -69,34 +69,8 @@ export default function DashboardHeader({ currentPage = "", buildPageHref }: Das
 
         <div className="flex items-center gap-2 ml-auto shrink-0">
           {/* Search */}
-          <div className="relative hidden sm:block">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-            <Input
-              placeholder="Search…"
-              className="pl-9 pr-12 h-9 w-52 bg-slate-50 border-slate-200 text-sm rounded-xl focus-visible:ring-emerald-400/30 focus-visible:border-emerald-400 transition-all focus-visible:w-64"
-              aria-label="Search dashboard"
-            />
-            <kbd className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded font-mono">⌘K</kbd>
-          </div>
 
-          {/* Notifications */}
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button
-              variant="ghost" size="icon"
-              className="relative h-9 w-9 rounded-xl hover:bg-emerald-50 hover:text-emerald-600"
-              aria-label="View notifications"
-            >
-              <Bell className="w-4 h-4 text-slate-600" />
-              <motion.span
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                className="absolute top-1.5 right-1.5 w-2 h-2 bg-emerald-500 rounded-full ring-2 ring-white"
-                aria-hidden="true"
-              />
-            </Button>
-          </motion.div>
 
-          {/* User dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <motion.button
@@ -106,7 +80,7 @@ export default function DashboardHeader({ currentPage = "", buildPageHref }: Das
                 aria-label="User menu"
               >
                 <Avatar className="w-7 h-7 ring-2 ring-emerald-200">
-                  <AvatarImage src={user?.image ? `/api/user/avatar?u=${user?.id ?? ""}` : ""} alt={user?.name ?? "User"} />
+                  <AvatarImage src={user?.id ? `/api/user/avatar?u=${user?.id}` : ""} alt={user?.name ?? "User"} />
                   <AvatarFallback className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-xs font-bold">
                     {user?.name?.[0]?.toUpperCase() ?? "T"}
                   </AvatarFallback>
@@ -120,7 +94,7 @@ export default function DashboardHeader({ currentPage = "", buildPageHref }: Das
               <DropdownMenuLabel className="font-normal px-3 py-2">
                 <div className="flex items-center gap-3">
                   <Avatar className="w-9 h-9">
-                    <AvatarImage src={user?.image ? `/api/user/avatar?u=${user?.id ?? ""}` : ""} alt={user?.name ?? "User"} />
+                    <AvatarImage src={user?.id ? `/api/user/avatar?u=${user?.id}` : ""} alt={user?.name ?? "User"} />
                     <AvatarFallback className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-xs font-bold">
                       {user?.name?.[0]?.toUpperCase() ?? "T"}
                     </AvatarFallback>

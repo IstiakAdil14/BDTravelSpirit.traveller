@@ -1,4 +1,4 @@
-import { features } from "@/constants/features";
+import { features } from "@/constants/common";
 import FeaturesUI from "./FeaturesUI";
 
 const FeaturesClient = () => {

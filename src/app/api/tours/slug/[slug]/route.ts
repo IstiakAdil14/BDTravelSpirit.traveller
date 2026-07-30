@@ -13,8 +13,14 @@ export async function GET(
       return NextResponse.json({ error: "Tour not found" }, { status: 404 });
     }
 
-    // Return just the tour object, not the nested structure
-    return NextResponse.json(data.tour);
+    // Return the tour object with nested relations merged in
+    return NextResponse.json({
+      ...data.tour,
+      reviews: data.reviews,
+      faqs: data.faqs,
+      gallery: data.gallery,
+      recommendations: data.recommendations
+    });
   } catch (error) {
     console.error("API Error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

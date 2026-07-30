@@ -5,12 +5,14 @@ import { MapPin, Clock, ArrowRight, Star, Users, TrendingUp } from 'lucide-react
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { motion } from "framer-motion";
 import Image from 'next/image';
+import Link from 'next/link';
 import { showProductionNotification } from '@/components/shared/ProductionNotification';
-
 import Autoplay from 'embla-carousel-autoplay';
 
 interface TourLocation {
-    _id: string;
+    id?: string;
+    _id?: string;
+    slug?: string;
     name: string;
     image: string;
     description: string;
@@ -65,7 +67,7 @@ const OurTourLocationsForYouUI = ({ tourLocations, stats }: OurTourLocationsForY
                 </div>
 
                 {/* Tour Locations Carousel */}
-                <div className="relative mb-16 ml-4 mr-4">
+                <div className="relative mb-16 ml-24 mr-24">
                     <Carousel
                         plugins={[Autoplay({ delay: 2000 })]}
                         opts={{
@@ -77,73 +79,73 @@ const OurTourLocationsForYouUI = ({ tourLocations, stats }: OurTourLocationsForY
                     >
                         <CarouselContent className="-ml-2 sm:-ml-4 md:-ml-4 mb-4">
                             {tourLocations.map((location) => (
-                                <CarouselItem key={location._id} className="pl-2 sm:pl-4 md:pl-4 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
-                                    <div
-                                        className="bg-white rounded-3xl overflow-hidden shadow-lg transition-all duration-500 border border-gray-100 group cursor-pointer hover:shadow-xl hover:-translate-y-1"
-                                        onMouseEnter={() => { }}
-                                        onMouseLeave={() => { }}
-                                    >
-                                        {/* Image */}
-                                        <div className="relative h-40 overflow-hidden">
-                                            <Image
-                                                src={location.image}
-                                                alt={`Tour location: ${location.name}`}
-                                                fill
-                                                className="object-cover transition-transform duration-700 group-hover:scale-110"
-                                                sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                                                onError={(e) => {
-                                                    e.currentTarget.src = '/images/placeholder.jpg'; // Fallback to placeholder if image fails to load
-                                                }}
-                                            />
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-                                        </div>
-
-                                        {/* Content */}
-                                        <div className="p-4">
-                                            <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-emerald-600 transition-colors">
-                                                {location.name.length > 18 ? location.name.slice(0, 18) + '...' : location.name}
-                                            </h3>
-
-                                            {/* Description */}
-                                            <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                                                {location.description}
-                                            </p>
-
-                                            {/* Highlights */}
-                                            <div className="flex flex-wrap gap-1 mb-3">
-                                                {location.highlights?.slice(0, 2).map((highlight, idx) => (
-                                                    <span
-                                                        key={idx}
-                                                        className="px-2 py-1 bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200/50"
-                                                    >
-                                                        {highlight}
-                                                    </span>
-                                                ))}
-                                                {location.highlights.length > 2 && (
-                                                    <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-full">
-                                                        +{location.highlights.length - 2} more
-                                                    </span>
-                                                )}
+                                <CarouselItem key={location.id || location._id} className="pl-2 sm:pl-4 md:pl-4 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
+                                    <Link href={`/tours/${location.slug || location.id || location._id}`} className="block h-full">
+                                        <div
+                                            className="bg-white rounded-3xl overflow-hidden shadow-lg transition-all duration-500 border border-gray-100 group cursor-pointer hover:shadow-xl hover:-translate-y-1 h-full flex flex-col"
+                                        >
+                                            {/* Image */}
+                                            <div className="relative h-40 overflow-hidden shrink-0">
+                                                <Image
+                                                    src={location.image}
+                                                    alt={`Tour location: ${location.name}`}
+                                                    fill
+                                                    className="object-cover transition-transform duration-700 group-hover:scale-110"
+                                                    sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                                                    onError={(e) => {
+                                                        e.currentTarget.src = '/images/placeholder.jpg'; // Fallback to placeholder if image fails to load
+                                                    }}
+                                                />
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
                                             </div>
-
-                                            {/* Duration and CTA */}
-                                            <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                                                <div className="flex items-center gap-2 text-gray-600">
-                                                    <Clock className="w-3 h-3" />
-                                                    <span className="text-xs font-medium">{location.duration}</span>
+    
+                                            {/* Content */}
+                                            <div className="p-4 flex flex-col flex-grow">
+                                                <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-emerald-600 transition-colors">
+                                                    {location.name.length > 18 ? location.name.slice(0, 18) + '...' : location.name}
+                                                </h3>
+    
+                                                {/* Description */}
+                                                <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                                                    {location.description}
+                                                </p>
+    
+                                                {/* Highlights */}
+                                                <div className="flex flex-wrap gap-1 mb-3">
+                                                    {location.highlights?.slice(0, 2).map((highlight, idx) => (
+                                                        <span
+                                                            key={idx}
+                                                            className="px-2 py-1 bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200/50"
+                                                        >
+                                                            {highlight}
+                                                        </span>
+                                                    ))}
+                                                    {location.highlights.length > 2 && (
+                                                        <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-full">
+                                                            +{location.highlights.length - 2} more
+                                                        </span>
+                                                    )}
                                                 </div>
-                                                <button suppressHydrationWarning={true} className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1 transition-all duration-300 hover:shadow-lg hover:scale-105">
-                                                    Explore
-                                                    <ArrowRight className="w-3 h-3" />
-                                                </button>
+    
+                                                {/* Duration and CTA */}
+                                                <div className="flex items-center justify-between pt-3 border-t border-gray-100 mt-auto">
+                                                    <div className="flex items-center gap-2 text-gray-600">
+                                                        <Clock className="w-3 h-3" />
+                                                        <span className="text-xs font-medium">{location.duration}</span>
+                                                    </div>
+                                                    <button suppressHydrationWarning={true} className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1 transition-all duration-300 hover:shadow-lg hover:scale-105">
+                                                        Explore
+                                                        <ArrowRight className="w-3 h-3" />
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    </Link>
                                 </CarouselItem>
                             ))}
                         </CarouselContent>
-                        <CarouselPrevious className="left-0 cursor-pointer" />
-                        <CarouselNext className="right-0 cursor-pointer" />
+                        <CarouselPrevious className="-left-16 cursor-pointer w-12 h-12 [&_svg]:size-8 hover:bg-gradient-to-r hover:from-emerald-400 hover:to-teal-500 hover:text-white hover:border-transparent transition-all duration-300" />
+                        <CarouselNext className="-right-16 cursor-pointer w-12 h-12 [&_svg]:size-8 hover:bg-gradient-to-r hover:from-emerald-400 hover:to-teal-500 hover:text-white hover:border-transparent transition-all duration-300" />
                     </Carousel>
                 </div>
 
@@ -171,13 +173,14 @@ const OurTourLocationsForYouUI = ({ tourLocations, stats }: OurTourLocationsForY
 
                 {/* CTA Button */}
                 <div className="text-center animate-fade-in">
-                    <button 
-                        onClick={showProductionNotification}
-                        suppressHydrationWarning={true} 
-                        className="bg-gradient-to-r from-emerald-500 via-teal-600 to-cyan-600 hover:from-emerald-600 hover:via-teal-700 hover:to-cyan-700 text-white px-10 py-2 rounded-full text-lg font-bold inline-flex items-center gap-3 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 border-2 border-white/20 cursor-pointer">
-                        View All Tour Locations
-                        <ArrowRight className="w-6 h-6" />
-                    </button>
+                    <Link href="/all-tours">
+                        <button 
+                            suppressHydrationWarning={true} 
+                            className="bg-gradient-to-r from-emerald-500 via-teal-600 to-cyan-600 hover:from-emerald-600 hover:via-teal-700 hover:to-cyan-700 text-white px-10 py-2 rounded-full text-lg font-bold inline-flex items-center gap-3 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 border-2 border-white/20 cursor-pointer">
+                            View All Tour Locations
+                            <ArrowRight className="w-6 h-6" />
+                        </button>
+                    </Link>
                     <p className="text-sm text-gray-500 mt-4">
                         ✨ New locations added every month
                     </p>

@@ -1,7 +1,7 @@
 // lib/regionLocationsService.ts
 import dbConnect from "@/lib/db/connect";
-import { TourModel } from "@/models/tour.model";
-import mongoose from "mongoose";
+import TourModel from "@/models/tours/tour.model";
+import { PipelineStage } from "mongoose";
 
 export type LocationSummary = {
   location: string;
@@ -17,25 +17,22 @@ export async function getLocationsForRegion(region: string): Promise<LocationSum
   await dbConnect();
 
   // Aggregate distinct locations within the region with counts and a sample tour for link/image
-  const pipeline: any[] = [
-    {
-      $unwind: "$destinations"
-    },
+  const pipeline: PipelineStage[] = [
     {
       $match: {
-        "destinations.region": { $regex: new RegExp(`^${region}$`, "i") },
-        status: "published"
+        "division": { $regex: new RegExp(`^${region}$`, "i") },
+        status: { $in: ["active", "published"] },
+        deletedAt: null,
       },
     },
     {
       $group: {
         _id: {
-          $ifNull: ["$destinations.city", "$destinations.region"]
+          $ifNull: ["$district", "$title"]
         },
         count: { $sum: 1 },
         sampleId: { $first: "$_id" },
         sampleSlug: { $first: "$slug" },
-        sampleImage: { $first: "$heroImage" },
       },
     },
     { $sort: { count: -1 as const, _id: 1 as const } },
@@ -46,11 +43,10 @@ export async function getLocationsForRegion(region: string): Promise<LocationSum
         count: 1,
         sampleTourId: { $toString: "$sampleId" },
         sampleSlug: "$sampleSlug",
-        sampleImage: "$sampleImage",
       },
     },
   ];
 
-  const results = await TourModel.aggregate(pipeline).allowDiskUse(true).exec();
-  return results as LocationSummary[];
+  const results = await TourModel.aggregate<LocationSummary>(pipeline).allowDiskUse(true).exec();
+  return results;
 }

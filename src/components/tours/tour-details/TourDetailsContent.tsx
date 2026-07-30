@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Icon } from '@/components/ui/icons';
-import { FiClipboard, FiCalendar, FiCheckCircle, FiMapPin, FiImage, FiStar, FiHelpCircle, FiFileText } from 'react-icons/fi';
+import { FiClipboard, FiCalendar, FiCheckCircle, FiMapPin, FiImage, FiStar, FiHelpCircle, FiFileText, FiBriefcase } from 'react-icons/fi';
 import TourHero from './TourHero';
 import TourOverview from './TourOverview';
 import TourItinerary from './TourItinerary';
@@ -15,6 +15,10 @@ import TourGuideInfo from './TourGuideInfo';
 import TourBookingWidget from './TourBookingWidget';
 import TourGallery from './TourGallery';
 import TourPolicies from './TourPolicies';
+import TourCountdown from './TourCountdown';
+import TourLocationMap from './TourLocationMap';
+import TourPreparation from './TourPreparation';
+import TourRelatedTours from './TourRelatedTours';
 
 interface TourDetailsContentProps {
   tour: any;
@@ -30,9 +34,27 @@ export default function TourDetailsContent({ tour }: TourDetailsContentProps) {
           <TourHero tour={tour} />
         </div>
 
+        
+
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 pb-12">
-          <div className="xl:col-span-2 space-y-6">
-            <div className="relative mb-8">
+          
+          <div className="xl:col-span-2 flex flex-col md:flex-row gap-6">
+            
+
+            {/* Main Content Area */}
+            <div className="flex-1 space-y-6 min-w-0">
+
+              <div className="relative mb-8">
+
+                {/* Countdown — directly below the hero */}
+              <div className="pb-6">
+                <TourCountdown
+                  departure={tour.departure}
+                  operatingWindow={tour.operatingWindow}
+                  durationDays={tour.duration?.days}
+                />
+              </div>
+
               <div className="flex items-center justify-center mb-6">
                 <div className="bg-gradient-to-r from-slate-800 to-slate-900 text-white px-6 py-3 rounded-full shadow-2xl">
                   <span className="font-bold text-lg tracking-wide">EXPLORE TOUR DETAILS</span>
@@ -43,6 +65,7 @@ export default function TourDetailsContent({ tour }: TourDetailsContentProps) {
                 {[
                   { id: 'overview', label: 'Overview', icon: FiClipboard, color: 'bg-blue-500', hoverColor: 'hover:bg-blue-600' },
                   { id: 'itinerary', label: 'Itinerary', icon: FiCalendar, color: 'bg-purple-500', hoverColor: 'hover:bg-purple-600' },
+                  { id: 'preparation', label: 'Preparation', icon: FiBriefcase, color: 'bg-rose-500', hoverColor: 'hover:bg-rose-600' },
                   { id: 'inclusions', label: 'Inclusions', icon: FiCheckCircle, color: 'bg-green-500', hoverColor: 'hover:bg-green-600' },
                   { id: 'destinations', label: 'Destinations', icon: FiMapPin, color: 'bg-red-500', hoverColor: 'hover:bg-red-600' },
                   { id: 'gallery', label: 'Gallery', icon: FiImage, color: 'bg-indigo-500', hoverColor: 'hover:bg-indigo-600' },
@@ -53,7 +76,7 @@ export default function TourDetailsContent({ tour }: TourDetailsContentProps) {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`group relative flex flex-col items-center gap-2 p-4 rounded-2xl transition-all duration-300 transform hover:scale-105 ${
+                    className={`group relative flex items-center justify-center p-4 rounded-2xl cursor-pointer transition-all duration-300 transform hover:scale-110 ${
                       activeTab === tab.id
                         ? `${tab.color} text-white shadow-2xl scale-110 ring-4 ring-white/50`
                         : `bg-white/90 text-gray-700 ${tab.hoverColor} hover:text-white shadow-lg hover:shadow-xl border border-gray-200/50`
@@ -64,14 +87,15 @@ export default function TourDetailsContent({ tour }: TourDetailsContentProps) {
                     }`}>
                       <tab.icon size={24} />
                     </div>
-                    <span className={`text-xs font-bold uppercase tracking-wider transition-all duration-300 ${
-                      activeTab === tab.id ? 'text-white' : 'text-gray-600 group-hover:text-white'
-                    }`}>
+                    
+                    {/* Tooltip */}
+                    <span className="absolute -top-10 left-1/2 -translate-x-1/2 px-2.5 py-1 bg-gray-900 text-white text-[10px] font-bold uppercase tracking-widest rounded shadow-xl opacity-0 pointer-events-none transition-all duration-300 group-hover:opacity-100 whitespace-nowrap z-50">
                       {tab.label}
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
                     </span>
                     
                     {activeTab === tab.id && (
-                      <div className="absolute inset-0 bg-white/20 rounded-2xl animate-pulse" />
+                      <div className="absolute inset-0 bg-white/20 rounded-2xl animate-pulse pointer-events-none" />
                     )}
                   </button>
                 ))}
@@ -88,6 +112,7 @@ export default function TourDetailsContent({ tour }: TourDetailsContentProps) {
                 <div className="relative z-10">
                   {activeTab === 'overview' && <TourOverview tour={tour} />}
                   {activeTab === 'itinerary' && <TourItinerary tour={tour} />}
+                  {activeTab === 'preparation' && <TourPreparation tour={tour} />}
                   {activeTab === 'inclusions' && <TourInclusions tour={tour} />}
                   {activeTab === 'destinations' && <TourDestinations tour={tour} />}
                   {activeTab === 'gallery' && <TourGallery tour={tour} />}
@@ -105,10 +130,12 @@ export default function TourDetailsContent({ tour }: TourDetailsContentProps) {
               <div className="bg-white/80 backdrop-blur-xl border border-white/20 rounded-2xl shadow-xl shadow-green-500/5 overflow-hidden">
                 <TourGuideInfo tour={tour} />
               </div>
+              <TourLocationMap tour={tour} />
             </div>
           </div>
+        </div>
 
-          <div className="xl:col-span-1">
+        <div className="xl:col-span-1">
             <div className="sticky top-8 space-y-6">
               <div className="relative group">
                 <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
@@ -120,6 +147,8 @@ export default function TourDetailsContent({ tour }: TourDetailsContentProps) {
             </div>
           </div>
         </div>
+        
+        <TourRelatedTours currentTour={tour} />
       </div>
     </div>
   );

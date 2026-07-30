@@ -53,11 +53,11 @@ export default function AccountMenu() {
           onClick={handleProfileClick}
           className="flex items-center space-x-2 px-4 py-2 bg-white border border-gray-200 rounded-xl hover:shadow-md transition-all cursor-pointer"
         >
-          {session?.user?.image ? (
+          {session?.user?.id ? (
             <img
-              src={session.user.image}
+              src={`/api/user/avatar?u=${session.user.id}`}
               alt={session.user.name || 'User'}
-              className="w-5 h-5 rounded-full"
+              className="w-5 h-5 rounded-full object-cover"
             />
           ) : (
             <User className="w-5 h-5 text-gray-600" />
@@ -72,11 +72,11 @@ export default function AccountMenu() {
           onClick={handleProfileClick}
           className="flex items-center space-x-2 px-4 py-2 bg-white border border-gray-200 rounded-xl hover:shadow-md transition-all cursor-pointer"
         >
-          {session?.user?.image ? (
+          {session?.user?.id ? (
             <img
-              src={session.user.image}
+              src={`/api/user/avatar?u=${session.user.id}`}
               alt={session.user.name || 'User'}
-              className="w-5 h-5 rounded-full"
+              className="w-5 h-5 rounded-full object-cover"
             />
           ) : (
             <User className="w-5 h-5 text-gray-600" />
@@ -177,11 +177,15 @@ export default function AccountMenu() {
                         </Link>{' '}
                         as an accredited BD Travel Spirit guide.
                       </p>
-                      <Link href="/auth/login">
+                      <a
+                        href="https://bd-travel-spirit-guide-system.vercel.app/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
                         <button className="w-full px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-full transition-all">
                           Log in
                         </button>
-                      </Link>
+                      </a>
                     </>
                   )}
                 </div>

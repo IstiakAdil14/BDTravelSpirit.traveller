@@ -3,6 +3,7 @@
 import { Shield, RefreshCw, AlertCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { DEFAULT_CANCELLATION_RULES } from '@/constants/booking/tour-booking.const';
 
 export default function TourPolicies({ tour }: { tour: any }) {
   return (
@@ -15,11 +16,11 @@ export default function TourPolicies({ tour }: { tour: any }) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {tour.cancellationPolicy?.refundable ? (
+          {tour.cancellationPolicy?.refundable !== false ? (
             <div className="space-y-4">
               <p className="text-green-600 font-medium">✓ Free cancellation available</p>
               <div className="space-y-2">
-                {tour.cancellationPolicy.rules?.map((rule: any, index: number) => (
+                {(tour.cancellationPolicy?.rules?.length ? tour.cancellationPolicy.rules : DEFAULT_CANCELLATION_RULES).map((rule: any, index: number) => (
                   <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                     <span>{rule.daysBefore} days before departure</span>
                     <span className="font-medium text-green-600">{rule.refundPercent}% refund</span>

@@ -9,7 +9,7 @@ interface RegionData {
   tourCount: number;
 }
 
-export default function RegionHero({ region, image }: { region: string; image?: string }) {
+export default function RegionHero({ region, displayName, image }: { region: string; displayName?: string; image?: string }) {
   const [regionData, setRegionData] = useState<RegionData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -26,7 +26,12 @@ export default function RegionHero({ region, image }: { region: string; image?: 
       });
   }, [region]);
 
-  const displayImage = regionData?.image || image || `/regions/${region}.jpg`;
+  const rawImage = regionData?.image || image;
+  const displayImage = rawImage && typeof rawImage === 'string' && rawImage.trim()
+    ? rawImage
+    : '/images/placeholder.jpg';
+
+  const title = displayName || regionData?.name || region;
 
   return (
     <motion.div
@@ -35,17 +40,19 @@ export default function RegionHero({ region, image }: { region: string; image?: 
       transition={{ duration: 0.6 }}
       className="relative h-[60vh] rounded-3xl overflow-hidden"
     >
-      <img
-        src={displayImage}
-        alt={region}
-        className="absolute inset-0 h-full w-full object-cover"
-      />
+      {displayImage && (
+        <img
+          src={displayImage}
+          alt={region}
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+      )}
 
       <div className="absolute inset-0 bg-black/50" />
 
       <div className="relative z-10 flex h-full items-center justify-center text-center text-white px-6">
         <div className="space-y-4">
-          <h1 className="text-5xl font-bold capitalize">{region}</h1>
+          <h1 className="text-5xl font-bold capitalize">{title}</h1>
           <p className="max-w-xl mx-auto text-lg text-white/90">
             Handpicked destinations, premium tours, unforgettable memories.
           </p>

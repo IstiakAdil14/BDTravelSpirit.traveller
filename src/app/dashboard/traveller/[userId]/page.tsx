@@ -32,6 +32,20 @@ interface DashboardData {
   travelTime: { travelled: string; remaining: string; pct: number };
   onboarding: Array<{ label: string; done: boolean }>;
   schedule: Array<{ time: string; title: string; tag: string; color: string }>;
+  stripeAccounts: Array<{
+    id: string;
+    label: string;
+    stripeCustomerId: string;
+    stripePaymentMethodId: string;
+    card?: {
+      brand: string;
+      last4: string;
+      expMonth: number;
+      expYear: number;
+    };
+    isActive: boolean;
+    isBackup: boolean;
+  }>;
 }
 
 export default function TravellerDashboardPage() {
@@ -116,6 +130,7 @@ export default function TravellerDashboardPage() {
         travelTime={dashboardData.travelTime}
         onboarding={dashboardData.onboarding}
         schedule={dashboardData.schedule}
+        stripeAccounts={dashboardData.stripeAccounts}
         buildPageHref={buildPageHref}
       />
     </DashboardShell>

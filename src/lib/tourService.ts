@@ -1,13 +1,13 @@
 import { dbConnect } from "@/lib/db/connect";
-import { TourModel } from "@/models/tour.model";
-import { AssetModel } from "@/models/asset.model";
+import TourModel from "@/models/tours/tour.model";
+import { AssetModel } from "@/models/assets/asset.model";
 import AssetFileModel from "@/models/assets/asset-file.model";
-import { ReviewModel } from "@/models/review.model";
-import { TourFAQModel } from "@/models/tourFAQ.model";
-import { GuideModel } from "@/models/guide.model";
+import { ReviewModel } from "@/models/tours/review.model";
+import { TourFAQModel } from "@/models/tours/tourFAQ.model";
+import GuideModel from "@/models/guide/guide.model";
 import { UserModel } from "@/models/user.model";
 import { TravelerModel } from "@/models/travelers/traveler.model";
-import { TOUR_STATUS } from "@/constants/tour.const";
+import { TOUR_STATUS } from "@/constants/tour";
 import mongoose from "mongoose";
 import { Review, Faq, Guide, Media } from "@/types/tour";
 
@@ -52,13 +52,17 @@ export async function getFullTourBySlug(slug: string) {
             ? GuideModel.find({ _id: tourDoc.companyId }).lean()
             : Promise.resolve([]),
         TourModel.find({
-            division: tourDoc.division,
             _id: { $ne: tourId },
             status: { $in: [TOUR_STATUS.ACTIVE, TOUR_STATUS.PUBLISHED] },
             deletedAt: null,
+            $or: [
+                { district: tourDoc.district },
+                { categories: { $in: tourDoc.categories && tourDoc.categories.length > 0 ? tourDoc.categories : [null] } },
+                { tags: { $in: tourDoc.tags && tourDoc.tags.length > 0 ? tourDoc.tags : [null] } }
+            ]
         })
             .populate({ path: "heroImage", populate: assetFilePopulate })
-            .limit(6)
+            .limit(3)
             .lean(),
     ]);
 
@@ -140,29 +144,80 @@ export async function getFullTourBySlug(slug: string) {
         _id: g._id.toString(),
         tourId: tourIdStr,
         name: g.companyName,
-        rating: 5, // Placeholder as Guide model doesn't have rating yet
-        // avatar: ??? Guide model doesn't have avatar. 
+        bio: g.bio || '',
+        phone: g.owner?.phone || '',
+        social: g.social || [],
+        address: g.address || {},
+        status: g.status,
+        rating: 5,
     });
 
     // --- ASSEMBLE ---
 
-    const tour = mapTour(tourDoc);
+    const guides = guideDocs.map(mapGuide);
+    const tour = { ...mapTour(tourDoc), guide: guides[0] || null };
     const gallery = (tourDoc.gallery || []).map((doc: any, i: number) => mapMedia(doc, i));
     const reviews = reviewDocs.map(mapReview);
     const faqs = faqDocs.map(mapFaq);
-    const guides = guideDocs.map(mapGuide);
     const recommendations = recDocs.map(mapTour);
 
     return { tour, gallery, reviews, faqs, guides, recommendations };
 }
 
-export async function getTours(options: { limit?: number; status?: string; isFeatured?: boolean } = {}) {
+export async function getTours(options: { limit?: number; status?: string; isFeatured?: boolean; search?: string; startDate?: string; endDate?: string } = {}) {
     await dbConnect();
     const query: any = {};
-    if (options.status) query.status = options.status;
-    if (options.isFeatured !== undefined) query.isFeatured = options.isFeatured;
+    if (options.status) {
+        if (options.status === "published") {
+            query.status = { $in: ["active", "published"] };
+        } else {
+            query.status = options.status;
+        }
+    }
+    if (options.isFeatured !== undefined) query.featured = options.isFeatured;
+
+    if (options.search) {
+        query.$or = [
+            { title: { $regex: options.search, $options: "i" } },
+            { summary: { $regex: options.search, $options: "i" } },
+            { district: { $regex: options.search, $options: "i" } },
+            { division: { $regex: options.search, $options: "i" } },
+            { slug: { $regex: options.search, $options: "i" } }
+        ];
+    }
+
+    if (options.startDate || options.endDate) {
+        const dateQuery: any = {};
+        if (options.startDate) {
+            dateQuery.$gte = new Date(options.startDate);
+        }
+        if (options.endDate) {
+            dateQuery.$lte = new Date(options.endDate);
+        }
+
+        // We want tours that either have a departure date in range OR an operating window overlapping the range
+        // If query.$or already exists (from search), we use $and to combine them
+        const dateConditions = [
+            { "departure.date": dateQuery },
+            { 
+                "operatingWindow.startDate": { $lte: options.endDate ? new Date(options.endDate) : new Date("2100-01-01") },
+                "operatingWindow.endDate": { $gte: options.startDate ? new Date(options.startDate) : new Date("1900-01-01") }
+            }
+        ];
+
+        if (query.$or) {
+            query.$and = [
+                { $or: query.$or },
+                { $or: dateConditions }
+            ];
+            delete query.$or;
+        } else {
+            query.$or = dateConditions;
+        }
+    }
 
     const tourDocs = await TourModel.find(query)
+        .sort({ createdAt: -1 })
         .limit(options.limit || 10)
         .populate({ path: "heroImage", populate: assetFilePopulate })
         .lean();

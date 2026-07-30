@@ -128,11 +128,7 @@ function NavIcon({
   user?: { id?: string; name?: string | null; image?: string | null };
 }) {
   if (item.useProfile && user) {
-    const avatarSrc = user.image
-      ? user.image
-      : user.id
-        ? `/api/user/avatar?u=${user.id}`
-        : "";
+    const avatarSrc = user.id ? `/api/user/avatar?u=${user.id}` : "";
 
     return (
       <Avatar

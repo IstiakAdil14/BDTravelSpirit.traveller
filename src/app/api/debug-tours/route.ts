@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
 import { dbConnect } from '@/lib/db/connect';
-import { TourModel } from '@/models/tour.model';
+import TourModel from '@/models/tours/tour.model';
+import { BangladeshDivisions } from '@/data/bangladesh-division';
 
 export async function GET() {
   try {
     await dbConnect();
     
-    const tours = await TourModel.find({}).lean();
+    const tours = await TourModel.find({}).lean() as any[];
     
     // Show actual tour destinations to see region names
     const tourDestinations: any[] = [];
@@ -26,15 +27,11 @@ export async function GET() {
     // Get unique regions from tours
     const uniqueRegions = [...new Set(tourDestinations.map(d => d.region).filter(Boolean))];
     
-    // Get regions from regions table
-    const Region = (await import('@/models/region.model')).default;
-    const regionTableRegions = await Region.find({}, 'name').lean();
-    
     return NextResponse.json({
       totalTours: tours.length,
       tourDestinations,
       uniqueRegionsInTours: uniqueRegions,
-      regionsInTable: regionTableRegions.map(r => r.name)
+      regionsInTable: Object.values(BangladeshDivisions)
     });
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });

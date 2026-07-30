@@ -1,6 +1,6 @@
 // lib/regionService.ts
 import dbConnect from "@/lib/db/connect";
-import {TourModel as Tour} from "@/models/tour.model";
+import Tour from "@/models/tours/tour.model";
 import mongoose from "mongoose";
 
 export async function getToursByRegion(region: string, limit = 20, cursor?: string) {

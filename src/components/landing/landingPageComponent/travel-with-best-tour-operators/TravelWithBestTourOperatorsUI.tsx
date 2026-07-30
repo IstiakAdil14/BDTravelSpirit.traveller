@@ -5,6 +5,7 @@ import { Award, Shield, Users, Star, ArrowRight, Sparkles, TrendingUp } from "lu
 import { useMemo, useState } from "react";
 import { useIsClient } from "@/hooks/useIsClient";
 import Link from "next/link";
+import Image from "next/image";
 
 // Type definitions for type safety
 interface TourOperator {
@@ -150,10 +151,12 @@ const OperatorCard = ({ operator, index }: OperatorCardProps) => {
                         {/* Logo or Icon */}
                         <div className="relative">
                             {operator.logo && !logoError ? (
-                                <img
+                                <Image
                                     src={operator.logo}
                                     alt={`${operator.name} logo`}
-                                    className="w-14 h-14 object-contain drop-shadow-lg group-hover:scale-105 transition-transform duration-300"
+                                    width={56}
+                                    height={56}
+                                    className="object-contain drop-shadow-lg group-hover:scale-105 transition-transform duration-300"
                                     onError={() => setLogoError(true)}
                                 />
                             ) : (

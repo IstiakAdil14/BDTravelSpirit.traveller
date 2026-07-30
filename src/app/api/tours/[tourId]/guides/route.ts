@@ -1,7 +1,7 @@
 // app/api/tours/[tourId]/guides/route.ts
 import { NextResponse } from "next/server";
 import { dbConnect } from "@/lib/db/connect";
-import { GuideModel as Guide } from "@/models/guide.model";
+import Guide from "@/models/guide/guide.model";
 import mongoose from "mongoose";
 
 export async function GET(req: Request, { params }: { params: Promise<{ tourId: string }> }) {

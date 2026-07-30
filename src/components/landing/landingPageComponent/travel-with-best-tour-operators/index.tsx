@@ -1,7 +1,5 @@
 import { Suspense } from 'react';
 import TravelWithBestTourOperatorsClient from './TravelWithBestTourOperatorsClient';
-import { dbConnect } from '@/lib/db/connect';
-import TourOperator from '@/models/tourOperator.model';
 
 const TravelWithBestTourOperatorsSkeleton = () => (
   <section className="py-20 bg-gradient-to-br from-blue-50 via-emerald-50/40 to-teal-50/60">
@@ -22,31 +20,30 @@ const TravelWithBestTourOperatorsSkeleton = () => (
   </section>
 );
 
+import dbConnect from '@/lib/db/connect';
+import GuideModel from '@/models/guide/guide.model';
+
+const generateSlug = (name: string) =>
+  (name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
 const TravelWithBestTourOperatorsServer = async () => {
   try {
     await dbConnect();
-    let operators = await TourOperator.find({}).limit(6).lean();
-    
-    // Auto-seed if empty
-    if (operators.length === 0) {
-      const { tourOperators } = await import('@/data/tourOperators');
-      await TourOperator.insertMany(tourOperators);
-      operators = await TourOperator.find({}).limit(6).lean();
-    }
+    const guides = await GuideModel.find({ status: 'approved' }).limit(6).lean();
 
-    const mappedOperators = operators.map((op: any) => ({
-      _id: op._id.toString(),
-      name: op.name,
-      slug: op.slug,
-      logo: op.logo,
-      rating: op.rating,
-      reviews: op.reviewCount || 0,
-      specialties: op.specializations || [],
-      certified: op.verified || false,
-      experience: op.stats?.experienceYears ? `${op.stats.experienceYears}+ years` : 'N/A'
+    const mappedOperators = guides.map((guide: any) => ({
+      _id: guide._id.toString(),
+      name: guide.companyName,
+      slug: generateSlug(guide.companyName),
+      logo: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=100&h=100&fit=crop',
+      rating: 4.8,
+      reviews: 15,
+      specialties: [],
+      certified: guide.status === 'approved',
+      experience: '1+ years'
     }));
 
-    return <TravelWithBestTourOperatorsClient initialOperators={JSON.parse(JSON.stringify(mappedOperators))} />;
+    return <TravelWithBestTourOperatorsClient initialOperators={mappedOperators} />;
   } catch (error) {
     console.error('Error fetching operators:', error);
     return <TravelWithBestTourOperatorsClient initialOperators={[]} />;

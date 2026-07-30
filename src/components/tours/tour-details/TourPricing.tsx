@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Calendar, Users, Tag, Info, CreditCard } from 'lucide-react';
+import { Calendar, Users, Tag, Info, CreditCard, AlertTriangle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -15,7 +15,7 @@ export default function TourPricing({ tour }: TourPricingProps) {
   const [selectedDeparture, setSelectedDeparture] = useState(0);
   const [travelers, setTravelers] = useState(1);
 
-  const departures = tour.departures || [];
+  const departures = tour.departures || (tour.departure ? [tour.departure] : []);
   const discounts = tour.discounts || [];
   const basePrice = tour.basePrice || { amount: 0, currency: 'BDT' };
 
@@ -66,114 +66,22 @@ export default function TourPricing({ tour }: TourPricingProps) {
         </p>
       </div>
 
-      {/* Price Display Card */}
-
-      {/* Active Discounts */}
-      {discounts.length > 0 && (
-        <div className="relative">
-          <div className="absolute -inset-1 bg-gradient-to-r from-green-400 to-emerald-400 rounded-xl blur opacity-30"></div>
-          <div className="relative bg-gradient-to-br from-green-50 to-emerald-50 backdrop-blur-sm border border-green-200/50 rounded-xl overflow-hidden">
-            <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                  <Tag className="h-5 w-5" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-lg">Active Discounts</h3>
-                  <p className="text-green-100 text-sm">Limited time offers</p>
-                </div>
-              </div>
-            </div>
-            <div className="p-6">
-              <div className="space-y-4">
-                {discounts.map((discount: any, index: number) => (
-                  <div key={index} className="flex items-center justify-between p-4 bg-white/80 backdrop-blur-sm rounded-xl border border-green-200/30 shadow-sm">
-                    <div>
-                      <div className="font-semibold text-green-800 capitalize flex items-center gap-2">
-                        <span className="text-lg">🎁</span>
-                        {discount.type.replace('_', ' ')} Discount
-                      </div>
-                      {discount.code && (
-                        <div className="text-sm text-green-600 font-mono bg-green-100 px-2 py-1 rounded mt-1 inline-block">
-                          Code: {discount.code}
-                        </div>
-                      )}
-                      {discount.validUntil && (
-                        <div className="text-xs text-green-600 mt-1">
-                          ⏰ Valid until: {new Date(discount.validUntil).toLocaleDateString()}
-                        </div>
-                      )}
-                    </div>
-                    <div className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-2 rounded-full font-bold text-sm shadow-lg">
-                      {discount.value}% OFF
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+      {/* Scarcity Alert */}
+      {departures.length > 0 && (departures[0].seatsTotal - departures[0].seatsBooked) <= 5 && (departures[0].seatsTotal - departures[0].seatsBooked) > 0 && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3 shadow-sm animate-in fade-in slide-in-from-top-4">
+          <div className="bg-red-100 text-red-600 rounded-full p-2 shrink-0">
+            <AlertTriangle className="w-5 h-5" />
+          </div>
+          <div>
+            <h4 className="text-red-800 font-bold">High Demand!</h4>
+            <p className="text-red-700 text-sm">
+              Only <span className="font-extrabold text-lg">{departures[0].seatsTotal - departures[0].seatsBooked}</span> seats left for this departure. Book soon!
+            </p>
           </div>
         </div>
       )}
 
-      {/* Departure Dates */}
-      {departures.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5" />
-              Available Departures
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {departures.map((departure: any, index: number) => {
-                const availableSeats = departure.seatsTotal - departure.seatsBooked;
-                const isAvailable = availableSeats > 0;
-                
-                return (
-                  <div
-                    key={index}
-                    className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-                      selectedDeparture === index
-                        ? 'border-blue-500 bg-blue-50'
-                        : isAvailable
-                        ? 'border-gray-200 hover:border-gray-300'
-                        : 'border-gray-200 bg-gray-50 cursor-not-allowed'
-                    }`}
-                    onClick={() => isAvailable && setSelectedDeparture(index)}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="font-medium text-gray-900">
-                          {new Date(departure.date).toLocaleDateString('en-US', {
-                            weekday: 'long',
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric'
-                          })}
-                        </div>
-                        {departure.meetingPoint && (
-                          <div className="text-sm text-gray-600 mt-1">
-                            Meeting: {departure.meetingPoint}
-                          </div>
-                        )}
-                      </div>
-                      <div className="text-right">
-                        <div className={`text-sm ${isAvailable ? 'text-green-600' : 'text-red-600'}`}>
-                          {isAvailable ? `${availableSeats} seats left` : 'Fully booked'}
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          {departure.seatsTotal} total seats
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+
 
       {/* Operating Windows */}
 

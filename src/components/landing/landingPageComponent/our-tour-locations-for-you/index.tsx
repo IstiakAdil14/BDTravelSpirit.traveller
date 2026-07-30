@@ -1,7 +1,9 @@
 import { Suspense } from 'react';
-import OurTourLocationsForYouClient from '../our-tour-locations-for-you/OurTourLocationsForYouClient';
-import { dbConnect } from '@/lib/db/connect';
-import TourLocation from '@/models/tourLocation.model';
+import { ourTourLocations } from '@/constants/tour';
+import OurTourLocationsForYouClient from './OurTourLocationsForYouClient';
+import { getTours } from '@/lib/tourService';
+
+type TourListItem = Awaited<ReturnType<typeof getTours>>[number];
 
 const OurTourLocationsForYouSkeleton = () => (
   <section className="py-20 bg-gradient-to-br from-white to-emerald-50">
@@ -52,11 +54,28 @@ const OurTourLocationsForYouSkeleton = () => (
 );
 
 const OurTourLocationsForYouServer = async () => {
-  await dbConnect();
-  const tourLocations = await TourLocation.find({}).lean();
+  let tourLocations = ourTourLocations; // fallback to static data
+
+  try {
+    const dbTours = await getTours({ limit: 12, status: 'published' });
+    if (dbTours && dbTours.length > 0) {
+      tourLocations = dbTours.map((tour: TourListItem) => ({
+        id: tour._id,
+        _id: tour._id,
+        slug: tour.slug,
+        name: tour.title,
+        image: tour.heroImage || '/images/placeholder.jpg',
+        description: tour.description || '',
+        highlights: [tour.location, tour.region].filter((s): s is string => Boolean(s)),
+        duration: tour.durationDays ? `${tour.durationDays} days` : 'Multi-day',
+      }));
+    }
+  } catch (err) {
+    console.error('[OurTourLocationsForYou] Failed to fetch from DB, using static data:', err);
+  }
 
   return (
-    <OurTourLocationsForYouClient tourLocations={JSON.parse(JSON.stringify(tourLocations))} />
+    <OurTourLocationsForYouClient tourLocations={tourLocations} />
   );
 };
 

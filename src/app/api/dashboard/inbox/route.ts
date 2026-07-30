@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/authOptions";
 import { dbConnect } from "@/lib/db/connect";
-import { UserNotificationModel, IUserNotification } from "@/models/notifications/user-notification.model";
+import { TravelerNotificationModel, ITravelerNotification } from "@/models/notifications/traveler-notification.model";
 import { Types } from "mongoose";
 
 /**
@@ -22,13 +22,13 @@ export async function GET(_req: NextRequest) {
 
     await dbConnect();
 
-    const notifications = await UserNotificationModel.find({
+    const notifications = await TravelerNotificationModel.find({
       recipient: session.user.id,
     })
       .sort({ createdAt: -1 })
       .lean();
 
-    const mapped = notifications.map((n: IUserNotification & { _id: Types.ObjectId }) => ({
+    const mapped = notifications.map((n: ITravelerNotification & { _id: Types.ObjectId }) => ({
       id: (n._id as Types.ObjectId).toString(),
       type: n.type,
       title: n.title,
@@ -71,7 +71,7 @@ export async function PATCH(req: NextRequest) {
     const { id, markAll } = body;
 
     if (markAll) {
-      await UserNotificationModel.updateMany(
+      await TravelerNotificationModel.updateMany(
         { recipient: session.user.id, isRead: false },
         { $set: { isRead: true, readAt: new Date() } }
       );
@@ -79,7 +79,7 @@ export async function PATCH(req: NextRequest) {
     }
 
     if (id && Types.ObjectId.isValid(id)) {
-      const updated = await UserNotificationModel.findOneAndUpdate(
+      const updated = await TravelerNotificationModel.findOneAndUpdate(
         { _id: id, recipient: session.user.id },
         { $set: { isRead: true, readAt: new Date() } },
         { new: true }

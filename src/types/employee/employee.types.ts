@@ -1,15 +1,16 @@
 // employee.types.ts
 // Updated to align with constants and Mongoose model (payroll, contactInfo, documents, etc.)
 
-import {
-  EmployeeStatus,
-  EmploymentType,
-  PayrollStatus,
-  SalaryPaymentMode,
-} from "@/constants/employee.const";
-import { CardBrand } from "@/constants/payment.const";
-import { Currency } from "@/constants/tour.const";
-import { AuditLog } from "../user/current-user.types";
+import { EmployeeStatus, EmploymentType, PayrollStatus, SalaryPaymentMode } from "@/constants/employee";
+import { CardBrand } from "@/constants/payment";
+import { Currency } from "@/constants/tour";
+
+export interface AuditLog {
+  action: string;
+  performedBy: string;
+  createdAt: string;
+  details?: Record<string, any>;
+}
 
 /* ---------------------------------------------------------------------
   1. PRIMITIVE / UTILITY TYPES

@@ -1,6 +1,6 @@
 import { useSession } from "next-auth/react";
 import { getUserDashboardPath } from "@/lib/utils/userRouting";
-import { UserRole } from "@/constants/user.const";
+import { UserRole } from "@/constants/user";
 
 export const useUserDashboard = () => {
   const { data: session } = useSession();

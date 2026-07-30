@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Search, Calendar, ArrowRight, MapPin } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -43,6 +44,7 @@ export default function SearchBar({ className = '', isLoading = false }: SearchB
   const isMobile = useIsMobile();
   const formatDate = useDateFormat();
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
+  const router = useRouter();
 
   // ✅ Prevent hydration mismatch until client knows screen size
   if (isMobile === null) {
@@ -86,7 +88,20 @@ export default function SearchBar({ className = '', isLoading = false }: SearchB
   }
 
   const handleSearch = () => {
-    showProductionNotification();
+    const params = new URLSearchParams();
+    if (query.trim()) {
+      params.append('search', query.trim());
+    }
+    if (selectedDateRange?.from) {
+      params.append('startDate', selectedDateRange.from.toISOString());
+    }
+    if (selectedDateRange?.to) {
+      params.append('endDate', selectedDateRange.to.toISOString());
+    }
+    
+    if (params.toString()) {
+      router.push(`/all-tours?${params.toString()}`);
+    }
   };
 
   return (
@@ -106,6 +121,7 @@ export default function SearchBar({ className = '', isLoading = false }: SearchB
               placeholder={isMobile ? 'Search destination' : 'Search for destination or activity'}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
               className="flex-1 outline-none text-gray-900 placeholder-gray-500"
             />
           </div>

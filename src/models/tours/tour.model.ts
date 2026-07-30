@@ -35,7 +35,7 @@ import {
   AccommodationType,
   TourDiscountType,
   TOUR_DISCOUNT_TYPE,
-} from "@/constants/tour.const";
+} from "@/constants/tour/tour.const";
 import { defineModel } from "@/lib/helpers/defineModel";
 import { HydratedDocument, Query } from "mongoose";
 import { FilterQuery } from "mongoose";
@@ -52,7 +52,7 @@ export type IPrice = {
 
 export type IDiscount = {
   type: TourDiscountType;
-  discount: TourDiscount; 
+  discount: TourDiscount;
   value: number; // For percentage, value between 0-100; for flat amount, value in currency units
   code?: string;
   validFrom?: Date;
@@ -113,8 +113,6 @@ export type IGeoPoint = {
 export type IOperatingWindow = {
   startDate: Date;
   endDate: Date;
-  seatsTotal?: number;
-  seatsBooked?: number;
 };
 
 export type IDeparture = {
@@ -268,8 +266,8 @@ export interface ITour extends Document {
   basePrice: IPrice;
   discounts?: IDiscount[];
   duration?: { days: number; nights?: number };
-  operatingWindows?: IOperatingWindow[];
-  departures?: IDeparture[];
+  operatingWindow?: IOperatingWindow;
+  departure?: IDeparture;
   paymentMethods: PaymentMethod[];
 
   // =============== COMPLIANCE & ACCESSIBILITY ===============
@@ -423,18 +421,7 @@ export interface ITourModel extends Model<ITour> {
     session?: ClientSession,
   ): Promise<ITour | null>;
 
-  // Departure helpers
-  addDeparture(
-    id: string | Types.ObjectId,
-    departure: Omit<IDeparture, "seatsBooked"> & { seatsBooked?: number },
-    session?: ClientSession,
-  ): Promise<ITour | null>;
-  updateDepartureSeats(
-    id: string | Types.ObjectId,
-    departureId: string | Types.ObjectId,
-    seatsBooked: number,
-    session?: ClientSession,
-  ): Promise<ITour | null>;
+  // (Departure helpers removed for single departure)
 }
 
 // =============== TOUR SCHEMA ===============
@@ -460,7 +447,6 @@ const TourSchema = new Schema<ITour>(
       required: true,
       unique: true,
       trim: true,
-      index: true,
     },
     status: {
       type: String,
@@ -668,23 +654,17 @@ const TourSchema = new Schema<ITour>(
       days: { type: Number, min: 0 },
       nights: { type: Number, min: 0 },
     },
-    operatingWindows: [
-      {
-        startDate: { type: Date, required: true },
-        endDate: { type: Date, required: true },
-        seatsTotal: { type: Number, min: 0 },
-        seatsBooked: { type: Number, min: 0 },
-      },
-    ],
-    departures: [
-      {
-        date: { type: Date, required: true },
-        seatsTotal: { type: Number, required: true, min: 0 },
-        seatsBooked: { type: Number, default: 0, min: 0 },
-        meetingPoint: { type: String, trim: true },
-        meetingCoordinates: { lat: Number, lng: Number },
-      },
-    ],
+    operatingWindow: {
+      startDate: { type: Date, required: true },
+      endDate: { type: Date, required: true },
+    },
+    departure: {
+      date: { type: Date },
+      seatsTotal: { type: Number, min: 0 },
+      seatsBooked: { type: Number, default: 0, min: 0 },
+      meetingPoint: { type: String, trim: true },
+      meetingCoordinates: { lat: Number, lng: Number },
+    },
 
     // =============== PAYMENT METHODS ===============
     paymentMethods: [
@@ -1070,8 +1050,8 @@ TourSchema.statics.findOneWithDeleted = function (
 
 // =============== SCHEMA HOOKS ===============
 
-// Pre-save hook to ensure unique slug
-TourSchema.pre("save", async function (this: HydratedDocument<ITour>) {
+// Pre-validate hook to ensure unique slug and uniqueTourCode
+TourSchema.pre("validate", async function (this: HydratedDocument<ITour>) {
   // Only generate if it's a new document or the code is missing
   if (this.isNew || !this.uniqueTourCode) {
     let code: string;
@@ -1140,7 +1120,7 @@ TourSchema.index({ status: 1, "suspension.endAt": 1 });
 TourSchema.index({ deletedAt: 1, status: 1 });
 TourSchema.index({ companyId: 1, status: 1 });
 TourSchema.index({ authorId: 1, moderationStatus: 1 });
-TourSchema.index({ "departures.date": 1 });
+TourSchema.index({ "departure.date": 1 });
 TourSchema.index({ "basePrice.amount": 1 });
 TourSchema.index({ division: 1, district: 1 }); // For location-based searches
 TourSchema.index({ tourType: 1, difficulty: 1 }); // For tour filtering

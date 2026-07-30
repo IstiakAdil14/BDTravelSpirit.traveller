@@ -40,6 +40,11 @@ export interface Guide {
   avatar?: string;
   rating?: number;
   createdAt?: string;
+  bio?: string;
+  phone?: string;
+  social?: any[];
+  address?: any;
+  status?: string;
 }
 
 export interface Media {
@@ -48,4 +53,37 @@ export interface Media {
   url: string;
   type: "image" | "video";
   order?: number;
+}
+
+export interface TourDeparture {
+  date: string | Date;
+  seatsTotal: number;
+  seatsBooked: number;
+  meetingPoint?: string;
+}
+
+export interface TourOperatingWindow {
+  startDate: string | Date;
+  endDate: string | Date;
+}
+
+export interface TimeLeft {
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+}
+
+export interface UnitProps {
+  value: number;
+  label: string;
+}
+
+export interface TourCountdownProps {
+  /** ISO string or Date for the single scheduled departure */
+  departure?: TourDeparture;
+  /** Operating window when a departure date is not set */
+  operatingWindow?: TourOperatingWindow;
+  /** Duration in days (used to infer end date if operatingWindow is absent) */
+  durationDays?: number;
 }

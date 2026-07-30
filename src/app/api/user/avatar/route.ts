@@ -4,7 +4,7 @@ import { authOptions } from "@/lib/auth/authOptions";
 import connectToDatabase from "@/lib/db/connect";
 import UserModel from "@/lib/db/models/User";
 
-const ALLOWED_ORIGINS = ["lh3.googleusercontent.com", "res.cloudinary.com", "avatars.githubusercontent.com"];
+const ALLOWED_ORIGINS = ["lh3.googleusercontent.com", "res.cloudinary.com", "avatars.githubusercontent.com", "ui-avatars.com"];
 
 function isAllowedUrl(url: string): boolean {
   try {
@@ -15,24 +15,51 @@ function isAllowedUrl(url: string): boolean {
   }
 }
 
-export async function GET(_req: NextRequest) {
+export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    let imageUrl = session.user.image;
+    const searchParams = req.nextUrl.searchParams;
+    const targetUserId = searchParams.get("u") || session.user.id;
 
-    if (!imageUrl) {
-      await connectToDatabase();
-      const dbUser = await UserModel.findById(session.user.id).select("image").lean() as { image?: string } | null;
-      imageUrl = dbUser?.image;
+    let imageUrl = null;
+    let userName = targetUserId === session.user.id ? session.user.name : "Traveler";
+
+    await connectToDatabase();
+    const dbUser = await UserModel.findById(targetUserId).select("name image avatar").lean() as any;
+    
+    if (dbUser) {
+      userName = dbUser.name || userName;
+      
+      if (dbUser.avatar) {
+          const AssetModel = (await import("@/models/assets/asset.model")).default;
+          const AssetFileModel = (await import("@/models/assets/asset-file.model")).default;
+          
+          const asset = await AssetModel.findById(dbUser.avatar);
+          if (asset) {
+              const file = await AssetFileModel.findById(asset.file);
+              if (file && file.publicUrl) {
+                  imageUrl = file.publicUrl;
+              }
+          }
+      }
+
+      if (!imageUrl && dbUser.image) {
+        imageUrl = dbUser.image;
+      }
+    }
+
+    if (!imageUrl && targetUserId === session.user.id && session.user.image) {
+      imageUrl = session.user.image;
     }
 
     if (!imageUrl) {
-      return NextResponse.json({ error: "No avatar" }, { status: 404 });
+      imageUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName || "Traveler")}&background=random`;
     }
+
     if (!isAllowedUrl(imageUrl)) {
       return NextResponse.json({ error: "Invalid avatar source" }, { status: 400 });
     }
@@ -51,7 +78,7 @@ export async function GET(_req: NextRequest) {
     return new NextResponse(buffer, {
       headers: {
         "Content-Type": contentType,
-        "Cache-Control": "private, max-age=300",
+        "Cache-Control": "no-store, max-age=0",
       },
     });
   } catch (err) {

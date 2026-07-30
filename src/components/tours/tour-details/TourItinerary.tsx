@@ -1,6 +1,6 @@
 'use client';
 
-import { Calendar, MapPin, Clock, Camera } from 'lucide-react';
+import { Calendar, MapPin, Clock, Camera, Utensils, Bus, Car, Train, Plane, Ship, Activity } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
@@ -109,12 +109,52 @@ export default function TourItinerary({ tour }: TourItineraryProps) {
                         )}
 
                         {day.description && (
-                          <div className="prose max-w-none">
+                          <div className="prose max-w-none mb-6">
                             <p className="text-gray-700 leading-relaxed text-lg">
                               {day.description}
                             </p>
                           </div>
                         )}
+
+                        <div className="flex flex-wrap gap-4 mt-6 pt-6 border-t border-gray-100">
+                          {/* Meals */}
+                          {day.mealsProvided && day.mealsProvided.length > 0 && (
+                            <div className="flex items-center gap-2 bg-orange-50 px-3 py-1.5 rounded-lg border border-orange-100">
+                              <Utensils className="w-4 h-4 text-orange-500" />
+                              <span className="text-sm font-semibold text-orange-900 capitalize">
+                                Meals: <span className="font-medium text-orange-700">{day.mealsProvided.join(', ')}</span>
+                              </span>
+                            </div>
+                          )}
+
+                          {/* Transport */}
+                          {day.travelMode && (
+                            <div className="flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100">
+                              {day.travelMode === 'bus' && <Bus className="w-4 h-4 text-blue-500" />}
+                              {day.travelMode === 'car' && <Car className="w-4 h-4 text-blue-500" />}
+                              {day.travelMode === 'train' && <Train className="w-4 h-4 text-blue-500" />}
+                              {day.travelMode === 'flight' && <Plane className="w-4 h-4 text-blue-500" />}
+                              {day.travelMode === 'boat' && <Ship className="w-4 h-4 text-blue-500" />}
+                              {!['bus', 'car', 'train', 'flight', 'boat'].includes(day.travelMode) && <Activity className="w-4 h-4 text-blue-500" />}
+                              
+                              <span className="text-sm font-semibold text-blue-900 capitalize">
+                                {day.travelMode}
+                              </span>
+                              
+                              {day.travelDistance && (
+                                <span className="text-xs text-blue-700 font-medium ml-1 bg-blue-100 px-1.5 py-0.5 rounded">
+                                  {day.travelDistance}
+                                </span>
+                              )}
+                              
+                              {day.estimatedTime && (
+                                <span className="text-xs text-blue-700 font-medium ml-1 bg-blue-100 px-1.5 py-0.5 rounded">
+                                  ⏱ {day.estimatedTime}
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>

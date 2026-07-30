@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BREAKPOINTS } from '@/lib/constants/dashboard';
+import { BREAKPOINTS } from "@/constants/dashboard";
 
 export function useResponsive() {
   const [screenSize, setScreenSize] = useState<keyof typeof BREAKPOINTS>('lg');

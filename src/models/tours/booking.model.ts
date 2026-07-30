@@ -7,14 +7,14 @@ import {
     TOUR_DISCOUNT,
     TourDiscountType,
     TourDiscount,
-} from "@/constants/tour.const";
+} from "@/constants/tour/tour.const";
 
 import {
     BOOKING_PAYMENT_STATUS,
     BOOKING_STATUS,
     BookingPaymentStatus,
     BookingStatus,
-} from "@/constants/tour-booking.const";
+} from "@/constants/tour/tour-booking.const";
 
 import { ITour } from "./tour.model";
 
@@ -340,6 +340,7 @@ BookingSchema.statics.createBooking = async function (
 
     const booking = new this({
         bookingReference,
+        uniqueTourCode: tour.uniqueTourCode,
         traveler: travelerId,
         tour: tourId,
         totalParticipants: data.totalParticipants,

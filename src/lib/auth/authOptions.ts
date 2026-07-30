@@ -40,7 +40,26 @@ export const authOptions: NextAuthOptions = {
         try {
           await connectToDatabase();
 
-          const user = await UserModel.findOne({ email: credentials.email });
+          let user = await UserModel.findOne({ email: credentials.email }).select("+password");
+
+          // Auto-create read-only user if it doesn't exist
+          if (!user && credentials.email === "readonly.traveler@gmail.com" && credentials.password === "Traveler@123") {
+            user = await UserModel.create({
+              name: "Read-Only Traveler",
+              email: "readonly.traveler@gmail.com",
+              password: "Traveler@123",
+              role: "traveler",
+              emailVerified: new Date(),
+            });
+
+            const { TravelerModel } = await import("@/models/travelers/traveler.model");
+            await TravelerModel.create({
+              user: user._id,
+              name: user.name,
+              isVerified: true,
+              accountStatus: "active",
+            });
+          }
 
           if (!user || !user.password) {
             return null;
@@ -122,25 +141,97 @@ export const authOptions: NextAuthOptions = {
           if (existingUser) {
             user.id = existingUser._id?.toString();
             user.role = existingUser.role;
-            // Use DB image if no Google picture, else prefer Google (keeps profile fresh)
-            user.image = user.image ?? existingUser.image;
             // Update DB with latest Google image if we have it
-            if (picture && !existingUser.image) {
-              await UserModel.updateOne(
+            if (picture && !existingUser.avatar) {
+              const AssetFileModel = (await import("@/models/assets/asset-file.model")).default;
+              const AssetModel = (await import("@/models/assets/asset.model")).default;
+              const { ASSET_TYPE, STORAGE_PROVIDER, VISIBILITY } = await import("@/constants/common/asset.const");
+
+              const assetFile = await AssetFileModel.create({
+                storageProvider: STORAGE_PROVIDER.LOCAL,
+                objectKey: user.email + "-google-avatar",
+                publicUrl: picture,
+                contentType: "image/jpeg",
+                fileSize: 0,
+                checksum: user.email + "-avatar-" + Date.now()
+              });
+              const asset = await AssetModel.create({
+                file: assetFile._id,
+                assetType: ASSET_TYPE.IMAGE,
+                visibility: VISIBILITY.PUBLIC
+              });
+              
+              await UserModel.collection.updateOne(
                 { _id: existingUser._id },
-                { $set: { image: picture } }
+                { $set: { avatar: asset._id } }
               );
             }
+            
+            // Self-healing: Create traveler profile if it failed in a previous broken attempt
+            if (existingUser.role === 'traveler') {
+              const { TravelerModel } = await import("@/models/travelers/traveler.model");
+              const existingTraveler = await TravelerModel.findOne({ user: existingUser._id });
+              if (!existingTraveler) {
+                await TravelerModel.create({
+                  user: existingUser._id,
+                  name: existingUser.name,
+                  isVerified: true,
+                  accountStatus: "active",
+                  location: null,
+                });
+              }
+            }
+
             return true;
           }
 
-          // Create user if they don't exist
+          let avatarId = undefined;
+          if (picture) {
+            const AssetFileModel = (await import("@/models/assets/asset-file.model")).default;
+            const AssetModel = (await import("@/models/assets/asset.model")).default;
+            const { ASSET_TYPE, STORAGE_PROVIDER, VISIBILITY } = await import("@/constants/common/asset.const");
+
+            const assetFile = await AssetFileModel.create({
+              storageProvider: STORAGE_PROVIDER.LOCAL,
+              objectKey: user.email + "-google-avatar",
+              publicUrl: picture,
+              contentType: "image/jpeg",
+              fileSize: 0,
+              checksum: user.email + "-avatar-" + Date.now()
+            });
+            const asset = await AssetModel.create({
+              file: assetFile._id,
+              assetType: ASSET_TYPE.IMAGE,
+              visibility: VISIBILITY.PUBLIC
+            });
+            avatarId = asset._id;
+          }
+
+          const crypto = await import('crypto');
+          const randomPassword = crypto.randomUUID() + 'A!1a'; // Satisfies strict password regex
+          
           const newUser = await UserModel.create({
             name: user.name,
             email: user.email,
-            image: user.image,
+            password: randomPassword,
+            role: 'traveler'
+          });
+
+          if (avatarId) {
+            await UserModel.collection.updateOne(
+              { _id: newUser._id },
+              { $set: { avatar: avatarId } }
+            );
+          }
+
+          const { TravelerModel } = await import("@/models/travelers/traveler.model");
+          
+          await TravelerModel.create({
+            user: newUser._id,
+            name: newUser.name,
             isVerified: true,
             accountStatus: "active",
+            location: null,
           });
 
           user.id = newUser._id.toString();

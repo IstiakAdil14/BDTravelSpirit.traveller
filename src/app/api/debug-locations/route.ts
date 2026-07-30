@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db/connect";
-import { TourModel } from "@/models/tour.model";
+import TourModel from "@/models/tours/tour.model";
 
 export async function GET(req: Request) {
   try {
@@ -10,24 +10,24 @@ export async function GET(req: Request) {
     await dbConnect();
     
     // Debug: Check all tours first
-    const allTours = await TourModel.find({ status: 'published' }).select('title destinations').lean();
+    const allTours = await TourModel.find({ status: { $in: ['active', 'published'] } }).select('title destinations').lean();
     
     // Debug: Check tours with any region
     const toursWithRegions = await TourModel.find({ 
-      status: 'published',
+      status: { $in: ['active', 'published'] },
       'destinations.region': { $exists: true }
     }).select('title destinations').lean();
     
     // Debug: Check tours with Barishal specifically
     const barishalTours = await TourModel.find({
       'destinations.region': { $regex: new RegExp(`^Barishal$`, 'i') },
-      status: 'published'
+      status: { $in: ['active', 'published'] }
     }).select('title destinations').lean();
     
     // Debug: Check tours with barishal (case insensitive)
     const barishalToursLoose = await TourModel.find({
       'destinations.region': { $regex: new RegExp(`barishal`, 'i') },
-      status: 'published'
+      status: { $in: ['active', 'published'] }
     }).select('title destinations').lean();
     
     return NextResponse.json({
@@ -37,11 +37,11 @@ export async function GET(req: Request) {
         toursWithRegions: toursWithRegions.length,
         barishalToursExact: barishalTours.length,
         barishalToursLoose: barishalToursLoose.length,
-        sampleTours: allTours.slice(0, 3).map(tour => ({
+        sampleTours: allTours.slice(0, 3).map((tour: any) => ({
           title: tour.title,
           destinations: tour.destinations
         })),
-        barishalSample: barishalToursLoose.slice(0, 3).map(tour => ({
+        barishalSample: barishalToursLoose.slice(0, 3).map((tour: any) => ({
           title: tour.title,
           destinations: tour.destinations
         }))

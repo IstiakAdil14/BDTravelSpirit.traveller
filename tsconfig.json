@@ -18,6 +18,25 @@
       { "name": "next" }
     ],
     "paths": {
+      "@/constants/customer-notification.const": ["src/constants/notifications/customer-notification.const"],
+      "@/constants/faq-report.const": ["src/constants/common/faq-report.const"],
+      "@/constants/tour.const": ["src/constants/tour/tour.const"],
+      "@/constants/user.const": ["src/constants/user/user.const"],
+      "@/constants/subscriber.const": ["src/constants/user/subscriber.const"],
+      "@/constants/advertising.const": ["src/constants/common/advertising.const"],
+      "@/constants/guide.const": ["src/constants/guide/guide.const"],
+      "@/constants/current-user/user.const": ["src/constants/user/user.const"],
+      "@/constants/tour/faq-report.const": ["src/constants/common/faq-report.const"],
+      "@/constants/notifications/traveler-notification.const": ["src/constants/notifications/customer-notification.const"],
+      "@/constants/tour/article-comment.const": ["src/constants/common/article-comment.const"],
+      "@/constants/tour/article.const": ["src/constants/common/article.const"],
+      "@/constants/current-user/audit-action.const": ["src/constants/common/audit-action.const"],
+      "@/constants/chat/chatmessage.const": ["src/constants/chat/chat-message.const"],
+      "@/constants/common/email-verification-purpose.const": ["src/constants/auth/email-verification-purpose.const"],
+      "@/constants/employee/reset-password-request.const": ["src/constants/auth/reset-password-request.const"],
+      "@/constants/guide/guide-forgot-password.const": ["src/constants/auth/guide-forgot-password.const"],
+      "@/constants/tour/tour-booking.const": ["src/constants/booking/tour-booking.const"],
+      "@/constants/tour/report.const": ["src/constants/common/report.const"],
       "@/*": ["src/*"]
     }
   },

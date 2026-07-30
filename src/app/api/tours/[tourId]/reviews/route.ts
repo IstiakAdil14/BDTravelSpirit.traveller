@@ -1,7 +1,7 @@
 // app/api/tours/[tourId]/reviews/route.ts
 import { NextResponse } from "next/server";
 import { dbConnect } from "@/lib/db/connect";
-import { ReviewModel as Review } from "@/models/review.model";
+import { ReviewModel as Review } from "@/models/tours/review.model";
 import mongoose from "mongoose";
 
 function encodeCursor(id: string) {

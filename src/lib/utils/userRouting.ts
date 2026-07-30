@@ -1,4 +1,4 @@
-import { USER_ROLE, UserRole } from "@/constants/user.const";
+import { USER_ROLE, UserRole } from "@/constants/user";
 
 // Simple base64 encoding/decoding for user IDs
 export const encodeUserId = (userId: string): string => {

@@ -7,9 +7,10 @@ import { QueryProvider } from "@/lib/providers/QueryProvider";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import BottomNav from "@/components/layout/BottomNav";
-import FloatingAIButton from "@/components/layout/FloatingAIButton";
 import { Toaster } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { SocketProvider } from "@/components/chat/SocketProvider";
+import TravelerChatWidget from "@/components/chat/TravelerChatWidget";
 
 export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -22,7 +23,8 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
 
   return (
     <SessionProvider>
-      <QueryProvider>
+      <SocketProvider>
+        <QueryProvider>
         <TooltipProvider>
           {!hideLayout && <Header />}
           {showBottomNav && !hideLayoutForDashboard ? (
@@ -33,15 +35,17 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
             children
           )}
           {!hideLayout && <Footer />}
-          {!hideLayoutForAuth && <FloatingAIButton />}
+          {!hideLayoutForAuth }
           {showBottomNav && (
             <Suspense fallback={null}>
               <BottomNav />
             </Suspense>
           )}
           <Toaster position="bottom-center" />
+          <TravelerChatWidget />
         </TooltipProvider>
-      </QueryProvider>
+        </QueryProvider>
+      </SocketProvider>
     </SessionProvider>
   );
 }

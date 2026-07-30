@@ -31,6 +31,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
+import { Modal } from "@/components/ui/modal";
 
 export interface Booking {
   id: string;
@@ -86,6 +87,9 @@ export default function BookingsTable({ bookings, isLoading }: BookingsTableProp
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const filteredData = useMemo(() => {
     if (statusFilter === "all") return bookings;
@@ -166,7 +170,13 @@ export default function BookingsTable({ bookings, isLoading }: BookingsTableProp
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem className="gap-2">
+              <DropdownMenuItem 
+                className="gap-2"
+                onClick={() => {
+                  setSelectedBooking(row.original);
+                  setIsModalOpen(true);
+                }}
+              >
                 <Eye className="w-4 h-4" /> View Details
               </DropdownMenuItem>
               {row.original.status === "completed" && (
@@ -300,6 +310,48 @@ export default function BookingsTable({ bookings, isLoading }: BookingsTableProp
           </Table>
         </div>
       )}
+
+      {/* Booking Details Modal */}
+      <Modal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)}
+        title="Booking Details"
+      >
+        {selectedBooking && (
+          <div className="space-y-4">
+            <div className="flex justify-between items-start">
+              <div>
+                <h3 className="font-semibold text-lg text-slate-900">{selectedBooking.title}</h3>
+                <p className="text-sm text-slate-500">{selectedBooking.location}</p>
+              </div>
+              <StatusBadge status={selectedBooking.status} />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100">
+              <div>
+                <p className="text-xs text-slate-500 mb-1">Booking ID</p>
+                <p className="text-sm font-mono text-slate-900">#{selectedBooking.id}</p>
+              </div>
+              <div>
+                <p className="text-xs text-slate-500 mb-1">Date</p>
+                <p className="text-sm font-medium text-slate-900">{selectedBooking.date}</p>
+              </div>
+              <div>
+                <p className="text-xs text-slate-500 mb-1">Duration</p>
+                <p className="text-sm font-medium text-slate-900">{selectedBooking.duration || "N/A"}</p>
+              </div>
+              <div>
+                <p className="text-xs text-slate-500 mb-1">Total Price</p>
+                <p className="text-sm font-medium text-emerald-600">{selectedBooking.price}</p>
+              </div>
+            </div>
+            
+            <div className="pt-4 flex justify-end gap-3 border-t border-slate-100">
+              <Button variant="outline" onClick={() => setIsModalOpen(false)}>Close</Button>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }

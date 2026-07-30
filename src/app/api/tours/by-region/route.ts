@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { dbConnect } from '@/lib/db/connect';
-import { TourModel } from '@/models/tour.model';
-import { AssetModel } from '@/models/asset.model';
+import TourModel from '@/models/tours/tour.model';
+import { AssetModel } from '@/models/assets/asset.model';
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
@@ -11,7 +11,7 @@ export async function GET(request: Request) {
     try {
         await dbConnect();
         
-        const query: any = { status: 'published' };
+        const query: any = { status: { $in: ['active', 'published'] } };
         
         // Filter by region if provided
         if (region) {

@@ -11,11 +11,11 @@ export default function LocationCard({ location }: { location: any }) {
       transition={{ duration: 0.3 }}
       viewport={{ once: true }}
     >
-      <Link href={`/tours?region=${location.region}&tour=${location.slug}`}>
+      <Link href={`/tours/${location.slug}`}>
         <Card className="group cursor-pointer overflow-hidden rounded-xl border border-gray-200 hover:border-blue-400/50 hover:shadow-md transition-all">
 
           {/* IMAGE (REDUCED HEIGHT) */}
-          <div className="relative w-[400px] h-[230px] overflow-hidden bg-gray-100">
+          <div className="relative w-[400px] h-[180px] overflow-hidden bg-gray-100">
             <img
               src={location.seo?.ogImage || location.image || '/images/placeholder.jpg'}
               alt={location.name}
@@ -29,7 +29,7 @@ export default function LocationCard({ location }: { location: any }) {
 
             {/* Title */}
             <div>
-              <h3 className="text-sm font-bold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-1">
+              <h3 className="text-lg font-bold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-1">
                 {location.name}
               </h3>
               <p className="text-[11px] uppercase tracking-wider font-semibold text-gray-500">
@@ -52,7 +52,7 @@ export default function LocationCard({ location }: { location: any }) {
               <div className="flex items-center gap-1.5 bg-yellow-50 px-2 py-0.5 rounded-full">
                 <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
                 <span className="font-bold text-yellow-700">
-                  {location.rating.toFixed(1)}
+                  {(location.rating || 0).toFixed(1)}
                 </span>
               </div>
             </div>

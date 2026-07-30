@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/authOptions';
 import { UserModel } from '@/models/user.model';
-import { UserNotificationModel } from '@/models/notifications/user-notification.model';
+import { TravelerNotificationModel } from '@/models/notifications/traveler-notification.model';
+import UserTourInteractionModel from '@/models/travelers/traveler-tour-interaction.model';
 import { getDbClient } from '@/lib/db';
 import { Types } from 'mongoose';
 
@@ -21,16 +22,16 @@ export async function GET(request: NextRequest) {
 
     await getDbClient();
 
-    const [user, unreadNotifications] = await Promise.all([
-      UserModel.findById(session.user.id).select('wishlist'),
-      UserNotificationModel.countDocuments({
+    const [userInteraction, unreadNotifications] = await Promise.all([
+      UserTourInteractionModel.findOne({ user: session.user.id }).select('wishlist'),
+      TravelerNotificationModel.countDocuments({
         recipient: session.user.id,
         isRead: false
       })
     ]);
 
     return NextResponse.json({
-      wishlistCount: user?.wishlist?.length || 0,
+      wishlistCount: userInteraction?.wishlist?.length || 0,
       notificationCount: unreadNotifications || 0
     });
 

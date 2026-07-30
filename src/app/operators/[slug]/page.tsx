@@ -1,34 +1,19 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import OperatorDetailPage from '@/components/operators/OperatorDetailPage';
-import { dbConnect } from '@/lib/db/connect';
-import TourOperator from '@/models/tourOperator.model';
+import { tourOperators } from '@/data/tourOperators';
 
-// Get operator from database - handles modern slug format (name-id)
+// Get operator from static data - handles modern slug format (name-id)
 const getOperatorBySlug = async (slug: string) => {
   try {
-    await dbConnect();
-
-    // Modern slug format: luxury-voyages-123abc
-    // Extract the ID from the end (last 6 characters after the last hyphen)
+    // Extract the name part of the slug in case it has an appended mock ID
     const lastHyphenIndex = slug.lastIndexOf('-');
-    const idPart = slug.substring(lastHyphenIndex + 1);
-    const namePart = slug.substring(0, lastHyphenIndex);
+    const namePart = lastHyphenIndex !== -1 ? slug.substring(0, lastHyphenIndex) : slug;
 
-    // Try to find by ID first (more reliable)
-    let operator = null;
-
-    // Check if we have a valid ID part (6 characters from _id)
-    if (idPart && idPart.length === 6) {
-      // Find operator where _id ends with this ID part
-      const operators = await TourOperator.find({}).lean();
-      operator = operators.find((op: any) => op._id.toString().slice(-6) === idPart);
-    }
-
-    // Fallback to slug-based search if ID search fails
-    if (!operator) {
-      operator = await TourOperator.findOne({ slug: namePart }).lean();
-    }
+    // Find operator by exact slug or matching prefix
+    const operator = tourOperators.find(
+      (op: any) => op.slug === slug || op.slug === namePart || slug.startsWith(op.slug || '')
+    );
 
     return operator ? JSON.parse(JSON.stringify(operator)) : null;
   } catch (error) {

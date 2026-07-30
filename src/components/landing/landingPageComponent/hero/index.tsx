@@ -1,7 +1,8 @@
 import { Suspense } from 'react';
 import HeroClient from './HeroClient';
 import { dbConnect } from '@/lib/db/connect';
-import { HeroSlideModel } from '@/models/heroSlide.model';
+import mongoose from 'mongoose';
+import { heroSlides as fallbackSlides } from '@/data/heroSlides';
 
 const HeroSkeleton = () => (
   <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
@@ -47,10 +48,29 @@ const HeroSkeleton = () => (
 );
 
 const HeroSectionServer = async () => {
-  await dbConnect();
-  const slides = await HeroSlideModel.find({ isActive: true }).sort({ order: 1 }).lean();
+  let slides = fallbackSlides;
+  try {
+    await dbConnect();
+    const collection = mongoose.connection.db?.collection('heroslides');
+    if (collection) {
+      const dbSlides = await collection.find({ isActive: true }).sort({ order: 1 }).toArray();
+      if (dbSlides.length > 0) {
+        slides = dbSlides.map((slide: any) => ({
+          image: slide.image,
+          title: slide.title,
+          subtitle: slide.subtitle,
+          alt: slide.alt,
+          _id: slide._id.toString(),
+          isActive: slide.isActive,
+          order: slide.order
+        }));
+      }
+    }
+  } catch (error) {
+    console.error("Failed to fetch hero slides for landing page:", error);
+  }
 
-  return <HeroClient slides={JSON.parse(JSON.stringify(slides))} />;
+  return <HeroClient slides={slides} />;
 };
 
 export default function HeroSection() {

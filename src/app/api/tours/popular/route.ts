@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
 import { dbConnect } from "@/lib/db/connect";
-import { TourModel } from "@/models/tour.model";
-import { AssetModel } from "@/models/asset.model";
+import TourModel from "@/models/tours/tour.model";
+import { AssetModel } from "@/models/assets/asset.model";
 
 export async function GET() {
     try {
         await dbConnect();
         
         const popularTours = await TourModel.find({
-            status: "published",
+            status: { $in: ["active", "published"] },
             "ratings.average": { $gt: 0 }
         })
         .sort({ "ratings.average": -1, "ratings.count": -1 })

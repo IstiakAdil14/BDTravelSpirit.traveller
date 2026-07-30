@@ -1,6 +1,6 @@
 import { dbConnect } from "@/lib/db/connect";
-import { TourModel } from "@/models/tour.model";
-import { AssetModel } from "@/models/asset.model";
+import TourModel from "@/models/tours/tour.model";
+import { AssetModel } from "@/models/assets/asset.model";
 import mongoose from "mongoose";
 import Link from "next/link";
 
@@ -35,7 +35,7 @@ export default async function PopularDestinationsPage() {
     <div className="container mx-auto px-4 py-8 mt-16">
       <h1 className="text-3xl font-bold mb-8">Top 20 Popular Destinations</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {destinations.map((dest, index) => (
+        {destinations.map((dest: any, index: number) => (
           <Link 
             key={dest._id} 
             href={`/tours?region=${dest.destination?.toLowerCase().replace(/\s+/g, '-') || 'bangladesh'}&tour=${dest.slug}`}

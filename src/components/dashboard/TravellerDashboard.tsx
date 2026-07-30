@@ -1,16 +1,101 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { motion, type Variants } from "framer-motion";
 import {
   Plane, Globe, Heart, Award, Star, CalendarDays,
   Compass, TrendingUp, CheckCircle2, Circle, Clock, ArrowRight,
-  Sun, Mountain, MapPin,
+  Sun, Mountain, MapPin, Camera, Loader2, CreditCard, Plus, Pencil, Trash2
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Modal } from "@/components/ui/modal";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
+import { loadStripe } from "@stripe/stripe-js";
+import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import BookingsTable, { type Booking } from "./BookingsTable";
+
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "");
+
+function StripeCardForm({ 
+  onSuccess, onCancel, editingAccount 
+}: { 
+  onSuccess: (pmId: string | null, label: string, accountId?: string) => void, 
+  onCancel: () => void,
+  editingAccount?: any 
+}) {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [error, setError] = useState<string | null>(null);
+  const [label, setLabel] = useState(editingAccount?.label || "");
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!stripe || !elements) return;
+
+    setIsProcessing(true);
+    setError(null);
+    
+    if (editingAccount) {
+      onSuccess(null, label, editingAccount.id);
+      return;
+    }
+
+    const cardEl = elements.getElement(CardElement);
+    if (!cardEl) return;
+
+    const { error: pmError, paymentMethod } = await stripe.createPaymentMethod({
+      type: 'card',
+      card: cardEl,
+    });
+
+    if (pmError) {
+      setError(pmError.message || "An error occurred");
+      setIsProcessing(false);
+      return;
+    }
+
+    onSuccess(paymentMethod.id, label);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <label className="text-sm font-medium text-slate-700">Card Label (Optional)</label>
+        <Input 
+          placeholder="e.g. Personal Card, Business Card" 
+          value={label} 
+          onChange={(e) => setLabel(e.target.value)} 
+          className="mt-1"
+        />
+      </div>
+      
+      {!editingAccount && (
+        <div>
+          <label className="text-sm font-medium text-slate-700 block mb-1">Card Details</label>
+          <div className="p-3 border border-slate-200 rounded-xl bg-white shadow-sm">
+            <CardElement options={{
+              style: { base: { fontSize: '16px', color: '#334155', '::placeholder': { color: '#94a3b8' } } }
+            }} />
+          </div>
+          {error && <p className="text-xs text-red-500 mt-2">{error}</p>}
+        </div>
+      )}
+
+      <div className="pt-4 flex justify-end gap-3">
+        <Button type="button" variant="outline" onClick={onCancel}>Cancel</Button>
+        <Button type="submit" disabled={(!stripe && !editingAccount) || isProcessing} className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2">
+          {isProcessing && <Loader2 className="h-4 w-4 animate-spin" />}
+          {editingAccount ? "Update Label" : "Save Card"}
+        </Button>
+      </div>
+    </form>
+  );
+}
 
 interface Stats {
   totalTrips: number;
@@ -37,6 +122,20 @@ interface TravellerDashboardProps {
   travelTime?: TravelTime;
   onboarding?: OnboardingTask[];
   schedule?: ScheduleEvent[];
+  stripeAccounts?: Array<{
+    id: string;
+    label: string;
+    stripeCustomerId: string;
+    stripePaymentMethodId: string;
+    card?: {
+      brand: string;
+      last4: string;
+      expMonth: number;
+      expYear: number;
+    };
+    isActive: boolean;
+    isBackup: boolean;
+  }>;
 }
 
 const PROGRESS_COLORS = [
@@ -96,12 +195,118 @@ export default function TravellerDashboard({
   travelTime = { travelled: "0d", remaining: "30d", pct: 0 },
   onboarding = [],
   schedule = [],
+  stripeAccounts = [],
 }: TravellerDashboardProps) {
-  const { data: session } = useSession();
+  const { data: session, update: updateSession } = useSession();
   const user = session?.user;
   const firstName = user?.name?.split(" ")[0] ?? "Traveller";
   const [activeDay, setActiveDay] = useState(() => new Date().getDay());
+  const [avatarKey, setAvatarKey] = useState("");
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const GreetingIcon = getGreetingIcon();
+
+  // Payment Methods State
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [editingAccount, setEditingAccount] = useState<any>(null);
+  const [isSavingPayment, setIsSavingPayment] = useState(false);
+  const [paymentToDelete, setPaymentToDelete] = useState<string | null>(null);
+
+  const handleOpenPaymentModal = (acc?: any) => {
+    if (acc) {
+      setEditingAccount(acc);
+    } else {
+      setEditingAccount(null);
+    }
+    setIsPaymentModalOpen(true);
+  };
+
+  const handleSavePayment = async (pmId: string | null, label: string, accountId?: string) => {
+    setIsSavingPayment(true);
+    try {
+      const payload = {
+        id: accountId,
+        label,
+        stripePaymentMethodId: pmId,
+      };
+      
+      const method = accountId ? "PUT" : "POST";
+      const res = await fetch("/api/dashboard/stripe-accounts", {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to save payment method");
+      }
+      
+      setIsPaymentModalOpen(false);
+      window.location.reload(); 
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || "Failed to save payment method.");
+    } finally {
+      setIsSavingPayment(false);
+    }
+  };
+
+  const handleDeletePayment = async (id: string) => {
+    try {
+      const res = await fetch(`/api/dashboard/stripe-accounts?id=${id}`, {
+        method: "DELETE"
+      });
+      if (!res.ok) throw new Error("Failed to delete payment method");
+      toast.success("Payment method removed successfully");
+      window.location.reload();
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to remove payment method.");
+    } finally {
+      setPaymentToDelete(null);
+    }
+  };
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingAvatar(true);
+    try {
+      // 1. Upload to assets
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const uploadRes = await fetch("/api/assets/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!uploadRes.ok) throw new Error("Upload failed");
+      const asset = await uploadRes.json();
+
+      // 2. Link asset to user profile
+      const updateRes = await fetch("/api/user/avatar/update", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ assetId: asset._id }),
+      });
+
+      if (!updateRes.ok) throw new Error("Avatar update failed");
+
+      // 3. Force session reload so UI updates the picture
+      setAvatarKey(`&t=${Date.now()}`);
+      updateSession();
+      window.location.reload();
+    } catch (error) {
+      console.error("Error updating avatar:", error);
+      alert("Failed to update avatar. Please try again.");
+    } finally {
+      setIsUploadingAvatar(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
 
   const onboardingDone = onboarding.filter((t) => t.done).length;
   const onboardingPct = onboarding.length > 0
@@ -148,18 +353,34 @@ export default function TravellerDashboard({
 
         {/* Profile Card */}
         <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-slate-200/70 bg-white p-6 shadow-sm text-center">
-          <div className="relative">
-            <div className="h-28 w-28 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 p-0.5 shadow-lg shadow-emerald-500/30">
+          <div className="relative group cursor-pointer" onClick={() => !isUploadingAvatar && fileInputRef.current?.click()}>
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              className="hidden" 
+              accept="image/*"
+              onChange={handleAvatarChange} 
+            />
+            <div className="h-28 w-28 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 p-0.5 shadow-lg shadow-emerald-500/30 overflow-hidden relative">
               <Avatar className="h-full w-full rounded-[14px]">
                 <AvatarImage
-                  src={user?.image ? `/api/user/avatar?u=${user?.id ?? ""}` : ""}
+                  src={user?.id ? `/api/user/avatar?u=${user?.id}${avatarKey}` : ""}
                   alt={user?.name ?? "Traveller"}
-                  className="rounded-[14px] object-cover"
+                  className={`rounded-[14px] object-cover transition-opacity duration-300 ${isUploadingAvatar ? "opacity-50" : "group-hover:opacity-75"}`}
                 />
                 <AvatarFallback className="rounded-[14px] bg-slate-900 text-2xl font-bold text-white">
                   {user?.name?.[0]?.toUpperCase() ?? "T"}
                 </AvatarFallback>
               </Avatar>
+              
+              {/* Overlay for uploading or hover */}
+              <div className={`absolute inset-0 flex items-center justify-center transition-opacity duration-300 ${isUploadingAvatar ? "opacity-100" : "opacity-0 group-hover:opacity-100 bg-black/30"}`}>
+                {isUploadingAvatar ? (
+                  <Loader2 className="h-8 w-8 text-white animate-spin" />
+                ) : (
+                  <Camera className="h-8 w-8 text-white drop-shadow-md" />
+                )}
+              </div>
             </div>
             <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-emerald-400 ring-2 ring-white">
               <span className="h-2 w-2 rounded-full bg-white" />
@@ -331,9 +552,9 @@ export default function TravellerDashboard({
             </div>
           ) : (
             <div className="space-y-3">
-              {schedule.map((ev) => (
+              {schedule.map((ev, i) => (
                 <div
-                  key={ev.title}
+                  key={`${ev.title}-${i}`}
                   className="flex items-center gap-4 rounded-xl border border-slate-100 bg-slate-50/60 p-3.5 transition-colors hover:bg-slate-50"
                 >
                   <div className={`h-10 w-1 shrink-0 rounded-full ${ev.color}`} />
@@ -371,10 +592,95 @@ export default function TravellerDashboard({
         </div>
       </motion.div>
 
+      {/* ── PAYMENT METHODS ── */}
+      <motion.div variants={fadeUp} className="rounded-2xl border border-slate-200/70 bg-white p-6 shadow-sm">
+        <div className="mb-5 flex items-center justify-between">
+          <div>
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-500">Payment Methods</h3>
+            <p className="text-xs text-slate-400 mt-1">Manage your saved cards for quick bookings</p>
+          </div>
+          <Button onClick={() => handleOpenPaymentModal()} size="sm" className="bg-emerald-600 hover:bg-emerald-700 rounded-xl gap-2">
+            <Plus className="h-4 w-4" /> Add Card
+          </Button>
+        </div>
+
+        {stripeAccounts.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-6 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200">
+            <CreditCard className="h-8 w-8 text-slate-300 mb-2" />
+            <p className="text-sm font-medium text-slate-500">No payment methods saved</p>
+          </div>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {stripeAccounts.map((acc) => (
+              <div key={acc.id} className="relative flex flex-col p-4 rounded-xl border border-slate-200 bg-white shadow-sm hover:border-emerald-200 transition-colors">
+                <div className="flex justify-between items-start mb-4">
+                  <div className="bg-slate-100 p-2 rounded-lg">
+                    <CreditCard className="h-5 w-5 text-slate-600" />
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <button onClick={() => handleOpenPaymentModal(acc)} className="text-slate-400 hover:text-emerald-600 p-1">
+                      <Pencil className="h-4 w-4" />
+                    </button>
+                    <button onClick={() => setPaymentToDelete(acc.id)} className="text-slate-400 hover:text-red-500 p-1">
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+                <p className="text-sm font-bold text-slate-800 capitalize mb-1">{acc.card?.brand || 'Card'} ending in {acc.card?.last4}</p>
+                <p className="text-xs text-slate-500 mb-3">{acc.label || 'Saved Payment Method'}</p>
+                <div className="mt-auto flex justify-between items-center border-t border-slate-100 pt-3">
+                  <span className="text-[10px] text-slate-400">Expires {acc.card?.expMonth}/{acc.card?.expYear}</span>
+                  {acc.isActive && <span className="text-[10px] bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full font-medium">Active</span>}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </motion.div>
+
       {/* ── BOOKINGS TABLE ── */}
       <motion.div variants={fadeUp}>
         <BookingsTable bookings={bookings} isLoading={isLoading} />
       </motion.div>
+
+      {/* Payment Modal */}
+      <Modal 
+        isOpen={isPaymentModalOpen} 
+        onClose={() => setIsPaymentModalOpen(false)} 
+        title={editingAccount ? "Edit Payment Method" : "Add Payment Method"}
+      >
+        <div className="space-y-4">
+          <Elements stripe={stripePromise}>
+            <StripeCardForm 
+              onSuccess={handleSavePayment} 
+              onCancel={() => setIsPaymentModalOpen(false)}
+              editingAccount={editingAccount}
+            />
+          </Elements>
+        </div>
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal 
+        isOpen={!!paymentToDelete} 
+        onClose={() => setPaymentToDelete(null)} 
+        title="Remove Payment Method"
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-slate-600">
+            Are you sure you want to remove this payment method? This action cannot be undone.
+          </p>
+          <div className="pt-4 flex justify-end gap-3">
+            <Button variant="outline" onClick={() => setPaymentToDelete(null)}>Cancel</Button>
+            <Button 
+              className="bg-red-600 hover:bg-red-700 text-white" 
+              onClick={() => paymentToDelete && handleDeletePayment(paymentToDelete)}
+            >
+              Remove Card
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </motion.div>
   );
 }

@@ -9,6 +9,7 @@ import {
   Inbox,
   CalendarDays,
   LogOut,
+  Heart,
 } from "lucide-react";
 
 import {
@@ -32,6 +33,7 @@ const NAV_ITEMS = [
   { label: "My Account", segment: "", icon: LayoutDashboard },
   { label: "Inbox", segment: "inbox", icon: Inbox },
   { label: "Bookings", segment: "bookings", icon: CalendarDays },
+  { label: "Wishlist", segment: "wishlist", icon: Heart },
   { label: "Reviews", segment: "reviews", icon: Star },
 ];
 

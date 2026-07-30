@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Star, MapPin, Calendar, Users, Share2, Heart } from 'lucide-react';
+import { useSession } from 'next-auth/react';
+import { Star, MapPin, Calendar, Users, Share2, Heart, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { showProductionNotification } from '@/components/shared/ProductionNotification';
@@ -20,7 +21,9 @@ interface TourHeroProps {
 }
 
 export default function TourHero({ tour }: TourHeroProps) {
+  const { data: session } = useSession();
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const [isLoadingWishlist, setIsLoadingWishlist] = useState(false);
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
@@ -44,6 +47,46 @@ export default function TourHero({ tour }: TourHeroProps) {
       setCurrent(api.selectedScrollSnap() + 1);
     });
   }, [api]);
+
+  useEffect(() => {
+    if (session?.user?.id && tour._id) {
+      fetch('/api/user/wishlist')
+        .then(res => res.json())
+        .then(data => {
+          if (data.wishlistIds?.includes(tour._id.toString())) {
+            setIsWishlisted(true);
+          }
+        })
+        .catch(console.error);
+    }
+  }, [session, tour._id]);
+
+  const handleWishlist = async () => {
+    if (!session?.user?.id) {
+      // You could route to login or show notification here
+      return;
+    }
+    
+    setIsLoadingWishlist(true);
+    try {
+      const res = await fetch('/api/user/wishlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tourId: tour._id }),
+      });
+      
+      const data = await res.json();
+      if (res.ok) {
+        setIsWishlisted(data.isWishlisted);
+        // Optionally trigger a global event so the header count updates
+        window.dispatchEvent(new Event('wishlistUpdated'));
+      }
+    } catch (error) {
+      console.error('Error toggling wishlist', error);
+    } finally {
+      setIsLoadingWishlist(false);
+    }
+  };
 
   const handleShare = async () => {
     showProductionNotification();
@@ -121,14 +164,19 @@ export default function TourHero({ tour }: TourHeroProps) {
             <Button
               variant="secondary"
               size="sm"
-              onClick={() => setIsWishlisted(!isWishlisted)}
+              onClick={handleWishlist}
+              disabled={isLoadingWishlist}
               className="bg-white/90 backdrop-blur-xl hover:bg-white shadow-2xl border-0 transition-all duration-300 hover:scale-110 w-12 h-12 p-0 rounded-full group"
             >
-              <Heart className={`h-5 w-5 transition-all duration-300 ${
-                isWishlisted 
-                  ? 'fill-red-500 text-red-500 scale-110' 
-                  : 'text-gray-600 group-hover:text-red-400 group-hover:scale-110'
-              }`} />
+              {isLoadingWishlist ? (
+                <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
+              ) : (
+                <Heart className={`h-5 w-5 transition-all duration-300 ${
+                  isWishlisted 
+                    ? 'fill-red-500 text-red-500 scale-110' 
+                    : 'text-gray-600 group-hover:text-red-400 group-hover:scale-110'
+                }`} />
+              )}
             </Button>
             <Button
               variant="secondary"
@@ -233,7 +281,7 @@ export default function TourHero({ tour }: TourHeroProps) {
                       <div className="space-y-2">
                         {tour.discounts.map((discount: any, index: number) => (
                           <Badge key={index} className="bg-gradient-to-r from-red-500 to-pink-500 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 px-4 py-2">
-                            🎉 Save {discount.value}% - Limited Time!
+                            🎉 Save {discount.type === 'percentage' ? `${discount.value}%` : `${tour.basePrice?.currency || '৳'} ${discount.value}`} - Limited Time!
                           </Badge>
                         ))}
                       </div>
