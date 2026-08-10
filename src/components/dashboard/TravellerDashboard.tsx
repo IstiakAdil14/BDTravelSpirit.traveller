@@ -274,6 +274,22 @@ export default function TravellerDashboard({
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      toast.error("Please select a valid image file (JPEG, PNG, or WebP)");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    const maxSizeInBytes = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSizeInBytes) {
+      toast.error("Image size must be less than 5MB");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
     setIsUploadingAvatar(true);
     try {
       // 1. Upload to assets
@@ -300,10 +316,10 @@ export default function TravellerDashboard({
       // 3. Force session reload so UI updates the picture
       setAvatarKey(`&t=${Date.now()}`);
       updateSession();
-      window.location.reload();
+      toast.success("Profile picture updated successfully!");
     } catch (error) {
       console.error("Error updating avatar:", error);
-      alert("Failed to update avatar. Please try again.");
+      toast.error("Failed to update avatar. Please try again.");
     } finally {
       setIsUploadingAvatar(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -379,7 +395,7 @@ export default function TravellerDashboard({
               type="file" 
               ref={fileInputRef} 
               className="hidden" 
-              accept="image/*"
+              accept="image/jpeg, image/png, image/webp"
               onChange={handleAvatarChange} 
             />
             <div className="h-28 w-28 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 p-0.5 shadow-lg shadow-emerald-500/30 overflow-hidden relative">
@@ -410,6 +426,7 @@ export default function TravellerDashboard({
           <div>
             <p className="text-base font-bold text-slate-900">{user?.name ?? "Traveller"}</p>
             <p className="text-xs text-slate-500">{user?.email ?? ""}</p>
+            <p className="text-[10px] text-slate-400 mt-1">Allowed *.jpeg, *.png, *.webp (Max 5MB)</p>
           </div>
           <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-200">
             <Star className="h-3 w-3 fill-emerald-500 text-emerald-500" /> Explorer Member
