@@ -13,6 +13,12 @@ export default function RouteAwareLoader() {
   useEffect(() => {
     const currentRoute = `${pathname}${searchParams ? `?${searchParams.toString()}` : ''}`;
     
+    // Skip loader for auth routes
+    if (pathname?.startsWith('/auth')) {
+      previousRoute.current = currentRoute;
+      return;
+    }
+
     // Only trigger if we actually changed routes (prevent initial load trigger if not desired)
     if (previousRoute.current && previousRoute.current !== currentRoute) {
       startLoading(currentRoute);

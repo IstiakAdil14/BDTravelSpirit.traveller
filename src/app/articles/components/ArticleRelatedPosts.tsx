@@ -27,6 +27,7 @@ export default async function ArticleRelatedPosts({ currentArticleId, tags }: Pr
       deleted: false,
       tags: { $in: tags }
     })
+    .setOptions({ strictPopulate: false })
     .select('title slug summary heroImage author categories tags publishedAt readingTime')
     .populate({
       path: 'author',

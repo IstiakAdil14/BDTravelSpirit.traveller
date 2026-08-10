@@ -25,6 +25,7 @@ async function getArticles(): Promise<IArticleSummary[]> {
     
     // Fetch only published articles and select only the fields needed for the summary
     const articlesDocs = await TravelArticleModel.find({ status: 'published', deleted: false })
+      .setOptions({ strictPopulate: false })
       .select('title banglaTitle slug summary heroImage author categories tags publishedAt readingTime viewCount likeCount shareCount')
       .populate({
         path: 'author',

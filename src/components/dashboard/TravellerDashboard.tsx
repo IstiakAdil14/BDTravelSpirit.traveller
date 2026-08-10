@@ -7,7 +7,7 @@ import { motion, type Variants } from "framer-motion";
 import {
   Plane, Globe, Heart, Award, Star, CalendarDays,
   Compass, TrendingUp, CheckCircle2, Circle, Clock, ArrowRight,
-  Sun, Mountain, MapPin, Camera, Loader2, CreditCard, Plus, Pencil, Trash2
+  Sun, Mountain, MapPin, Camera, Loader2, CreditCard, Plus, Pencil, Trash2, MessageSquare, Settings
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Modal } from "@/components/ui/modal";
@@ -158,11 +158,13 @@ const DEFAULT_PROGRESS: ProgressItem[] = [
   { label: "Reviews Written", val: 0 },
 ];
 
-const QUICK_LINKS = [
-  { label: "Explore Tours",  href: "/tours",        icon: Compass,     bg: "bg-emerald-50", text: "text-emerald-600", border: "border-emerald-200" },
-  { label: "My Bookings",   href: "bookings",       icon: CalendarDays, bg: "bg-sky-50",    text: "text-sky-600",    border: "border-sky-200" },
-  { label: "Write Review",  href: "reviews",        icon: Star,         bg: "bg-violet-50", text: "text-violet-600", border: "border-violet-200" },
-  { label: "Destinations",  href: "/destinations",  icon: Mountain,     bg: "bg-teal-50",   text: "text-teal-600",   border: "border-teal-200" },
+const DASHBOARD_PAGES = [
+  { label: "My Bookings", href: "bookings", icon: CalendarDays, desc: "Manage your upcoming and past trips", bg: "bg-sky-50", text: "text-sky-600", border: "border-sky-200", hoverBg: "hover:bg-sky-100" },
+  { label: "Inbox", href: "inbox", icon: MessageSquare, desc: "Messages with guides and support", bg: "bg-violet-50", text: "text-violet-600", border: "border-violet-200", hoverBg: "hover:bg-violet-100" },
+  { label: "Favorites", href: "favorites", icon: Heart, desc: "Tours and places you saved", bg: "bg-rose-50", text: "text-rose-600", border: "border-rose-200", hoverBg: "hover:bg-rose-100" },
+  { label: "Payments", href: "payments", icon: CreditCard, desc: "Manage your saved cards", bg: "bg-amber-50", text: "text-amber-600", border: "border-amber-200", hoverBg: "hover:bg-amber-100" },
+  { label: "Reviews", href: "reviews", icon: Star, desc: "Your ratings and feedback", bg: "bg-emerald-50", text: "text-emerald-600", border: "border-emerald-200", hoverBg: "hover:bg-emerald-100" },
+  { label: "Settings", href: "settings", icon: Settings, desc: "Profile and account preferences", bg: "bg-slate-50", text: "text-slate-600", border: "border-slate-200", hoverBg: "hover:bg-slate-100" },
 ];
 
 const container: Variants = { hidden: {}, show: { transition: { staggerChildren: 0.07 } } };
@@ -345,6 +347,25 @@ export default function TravellerDashboard({
             </p>
           </div>
         </div>
+      </motion.div>
+
+      {/* ── DASHBOARD NAVIGATION ── */}
+      <motion.div variants={fadeUp} className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+        {DASHBOARD_PAGES.map((page) => (
+          <Link
+            key={page.label}
+            href={buildPageHref(page.href)}
+            className={`flex items-start gap-4 p-5 rounded-2xl border ${page.border} ${page.bg} ${page.hoverBg} transition-all duration-200 hover:shadow-md group cursor-pointer`}
+          >
+            <div className="p-3 rounded-xl bg-white shadow-sm ring-1 ring-black/5 group-hover:scale-110 transition-transform duration-300">
+              <page.icon className={`h-6 w-6 ${page.text}`} />
+            </div>
+            <div>
+              <h3 className="font-bold text-slate-800 text-base">{page.label}</h3>
+              <p className="text-xs text-slate-500 mt-1 leading-relaxed">{page.desc}</p>
+            </div>
+          </Link>
+        ))}
       </motion.div>
 
 
@@ -576,19 +597,6 @@ export default function TravellerDashboard({
             </div>
           )}
 
-          {/* Quick links */}
-          <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-            {QUICK_LINKS.map((ql) => (
-              <Link
-                key={ql.label}
-                href={ql.href.startsWith("/") ? ql.href : buildPageHref(ql.href)}
-                className={`flex flex-col items-center gap-1.5 rounded-xl border ${ql.border} ${ql.bg} p-3 text-center transition-all hover:shadow-sm`}
-              >
-                <ql.icon className={`h-4 w-4 ${ql.text}`} />
-                <span className={`text-[10px] font-semibold ${ql.text}`}>{ql.label}</span>
-              </Link>
-            ))}
-          </div>
         </div>
       </motion.div>
 

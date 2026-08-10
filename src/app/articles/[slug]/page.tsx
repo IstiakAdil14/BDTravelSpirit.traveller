@@ -28,6 +28,7 @@ async function getArticle(slug: string): Promise<IArticleDetail | null> {
     if (!mongoose.models.AssetFile) mongoose.model("AssetFile", AssetFileModel.schema);
 
     const articleDoc = await TravelArticleModel.findOne({ slug, status: 'published', deleted: false })
+      .setOptions({ strictPopulate: false })
       .populate({
         path: 'author',
         select: 'name avatar',
