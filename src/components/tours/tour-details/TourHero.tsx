@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useSession } from 'next-auth/react';
+import { toast } from 'sonner';
 import { Star, MapPin, Calendar, Users, Share2, Heart, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -89,7 +90,25 @@ export default function TourHero({ tour }: TourHeroProps) {
   };
 
   const handleShare = async () => {
-    showProductionNotification();
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: tour.title,
+          text: `Check out this amazing tour: ${tour.title}`,
+          url: window.location.href,
+        });
+      } catch (error) {
+        console.error('Error sharing', error);
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success("Link copied to clipboard!");
+      } catch (err) {
+        console.error('Failed to copy', err);
+        toast.error("Failed to copy link");
+      }
+    }
   };
 
   return (
@@ -160,33 +179,35 @@ export default function TourHero({ tour }: TourHeroProps) {
             </div>
           )}
 
-          <div className="absolute top-6 right-6 flex space-x-3 z-10">
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={handleWishlist}
-              disabled={isLoadingWishlist}
-              className="bg-white/90 backdrop-blur-xl hover:bg-white shadow-2xl border-0 transition-all duration-300 hover:scale-110 w-12 h-12 p-0 rounded-full group"
-            >
-              {isLoadingWishlist ? (
-                <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
-              ) : (
-                <Heart className={`h-5 w-5 transition-all duration-300 ${
-                  isWishlisted 
-                    ? 'fill-red-500 text-red-500 scale-110' 
-                    : 'text-gray-600 group-hover:text-red-400 group-hover:scale-110'
-                }`} />
-              )}
-            </Button>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={handleShare}
-              className="bg-white/90 backdrop-blur-xl hover:bg-white shadow-2xl border-0 transition-all duration-300 hover:scale-110 w-12 h-12 p-0 rounded-full group"
-            >
-              <Share2 className="h-5 w-5 text-gray-600 group-hover:text-blue-500 transition-all duration-300 group-hover:scale-110" />
-            </Button>
-          </div>
+          {session?.user && (
+            <div className="absolute top-6 right-6 flex space-x-3 z-10">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={handleWishlist}
+                disabled={isLoadingWishlist}
+                className="bg-white/90 backdrop-blur-xl hover:bg-white shadow-2xl border-0 transition-all duration-300 hover:scale-110 w-12 h-12 p-0 rounded-full group"
+              >
+                {isLoadingWishlist ? (
+                  <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
+                ) : (
+                  <Heart className={`h-5 w-5 transition-all duration-300 ${
+                    isWishlisted 
+                      ? 'fill-red-500 text-red-500 scale-110' 
+                      : 'text-gray-600 group-hover:text-red-400 group-hover:scale-110'
+                  }`} />
+                )}
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={handleShare}
+                className="bg-white/90 backdrop-blur-xl hover:bg-white shadow-2xl border-0 transition-all duration-300 hover:scale-110 w-12 h-12 p-0 rounded-full group"
+              >
+                <Share2 className="h-5 w-5 text-gray-600 group-hover:text-blue-500 transition-all duration-300 group-hover:scale-110" />
+              </Button>
+            </div>
+          )}
         </div>
 
         <div className="p-10 relative">
