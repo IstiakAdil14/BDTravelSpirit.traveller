@@ -50,7 +50,7 @@ export default function TourHero({ tour }: TourHeroProps) {
 
   useEffect(() => {
     if (session?.user?.id && tour._id) {
-      fetch('/api/user/wishlist')
+      fetch('/api/user/wishlist', { cache: 'no-store' })
         .then(res => res.json())
         .then(data => {
           if (data.wishlistIds?.includes(tour._id.toString())) {

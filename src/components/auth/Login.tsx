@@ -3,18 +3,20 @@
 import { signIn } from "next-auth/react";
 import { FcGoogle } from "react-icons/fc";
 import Link from "next/link";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
-export default function Login() {
+function LoginContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams?.get("callbackUrl") || "/";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
   const handleGoogleSignIn = () => {
-    signIn("google", { callbackUrl: "/" });
+    signIn("google", { callbackUrl });
   };
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
@@ -33,7 +35,7 @@ export default function Login() {
         throw new Error(res.error);
       }
 
-      router.push("/");
+      router.push(callbackUrl);
     } catch (err: any) {
       setError(err.message || "Invalid email or password");
     } finally {
@@ -135,7 +137,7 @@ export default function Login() {
             <div className="mt-8 text-center">
               <p className="text-teal-300/60 text-sm mb-2">New to BD Travel Spirit?</p>
               <Link 
-                href="/auth/signup" 
+                href={`/auth/signup${callbackUrl !== "/" ? `?callbackUrl=${encodeURIComponent(callbackUrl)}` : ""}`} 
                 className="inline-flex items-center gap-1 text-cyan-300 hover:text-white font-semibold transition-all duration-300 hover:scale-105"
               >
                 Start your adventure
@@ -145,5 +147,13 @@ export default function Login() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function Login() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoginContent />
+    </Suspense>
   );
 }

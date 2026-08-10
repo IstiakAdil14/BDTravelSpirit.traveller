@@ -1,5 +1,5 @@
 // audit.model.ts
-import { AUDIT_ACTION, AuditAction } from "@/constants/current-user/audit-action.const";
+import { AUDIT_ACTION, AuditAction } from "@/constants/audit-action.const";
 import { defineModel } from "@/lib/helpers/defineModel";
 import {
     Schema,
@@ -38,7 +38,7 @@ export interface IAuditDoc extends Document {
 export interface ICreateAuditParams {
     targetModel: string;
     target: Types.ObjectId | string;
-    action: string;
+    action: AuditAction;
 
     note?: string;
     ip?: string;

@@ -8,7 +8,7 @@ import {
     Currency,
     TourDiscountType,
     TourDiscount,
-} from "@/constants/tour/tour.const";
+} from "@/constants/tour.const";
 
 // =============== LOCAL TYPE DEFINITIONS (mirroring tour.model) ===============
 

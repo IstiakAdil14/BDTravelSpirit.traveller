@@ -6,7 +6,7 @@ import {
   NotificationRelatedModal,
   USER_NOTIFICATION_TYPE,
   UserNotificationType,
-} from "@/constants/notifications/traveler-notification.const";
+} from "@/constants/traveler-notification.const";
 import { defineModel } from "@/lib/helpers/defineModel";
 import { Schema, Document, Types } from "mongoose";
 

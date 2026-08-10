@@ -11,6 +11,7 @@ import BookingsPage from "@/components/dashboard/bookings/BookingsPage";
 import ReviewsPage from "@/components/dashboard/reviews/ReviewsPage";
 import InboxPage from "@/components/dashboard/inbox/InboxPage";
 import WishlistPage from "@/components/dashboard/wishlist/WishlistPage";
+import BookingDetailsPage from "@/components/dashboard/bookings/BookingDetailsPage";
 
 interface DashboardData {
   stats: { totalTrips: number; placesVisited: number; wishlistItems: number; reviewsWritten: number };
@@ -60,7 +61,7 @@ function DashboardContent() {
         return;
       }
 
-      fetch("/api/dashboard")
+      fetch("/api/dashboard", { cache: 'no-store' })
         .then((r) => r.json())
         .then((data) => { setDashboardData(data); setLoading(false); })
         .catch(() => setLoading(false));
@@ -76,6 +77,7 @@ function DashboardContent() {
   const renderContent = () => {
     switch (page) {
       case "bookings": return <BookingsPage />;
+      case "booking-details": return <BookingDetailsPage bookingId={searchParams.get("bookingId")} />;
       case "reviews":  return <ReviewsPage />;
       case "inbox":    return <InboxPage />;
       case "wishlist": return <WishlistPage wishlistItems={dashboardData?.wishlistItems} />;

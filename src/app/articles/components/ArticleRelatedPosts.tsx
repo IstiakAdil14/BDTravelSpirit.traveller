@@ -31,12 +31,15 @@ export default async function ArticleRelatedPosts({ currentArticleId, tags }: Pr
     .populate({
       path: 'author',
       select: 'name avatar',
+      strictPopulate: false,
       populate: {
         path: 'avatar',
         select: 'file',
+        strictPopulate: false,
         populate: {
           path: 'file',
-          select: 'publicUrl'
+          select: 'publicUrl',
+          strictPopulate: false
         }
       }
     })

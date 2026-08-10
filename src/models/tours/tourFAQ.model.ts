@@ -4,11 +4,9 @@ import {
     Types,
     Query,
 } from "mongoose";
-import { MODERATION_STATUS, ModerationStatus } from "@/constants/tour/tour.const";
+import { MODERATION_STATUS, ModerationStatus } from "@/constants/tour.const";
 import { defineModel } from "@/lib/helpers/defineModel";
-import { FAQ_REPORT_REASON, FaqReportReason } from "@/constants/tour/faq-report.const";
-import "@/models/tours/tourFAQVote.model"
-import "@/models/travelers/traveler.model"
+import { FAQ_REPORT_REASON, FaqReportReason } from "@/constants/faq-report.const";
 
 /* ------------------------------------------------------------------ */
 /* Report Types */

@@ -13,9 +13,11 @@ export async function GET(request: Request) {
       .populate({
         path: 'heroImage',
         select: 'title file',
+        strictPopulate: false,
         populate: {
           path: 'file',
-          select: 'publicUrl'
+          select: 'publicUrl',
+          strictPopulate: false
         }
       })
       .sort({ publishedAt: -1 })

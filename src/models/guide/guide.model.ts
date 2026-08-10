@@ -14,7 +14,7 @@ import {
     GuideDocumentCategory,
     GuideSocialPlatform,
     GuideStatus,
-} from "@/constants/guide/guide.const";
+} from "@/constants/guide.const";
 import { defineModel } from "@/lib/helpers/defineModel";
 import mongoose from "mongoose";
 import { withTransaction } from "@/lib/helpers/withTransaction";
@@ -29,7 +29,7 @@ import generateStrongPassword from "@/utils/helpers/generate-strong-password";
 // ────────────────────────────────────────────────────────────────────────────
 
 /** Address information for the guide */
-export interface IGuideAddress {
+export interface GuideAddress {
     country?: string;
     division?: string;
     city?: string;
@@ -38,7 +38,7 @@ export interface IGuideAddress {
 }
 
 /** Social media platform link */
-export interface IGuideSocialLink {
+export interface GuideSocialLink {
     platform: GuideSocialPlatform;
     url: string;
 }
@@ -51,14 +51,14 @@ export interface IGuideDocument {
 }
 
 /** Owner account information */
-export interface IGuideOwner {
+export interface GuideOwner {
     user: Types.ObjectId;      // Reference to User model for authentication
     phone?: string;            // Contact number
     oauthProvider?: string;    // "google", "facebook", etc.
 }
 
 /** Suspension details */
-export interface IGuideSuspension {
+export interface GuideSuspension {
     reason: string;
     suspendedBy: Types.ObjectId;
     until: Date;
@@ -76,14 +76,14 @@ export interface IGuide extends Document {
     logoUrl: Types.ObjectId;   // Company logo reference
 
     // ========== SOCIAL MEDIA ==========
-    social?: IGuideSocialLink[];
+    social?: GuideSocialLink[];
 
     // ========== OWNER INFORMATION ==========
-    owner: IGuideOwner;
+    owner: GuideOwner;
 
     // ========== VERIFICATION ==========
     documents: IGuideDocument[];  // Required verification docs
-    address?: IGuideAddress;        // Business address
+    address?: GuideAddress;        // Business address
 
     // ========== STATUS & LIFECYCLE ==========
     status: GuideStatus;           // Current approval status
@@ -92,7 +92,7 @@ export interface IGuide extends Document {
     reviewComment?: string;
 
     // ========== MODERATION ==========
-    suspension?: IGuideSuspension;  // Suspension details if applicable
+    suspension?: GuideSuspension;  // Suspension details if applicable
     deletedAt?: Date;              // Soft delete timestamp
 
     // ========== TIMESTAMPS ==========
@@ -167,7 +167,7 @@ export interface GuideModel extends Model<IGuide> {
  * - Used for business location
  * - Hierarchical: Country → Division → City → Street
  */
-const AddressSchema = new Schema<IGuideAddress>(
+const AddressSchema = new Schema<GuideAddress>(
     {
         country: { type: String, trim: true },
         division: { type: String, trim: true },
@@ -183,7 +183,7 @@ const AddressSchema = new Schema<IGuideAddress>(
  * - Validates URL format
  * - Platform must be from predefined enum
  */
-const SocialLinkSchema = new Schema<IGuideSocialLink>(
+const SocialLinkSchema = new Schema<GuideSocialLink>(
     {
         platform: {
             type: String,
@@ -230,7 +230,7 @@ const DocumentSchema = new Schema<IGuideDocument>(
  * - Links guide to User model for authentication
  * - Validates Bangladeshi phone numbers
  */
-const OwnerSchema = new Schema<IGuideOwner>(
+const OwnerSchema = new Schema<GuideOwner>(
     {
         user: {
             type: Schema.Types.ObjectId,
@@ -259,7 +259,7 @@ const OwnerSchema = new Schema<IGuideOwner>(
  * - Tracks moderation actions
  * - Includes duration and reason
  */
-const SuspensionSchema = new Schema<IGuideSuspension>(
+const SuspensionSchema = new Schema<GuideSuspension>(
     {
         reason: {
             type: String,
@@ -323,7 +323,7 @@ const GuideSchema = new Schema<IGuide>(
             type: [SocialLinkSchema],
             default: [],
             validate: {
-                validator: (links: IGuideSocialLink[]) => links.length <= 5,
+                validator: (links: GuideSocialLink[]) => links.length <= 5,
                 message: 'Cannot have more than 5 social links',
             },
         },
@@ -333,7 +333,7 @@ const GuideSchema = new Schema<IGuide>(
             type: OwnerSchema,
             required: [true, 'Owner information is required'],
             validate: {
-                validator: function (this: IGuide, value: IGuideOwner) {
+                validator: function (this: IGuide, value: GuideOwner) {
                     // Owner is required only after approval
                     return this.status !== GUIDE_STATUS.APPROVED || !!value?.user;
                 },
@@ -723,6 +723,9 @@ GuideSchema.index({ companyName: 1 });
 // ────────────────────────────────────────────────────────────────────────────
 // 2. COMPOUND INDEXES (Query Optimization)
 // ────────────────────────────────────────────────────────────────────────────
+
+GuideSchema.index({ createdAt: -1 });
+GuideSchema.index({ updatedAt: -1 });
 
 // Active guides lookup
 GuideSchema.index({

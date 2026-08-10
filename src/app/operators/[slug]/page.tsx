@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import OperatorDetailPage from '@/components/operators/OperatorDetailPage';
+import LoaderDataInjector from '@/components/loaders/LoaderDataInjector';
 import { tourOperators } from '@/data/tourOperators';
 
 // Get operator from static data - handles modern slug format (name-id)
@@ -51,5 +52,16 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
     notFound();
   }
 
-  return <OperatorDetailPage operator={operator} />;
+  return (
+    <>
+      <LoaderDataInjector metadata={{
+        title: operator.name,
+        subtitle: 'Loading Operator Profile',
+        location: operator.regions?.[0] || 'Bangladesh',
+        image: operator.logo || operator.coverImage || '',
+        insightText: operator.tagline || operator.description || 'View operator details.'
+      }} />
+      <OperatorDetailPage operator={operator} />
+    </>
+  );
 }

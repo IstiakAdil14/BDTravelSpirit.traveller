@@ -6,6 +6,7 @@ export interface User extends Document {
   email: string;
   password?: string; // optional for OAuth users
   image?: string;
+  avatar?: mongoose.Types.ObjectId;
   role?: string;
   emailVerified?: Date;
   createdAt: Date;
@@ -31,6 +32,10 @@ const UserSchema = new mongoose.Schema<User>(
       required: false, // Make password optional for OAuth users
     },
     image: String,
+    avatar: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Asset",
+    },
     role: {
       type: String,
       default: "traveler",
@@ -64,6 +69,9 @@ UserSchema.methods.comparePassword = async function (candidatePassword: string):
   return bcrypt.compare(candidatePassword, this.password);
 };
 
+if (process.env.NODE_ENV === "development") {
+  delete models.User;
+}
 const UserModel = models.User || model<User>("User", UserSchema);
 
 export default UserModel;

@@ -6,13 +6,15 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import AccountExistsPopup from "@/components/ui/AccountExistsPopup";
+import { Suspense } from "react";
 
-export default function Signup() {
+function SignupContent() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
     const [showAccountExistsPopup, setShowAccountExistsPopup] = useState(false);
     const router = useRouter();
     const searchParams = useSearchParams();
+    const callbackUrl = searchParams?.get("callbackUrl") || "/";
     
     useEffect(() => {
         if (searchParams.get('error') === 'AccountExists') {
@@ -25,7 +27,7 @@ export default function Signup() {
         setError("");
         
         // Start Google OAuth to get email, but don't create session yet
-        window.location.href = `/api/auth/signin/google?callbackUrl=${encodeURIComponent('/')}`;
+        window.location.href = `/api/auth/signin/google?callbackUrl=${encodeURIComponent(callbackUrl)}`;
     };
 
     return (
@@ -88,7 +90,7 @@ export default function Signup() {
 
                 {/* Sign In Link */}
                 <div className="text-center">
-                    <Link href="/auth/login" className="text-teal-600 hover:text-teal-700 font-medium">
+                    <Link href={`/auth/login${callbackUrl !== "/" ? `?callbackUrl=${encodeURIComponent(callbackUrl)}` : ""}`} className="text-teal-600 hover:text-teal-700 font-medium">
                         Sign in instead
                     </Link>
                 </div>
@@ -106,13 +108,22 @@ export default function Signup() {
                 </p>
             </div>
             
+            
             <AccountExistsPopup 
                 show={showAccountExistsPopup} 
                 onClose={() => {
                     setShowAccountExistsPopup(false);
-                    router.push('/auth/login');
+                    router.push(`/auth/login${callbackUrl !== "/" ? `?callbackUrl=${encodeURIComponent(callbackUrl)}` : ""}`);
                 }} 
             />
         </div>
+    );
+}
+
+export default function Signup() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <SignupContent />
+        </Suspense>
     );
 }

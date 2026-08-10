@@ -4,6 +4,9 @@ import { authOptions } from "@/lib/auth/authOptions";
 import connectToDatabase from "@/lib/db/connect";
 import UserModel from "@/lib/db/models/User";
 
+import AssetModel from "@/models/assets/asset.model";
+import AssetFileModel from "@/models/assets/asset-file.model";
+
 const ALLOWED_ORIGINS = ["lh3.googleusercontent.com", "res.cloudinary.com", "avatars.githubusercontent.com", "ui-avatars.com"];
 
 function isAllowedUrl(url: string): boolean {
@@ -18,15 +21,15 @@ function isAllowedUrl(url: string): boolean {
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    if (!session?.user?.id && !req.nextUrl.searchParams.get('u')) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const searchParams = req.nextUrl.searchParams;
-    const targetUserId = searchParams.get("u") || session.user.id;
+    const targetUserId = searchParams.get("u") || session?.user?.id;
 
     let imageUrl = null;
-    let userName = targetUserId === session.user.id ? session.user.name : "Traveler";
+    let userName = targetUserId === session?.user?.id ? session?.user?.name : "Traveler";
 
     await connectToDatabase();
     const dbUser = await UserModel.findById(targetUserId).select("name image avatar").lean() as any;
@@ -35,9 +38,6 @@ export async function GET(req: NextRequest) {
       userName = dbUser.name || userName;
       
       if (dbUser.avatar) {
-          const AssetModel = (await import("@/models/assets/asset.model")).default;
-          const AssetFileModel = (await import("@/models/assets/asset-file.model")).default;
-          
           const asset = await AssetModel.findById(dbUser.avatar);
           if (asset) {
               const file = await AssetFileModel.findById(asset.file);
@@ -52,8 +52,8 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    if (!imageUrl && targetUserId === session.user.id && session.user.image) {
-      imageUrl = session.user.image;
+    if (!imageUrl && targetUserId === session?.user?.id && session?.user?.image) {
+      imageUrl = session?.user?.image;
     }
 
     if (!imageUrl) {
@@ -64,21 +64,10 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Invalid avatar source" }, { status: 400 });
     }
 
-    const res = await fetch(imageUrl, {
-      headers: { "User-Agent": "BD-Travel-Spirit-Avatar/1.0" },
-    });
-
-    if (!res.ok) {
-      return NextResponse.json({ error: "Failed to fetch image" }, { status: 502 });
-    }
-
-    const contentType = res.headers.get("content-type") || "image/jpeg";
-    const buffer = await res.arrayBuffer();
-
-    return new NextResponse(buffer, {
+    return NextResponse.redirect(imageUrl, {
+      status: 302,
       headers: {
-        "Content-Type": contentType,
-        "Cache-Control": "no-store, max-age=0",
+        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
       },
     });
   } catch (err) {

@@ -15,6 +15,7 @@ import ArticleEngagementBar from '../components/ArticleEngagementBar';
 import ArticleTableOfContents from '../components/ArticleTableOfContents';
 import ArticleComments from '../components/ArticleComments';
 import ArticleRelatedPosts from '../components/ArticleRelatedPosts';
+import LoaderDataInjector from '@/components/loaders/LoaderDataInjector';
 
 // Function to fetch article by slug
 async function getArticle(slug: string): Promise<IArticleDetail | null> {
@@ -30,12 +31,15 @@ async function getArticle(slug: string): Promise<IArticleDetail | null> {
       .populate({
         path: 'author',
         select: 'name avatar',
+        strictPopulate: false,
         populate: {
           path: 'avatar',
           select: 'file',
+          strictPopulate: false,
           populate: {
             path: 'file',
-            select: 'publicUrl'
+            select: 'publicUrl',
+            strictPopulate: false
           }
         }
       })
@@ -156,6 +160,13 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
 
   return (
     <main className="bg-slate-50 min-h-screen pt-32 lg:pt-40 pb-20 relative">
+      <LoaderDataInjector metadata={{
+        title: article.title,
+        subtitle: 'Preparing travel story',
+        location: 'Travel Article',
+        image: article.heroImage?.url || '',
+        insightText: article.summary
+      }} />
 
       <ArticleHero article={article} />
       

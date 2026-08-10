@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Calendar, Users, CreditCard, Shield, CheckCircle2,
   Zap, Loader2, PartyPopper,
@@ -10,6 +10,7 @@ import {
 import BookingPaymentDialog from './BookingPaymentDialog';
 import { getUserDashboardPath } from '@/lib/utils/userRouting';
 import { USER_ROLE, UserRole } from '@/constants/user';
+import { toast } from "sonner";
 
 interface TourBookingWidgetProps {
   tour: {
@@ -55,12 +56,22 @@ const PAYMENT_ICONS: Record<string, string> = {
 export default function TourBookingWidget({ tour }: TourBookingWidgetProps) {
   const { data: session } = useSession();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [travelers, setTravelers] = useState(1);
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
   const [isBooking, setIsBooking] = useState(false);
   const [result, setResult] = useState<{ ref: string; total: number } | null>(null);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (session && searchParams?.get('booking-intent') === 'true') {
+      setIsPaymentDialogOpen(true);
+      const url = new URL(window.location.href);
+      url.searchParams.delete('booking-intent');
+      window.history.replaceState({}, '', url.pathname + url.search);
+    }
+  }, [session, searchParams]);
 
   const basePrice = tour.basePrice ?? { amount: 0, currency: 'BDT' };
   const departure = tour.departure;
@@ -85,13 +96,26 @@ export default function TourBookingWidget({ tour }: TourBookingWidgetProps) {
   const totalPaid = Math.max(0, subtotal - discountAmount);
 
   const canBook =
-    !!session &&
     !isBooking &&
     (seatsAvailable === null || seatsAvailable >= travelers);
 
   const handleBookClick = () => {
     if (!session) {
-      router.push('/auth/signin');
+      const url = new URL(window.location.href);
+      url.searchParams.set('booking-intent', 'true');
+      const callbackUrl = url.pathname + url.search;
+      
+      toast("You're not logged in", {
+        description: "If you want to continue booking, please login or signup.",
+        action: {
+          label: "Login/Signup",
+          onClick: () => router.push(`/auth/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`),
+        },
+        cancel: {
+          label: "Cancel",
+          onClick: () => {},
+        },
+      });
       return;
     }
     setIsPaymentDialogOpen(true);
@@ -147,6 +171,14 @@ export default function TourBookingWidget({ tour }: TourBookingWidgetProps) {
           Total paid: <span className="font-semibold text-gray-800">{basePrice.currency} {result.total.toLocaleString()}</span>
         </p>
         <p className="text-xs text-gray-400">Check your dashboard for booking details.</p>
+        <button
+          onClick={() => {
+            setResult(null);
+          }}
+          className="w-full bg-white hover:bg-green-50 text-green-700 border border-green-200 font-semibold py-3 rounded-xl transition-all mb-2"
+        >
+          Back to Tour
+        </button>
         <button
           onClick={() => {
             if (session?.user?.id) {

@@ -1,11 +1,14 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useSession } from "next-auth/react";
+import Link from "next/link";
 import {
   useReactTable,
   getCoreRowModel,
   getFilteredRowModel,
   getSortedRowModel,
+  getPaginationRowModel,
   flexRender,
   type ColumnDef,
   type SortingState,
@@ -83,6 +86,7 @@ interface BookingsTableProps {
 }
 
 export default function BookingsTable({ bookings, isLoading }: BookingsTableProps) {
+  const { data: session } = useSession();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
@@ -202,6 +206,12 @@ export default function BookingsTable({ bookings, isLoading }: BookingsTableProp
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    initialState: {
+      pagination: {
+        pageSize: 5,
+      },
+    },
   });
 
   const statusCounts = useMemo(
@@ -263,52 +273,86 @@ export default function BookingsTable({ bookings, isLoading }: BookingsTableProp
       {isLoading ? (
         <TableSkeleton />
       ) : (
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              {table.getHeaderGroups().map((hg) => (
-                <TableRow key={hg.id} className="hover:bg-transparent border-slate-200">
-                  {hg.headers.map((header) => (
-                    <TableHead
-                      key={header.id}
-                      className="text-xs font-medium text-slate-500 uppercase tracking-wide h-10"
-                    >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(header.column.columnDef.header, header.getContext())}
-                    </TableHead>
-                  ))}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    className="border-slate-100 hover:bg-slate-50/50 transition-colors"
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id} className="py-3.5">
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </TableCell>
+        <>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                {table.getHeaderGroups().map((hg) => (
+                  <TableRow key={hg.id} className="hover:bg-transparent border-slate-200">
+                    {hg.headers.map((header) => (
+                      <TableHead
+                        key={header.id}
+                        className="text-xs font-medium text-slate-500 uppercase tracking-wide h-10"
+                      >
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(header.column.columnDef.header, header.getContext())}
+                      </TableHead>
                     ))}
                   </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={columns.length} className="h-32 text-center">
-                    <div className="flex flex-col items-center gap-2 text-slate-400">
-                      <Plane className="h-8 w-8 text-slate-300" />
-                      <p className="text-sm font-medium">No bookings found</p>
-                      <p className="text-xs">Try adjusting your filters</p>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
+                ))}
+              </TableHeader>
+              <TableBody>
+                {table.getRowModel().rows.length ? (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow
+                      key={row.id}
+                      className="border-slate-100 hover:bg-slate-50/50 transition-colors"
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id} className="py-3.5">
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={columns.length} className="h-32 text-center">
+                      <div className="flex flex-col items-center gap-2 text-slate-400">
+                        <Plane className="h-8 w-8 text-slate-300" />
+                        <p className="text-sm font-medium">No bookings found</p>
+                        <p className="text-xs">Try adjusting your filters</p>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+          
+          {/* Pagination Controls */}
+          {table.getPageCount() > 1 && (
+            <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200">
+              <div className="text-sm text-slate-500">
+                Showing {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} to {Math.min((table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize, filteredData.length)} of {filteredData.length} entries
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => table.previousPage()}
+                  disabled={!table.getCanPreviousPage()}
+                  className="text-xs h-8"
+                >
+                  Previous
+                </Button>
+                <div className="text-xs font-medium text-slate-700 mx-2">
+                  Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => table.nextPage()}
+                  disabled={!table.getCanNextPage()}
+                  className="text-xs h-8"
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       {/* Booking Details Modal */}
@@ -348,6 +392,14 @@ export default function BookingsTable({ bookings, isLoading }: BookingsTableProp
             
             <div className="pt-4 flex justify-end gap-3 border-t border-slate-100">
               <Button variant="outline" onClick={() => setIsModalOpen(false)}>Close</Button>
+              <Link 
+                href={`/dashboard?role=${(session?.user as any)?.role || 'traveler'}&id=${session?.user?.id}&page=booking-details&bookingId=${selectedBooking.id}`}
+                onClick={() => setIsModalOpen(false)}
+              >
+                <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0 shadow-md">
+                  View Full Details
+                </Button>
+              </Link>
             </div>
           </div>
         )}

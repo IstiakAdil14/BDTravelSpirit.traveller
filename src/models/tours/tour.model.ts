@@ -35,7 +35,7 @@ import {
   AccommodationType,
   TourDiscountType,
   TOUR_DISCOUNT_TYPE,
-} from "@/constants/tour/tour.const";
+} from "@/constants/tour.const";
 import { defineModel } from "@/lib/helpers/defineModel";
 import { HydratedDocument, Query } from "mongoose";
 import { FilterQuery } from "mongoose";
@@ -52,7 +52,7 @@ export type IPrice = {
 
 export type IDiscount = {
   type: TourDiscountType;
-  discount: TourDiscount;
+  discount: TourDiscount; 
   value: number; // For percentage, value between 0-100; for flat amount, value in currency units
   code?: string;
   validFrom?: Date;
@@ -421,7 +421,6 @@ export interface ITourModel extends Model<ITour> {
     session?: ClientSession,
   ): Promise<ITour | null>;
 
-  // (Departure helpers removed for single departure)
 }
 
 // =============== TOUR SCHEMA ===============
@@ -1050,8 +1049,8 @@ TourSchema.statics.findOneWithDeleted = function (
 
 // =============== SCHEMA HOOKS ===============
 
-// Pre-validate hook to ensure unique slug and uniqueTourCode
-TourSchema.pre("validate", async function (this: HydratedDocument<ITour>) {
+// Pre-save hook to ensure unique slug
+TourSchema.pre("save", async function (this: HydratedDocument<ITour>) {
   // Only generate if it's a new document or the code is missing
   if (this.isNew || !this.uniqueTourCode) {
     let code: string;

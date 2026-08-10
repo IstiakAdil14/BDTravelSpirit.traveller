@@ -13,6 +13,7 @@ import OperatorDetailSkeleton from '@/components/operators/OperatorDetailSkeleto
 import TourDetailsContent from './tour-details/TourDetailsContent';
 import TourDetailsSkeleton from './tour-details/TourDetailsSkeleton';
 import ToursFilter, { ToursFilterState } from './ToursFilter';
+import { useLoader } from '@/components/loaders/LoaderProvider';
 
 
 const regionMap: { [key: string]: string } = {
@@ -58,6 +59,7 @@ const EMPTY_FILTER: ToursFilterState = { search: '', district: 'all', duration: 
 
 export default function ToursContent() {
   const searchParams = useSearchParams();
+  const { startLoading, stopLoading, setLoaderMetadataOverride } = useLoader();
   const [regionData, setRegionData] = useState<any>(null);
   const [locations, setLocations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -73,6 +75,7 @@ export default function ToursContent() {
 
   useEffect(() => {
     async function fetchData() {
+      startLoading(window.location.pathname + window.location.search);
       setLoading(true);
       setFilters(EMPTY_FILTER); // reset filters when region changes
 
@@ -83,6 +86,13 @@ export default function ToursContent() {
           if (res.ok) {
             const data = await res.json();
             setTourDetails(data);
+            setLoaderMetadataOverride({
+              title: data.title || data.name,
+              subtitle: 'Preparing your itinerary',
+              location: data.location || 'Tour Details',
+              image: data.image || data.images?.[0] || '',
+              insightText: data.shortDescription || `Experience ${data.title || data.name}.`,
+            });
           }
         } catch (error) {
           console.error('Error fetching tour details:', error);
@@ -96,6 +106,16 @@ export default function ToursContent() {
 
           setOperatorData(operatorData);
           setLocations(operatorData?.tours || []);
+          
+          if (operatorData) {
+            setLoaderMetadataOverride({
+              title: operatorData.name,
+              subtitle: 'Tour Operator',
+              location: operatorData.location || 'Bangladesh',
+              image: operatorData.logo || operatorData.coverImage || '',
+              insightText: operatorData.description || 'View operator tours.',
+            });
+          }
         } catch (error) {
           console.error('Error fetching operator data:', error);
         }
@@ -133,16 +153,28 @@ export default function ToursContent() {
 
           setRegionData(regionData);
           setLocations(locationsData);
+          
+          if (regionData) {
+            setLoaderMetadataOverride({
+              title: regionData.name,
+              subtitle: 'Discovering hidden gems',
+              location: `${regionData.name} Division`,
+              image: regionData.image,
+              insightText: regionData.description,
+            });
+          }
         } catch (error) {
           console.error('Error fetching data:', error);
         }
       }
 
       setLoading(false);
+      // Wait 3 seconds so user can see the gorgeous dynamic metadata before transitioning
+      setTimeout(() => stopLoading(), 3000);
     }
 
     fetchData();
-  }, [region, location, category, operator, tourSlug]);
+  }, [region, location, category, operator, tourSlug, startLoading, stopLoading, setLoaderMetadataOverride]);
 
   // ── Apply filters + sort client-side ───────────────────────────────────────
   const filteredLocations = useMemo(() => {

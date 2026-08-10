@@ -35,6 +35,7 @@ export default function BookingPaymentDialog({
   const [mounted, setMounted] = useState(false);
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethodType[]>([]);
   const [loading, setLoading] = useState(true);
+  const [step, setStep] = useState<1 | 2>(1);
   const [selectedMethodId, setSelectedMethodId] = useState<string>('');
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -53,6 +54,7 @@ export default function BookingPaymentDialog({
   useEffect(() => {
     setMounted(true);
     if (isOpen) {
+      setStep(1);
       fetchPaymentMethods();
     }
   }, [isOpen]);
@@ -136,9 +138,11 @@ export default function BookingPaymentDialog({
         <div className="flex items-start justify-between px-[24px] pt-[24px] pb-[20px] border-b border-gray-100 shrink-0">
           <div>
             <h3 className="text-[28px] font-bold text-gray-900 leading-tight">
-              Payment Details
+              {step === 1 ? 'Review Booking' : 'Payment Details'}
             </h3>
-            <p className="text-gray-500 text-[14px] mt-1">Complete your booking securely</p>
+            <p className="text-gray-500 text-[14px] mt-1">
+              {step === 1 ? 'Please review your booking details' : 'Complete your booking securely'}
+            </p>
           </div>
           <button 
             onClick={onClose}
@@ -152,27 +156,31 @@ export default function BookingPaymentDialog({
         <div className="px-[24px] py-[20px] space-y-[20px] overflow-y-auto custom-scrollbar">
           
           {/* Package Info */}
-          {tourTitle && (
-            <>
-              <div>
-                <h4 className="text-[18px] font-semibold text-gray-900">{tourTitle}</h4>
-                <p className="text-[13px] text-gray-500 mt-1">{tourLocation}</p>
-              </div>
-              <hr className="border-gray-100" />
-            </>
-          )}
+          {step === 1 && (
+            <div className="space-y-[20px] animate-in fade-in slide-in-from-right-4 duration-300">
+              {tourTitle && (
+                <>
+                  <div>
+                    <h4 className="text-[18px] font-semibold text-gray-900">{tourTitle}</h4>
+                    <p className="text-[13px] text-gray-500 mt-1">{tourLocation}</p>
+                  </div>
+                  <hr className="border-gray-100" />
+                </>
+              )}
 
-          {/* Price Breakdown */}
-          <div className="bg-white border border-gray-200 rounded-xl p-4 flex items-center justify-between">
-            <div>
-              <p className="text-[14px] text-gray-500 mb-1">Total Amount</p>
-              <p className="text-[22px] font-semibold text-gray-900">৳ {totalBdt.toLocaleString()}</p>
+              {/* Price Breakdown */}
+              <div className="bg-white border border-gray-200 rounded-xl p-4 flex items-center justify-between">
+                <div>
+                  <p className="text-[14px] text-gray-500 mb-1">Total Amount</p>
+                  <p className="text-[22px] font-semibold text-gray-900">৳ {totalBdt.toLocaleString()}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-[14px] text-gray-500 mb-1">USD Equivalent</p>
+                  <p className="text-[22px] font-semibold text-blue-600">${totalUsd}</p>
+                </div>
+              </div>
             </div>
-            <div className="text-right">
-              <p className="text-[14px] text-gray-500 mb-1">USD Equivalent</p>
-              <p className="text-[22px] font-semibold text-blue-600">${totalUsd}</p>
-            </div>
-          </div>
+          )}
 
           {error && (
             <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-100 rounded-xl">
@@ -181,8 +189,9 @@ export default function BookingPaymentDialog({
           )}
 
           {/* Payment Method */}
-          <div>
-            <h4 className="text-[14px] font-medium text-gray-500 mb-3">Payment Method</h4>
+          {step === 2 && (
+            <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+              <h4 className="text-[14px] font-medium text-gray-500 mb-3">Payment Method</h4>
             
             {loading ? (
               <div className="flex flex-col items-center justify-center py-8">
@@ -329,20 +338,39 @@ export default function BookingPaymentDialog({
             </>
           )}
         </div>
-      </div>
+      )}
+    </div>
 
-      {/* Footer */}
-        {!loading && !isAddingNew && (
-          <div className="px-[24px] pb-[24px] pt-[20px] border-t border-gray-100 shrink-0">
+
+        {/* Footer */}
+        <div className="px-[24px] pb-[24px] pt-[20px] border-t border-gray-100 shrink-0 bg-white">
+          {step === 1 ? (
             <button
-              onClick={handleConfirm}
-              disabled={!selectedMethodId}
-              className="w-full h-[48px] bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-[15px] font-semibold rounded-xl transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={() => setStep(2)}
+              className="w-full h-[48px] bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-[15px] font-semibold rounded-xl transition-all shadow-md"
             >
-              Confirm Booking
+              Proceed to Payment
             </button>
-          </div>
-        )}
+          ) : (
+            !loading && !isAddingNew && (
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setStep(1)}
+                  className="px-6 h-[48px] bg-gray-100 hover:bg-gray-200 text-gray-700 text-[15px] font-semibold rounded-xl transition-all"
+                >
+                  Back
+                </button>
+                <button
+                  onClick={handleConfirm}
+                  disabled={!selectedMethodId}
+                  className="flex-1 h-[48px] bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-[15px] font-semibold rounded-xl transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Confirm Booking
+                </button>
+              </div>
+            )
+          )}
+        </div>
       </div>
     </div>,
     document.body

@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/authOptions';
@@ -77,7 +78,7 @@ export async function GET(_req: NextRequest) {
     });
     
     const traveler = await TravelerModel.findOne({ user: userId });
-    const bookingDocs = traveler ? await BookingModel.find({ traveler: traveler._id }).populate('tour').lean() : [];
+    const bookingDocs = traveler ? await BookingModel.find({ traveler: traveler._id }).sort({ createdAt: -1 }).populate('tour').lean() : [];
     
     const tours = bookingDocs.map((b: any) => b.tour).filter(Boolean);
     const bookingIds = tours.map((t: any) => t._id as mongoose.Types.ObjectId);
@@ -202,6 +203,10 @@ export async function GET(_req: NextRequest) {
       onboarding,
       schedule,
       stripeAccounts,
+    }, {
+      headers: {
+        'Cache-Control': 'no-store, max-age=0'
+      }
     });
   } catch (err) {
     console.error('Dashboard API error:', err);

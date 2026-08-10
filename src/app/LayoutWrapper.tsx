@@ -11,6 +11,8 @@ import { Toaster } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SocketProvider } from "@/components/chat/SocketProvider";
 import TravelerChatWidget from "@/components/chat/TravelerChatWidget";
+import { LoaderProvider } from "@/components/loaders/LoaderProvider";
+import RouteAwareLoader from "@/components/loaders/RouteAwareLoader";
 
 export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -26,7 +28,9 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
       <SocketProvider>
         <QueryProvider>
         <TooltipProvider>
-          {!hideLayout && <Header />}
+          <LoaderProvider>
+            <RouteAwareLoader />
+            {!hideLayout && <Header />}
           {showBottomNav && !hideLayoutForDashboard ? (
             <div className="pb-[calc(3rem+env(safe-area-inset-bottom))] lg:pb-0">
               {children}
@@ -43,6 +47,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
           )}
           <Toaster position="bottom-center" />
           <TravelerChatWidget />
+          </LoaderProvider>
         </TooltipProvider>
         </QueryProvider>
       </SocketProvider>

@@ -7,7 +7,7 @@ import {
     ReportPriority,
     ReportReason,
     ReportStatus,
-} from "@/constants/tour/report.const";
+} from "@/constants/report.const";
 import { defineModel } from "@/lib/helpers/defineModel";
 import {
     Schema,

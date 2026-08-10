@@ -15,7 +15,7 @@ export default function UtilityIcons() {
   React.useEffect(() => {
     const fetchCounts = () => {
       if (session?.user?.id) {
-        fetch('/api/utility-counts')
+        fetch('/api/utility-counts', { cache: 'no-store' })
           .then(res => res.json())
           .then(data => {
             setWishlistCount(data.wishlistCount || 0);

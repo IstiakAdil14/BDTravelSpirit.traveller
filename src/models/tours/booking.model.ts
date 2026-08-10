@@ -7,14 +7,14 @@ import {
     TOUR_DISCOUNT,
     TourDiscountType,
     TourDiscount,
-} from "@/constants/tour/tour.const";
+} from "@/constants/tour.const";
 
 import {
     BOOKING_PAYMENT_STATUS,
     BOOKING_STATUS,
     BookingPaymentStatus,
     BookingStatus,
-} from "@/constants/tour/tour-booking.const";
+} from "@/constants/tour-booking.const";
 
 import { ITour } from "./tour.model";
 

@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/authOptions';
@@ -17,6 +18,10 @@ export async function GET(req: NextRequest) {
     
     return NextResponse.json({
       wishlistIds: interaction?.wishlist?.map((item: any) => item.tour?.toString()) || []
+    }, {
+      headers: {
+        'Cache-Control': 'no-store, max-age=0'
+      }
     });
   } catch (error) {
     console.error('Wishlist GET error:', error);

@@ -157,7 +157,8 @@ export default function BookingsPage() {
       const VoucherPDF = (await import('./VoucherPDF')).default;
       
       const userName = session?.user?.name || "Traveler";
-      const blob = await pdf(<VoucherPDF booking={booking} userName={userName} />).toBlob();
+      const extendedBooking = { ...booking, travelerName: userName };
+      const blob = await pdf(<VoucherPDF booking={extendedBooking} />).toBlob();
       
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -567,13 +568,20 @@ export default function BookingsPage() {
                 </div>
               </div>
               
-              <div className="pt-4">
+              <div className="pt-4 flex gap-3">
                 <button
                   onClick={() => setIsModalOpen(false)}
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3.5 rounded-xl transition-all shadow-md"
+                  className="flex-1 bg-white hover:bg-slate-50 text-slate-700 font-semibold py-3.5 rounded-xl border border-slate-200 transition-all"
                 >
-                  Close Details
+                  Close
                 </button>
+                <Link
+                  href={`/dashboard?role=${(session?.user as any)?.role || 'traveler'}&id=${session?.user?.id}&page=booking-details&bookingId=${selectedBooking.id}`}
+                  className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3.5 rounded-xl transition-all shadow-md text-center inline-flex items-center justify-center gap-2"
+                  onClick={() => setIsModalOpen(false)}
+                >
+                  Full Details <ArrowRight className="w-4 h-4" />
+                </Link>
               </div>
             </div>
           </div>
