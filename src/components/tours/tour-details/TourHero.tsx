@@ -22,7 +22,7 @@ interface TourHeroProps {
 }
 
 export default function TourHero({ tour }: TourHeroProps) {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [isLoadingWishlist, setIsLoadingWishlist] = useState(false);
   const [api, setApi] = useState<CarouselApi>();
@@ -179,7 +179,7 @@ export default function TourHero({ tour }: TourHeroProps) {
             </div>
           )}
 
-          {session?.user && (
+          {status === 'authenticated' && (
             <div className="absolute top-6 right-6 flex space-x-3 z-10">
               <Button
                 variant="secondary"
