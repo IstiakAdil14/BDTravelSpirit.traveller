@@ -1,5 +1,10 @@
 import { RouteAwareLoader } from '@/components/loaders';
+import { Suspense } from 'react';
 
 export default function Loading() {
-  return <RouteAwareLoader />;
+  return (
+    <Suspense fallback={null}>
+      <RouteAwareLoader />
+    </Suspense>
+  );
 }

@@ -8,22 +8,22 @@
 type EnumValues<T> = T[keyof T];
 
 /** Roles supported by the platform */
-export enum USER_ROLE {
+export const USER_ROLE = {
   /** Regular user booking tours */
-  TRAVELER = "traveler",
+  TRAVELER: "traveler",
 
   /** Person conducting tours */
-  GUIDE = "guide",
+  GUIDE: "guide",
 
   /** Manages schedules, logistics */
-  ASSISTANT = "assistant",
+  ASSISTANT: "assistant",
 
   /** Customer support staff */
-  SUPPORT = "support",
+  SUPPORT: "support",
 
   /** Platform administrator */
-  ADMIN = "admin",
-}
+  ADMIN: "admin",
+} as const;
 export type UserRole = EnumValues<typeof USER_ROLE>;
 // "traveler" | "guide" | "assistant" | "support" | "admin"
 

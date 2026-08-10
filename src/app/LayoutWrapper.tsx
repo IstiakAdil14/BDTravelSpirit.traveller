@@ -29,7 +29,9 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
         <QueryProvider>
         <TooltipProvider>
           <LoaderProvider>
-            <RouteAwareLoader />
+            <Suspense fallback={null}>
+              <RouteAwareLoader />
+            </Suspense>
             {!hideLayout && <Header />}
           {showBottomNav && !hideLayoutForDashboard ? (
             <div className="pb-[calc(3rem+env(safe-area-inset-bottom))] lg:pb-0">

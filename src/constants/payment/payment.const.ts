@@ -1,12 +1,12 @@
 import {  USER_ROLE  } from "../user";
 
 // Payment ownership should be domain-specific
-export enum PAYMENT_OWNER_TYPE {
-    ADMIN = USER_ROLE.ADMIN,
-    GUIDE = USER_ROLE.GUIDE,
-    TRAVELER = USER_ROLE.TRAVELER,
-}
-export type PaymentOwnerType = `${PAYMENT_OWNER_TYPE}`;
+export const PAYMENT_OWNER_TYPE = {
+    ADMIN: USER_ROLE.ADMIN,
+    GUIDE: USER_ROLE.GUIDE,
+    TRAVELER: USER_ROLE.TRAVELER,
+} as const;
+export type PaymentOwnerType = typeof PAYMENT_OWNER_TYPE[keyof typeof PAYMENT_OWNER_TYPE];
 
 // Multi-gateway ready (Bangladesh + Global)
 export enum PAYMENT_PROVIDER {
