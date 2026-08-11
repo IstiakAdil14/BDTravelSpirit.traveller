@@ -1,5 +1,11 @@
 import { Suspense } from 'react';
 import ToursContent from '@/components/tours/ToursContent';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Discover Tours',
+  description: 'Find and book the perfect tour package in Bangladesh with BD Travel Spirit.',
+};
 
 export default function ToursPage() {
   return (

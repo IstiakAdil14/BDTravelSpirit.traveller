@@ -3,6 +3,12 @@ import TourModel from "@/models/tours/tour.model";
 import { AssetModel } from "@/models/assets/asset.model";
 import mongoose from "mongoose";
 import Link from "next/link";
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Top Popular Destinations',
+  description: 'Explore the most popular and highly rated travel destinations in Bangladesh with BD Travel Spirit.',
+};
 
 export default async function PopularDestinationsPage() {
   await dbConnect();

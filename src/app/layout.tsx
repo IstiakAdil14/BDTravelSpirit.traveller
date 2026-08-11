@@ -19,10 +19,50 @@ const inter = Inter({
 
 // Metadata (same as your previous setup)
 export const metadata: Metadata = {
-  title: "BD Travel Spirit - Discover Bangladesh's Hidden Gems",
+  metadataBase: new URL('https://bdtravelspirit.com'),
+  title: {
+    default: "BD Travel Spirit - Discover Bangladesh's Hidden Gems",
+    template: "%s | BD Travel Spirit"
+  },
   description:
-    "Explore Bangladesh's breathtaking destinations, cultural heritage, and adventure experiences with BD Travel Spirit.",
-  // ... all other metadata
+    "Explore Bangladesh's breathtaking destinations, cultural heritage, and adventure experiences with BD Travel Spirit. Book tours and connect with local operators.",
+  keywords: ["Bangladesh travel", "BD tours", "Sylhet tours", "Cox's Bazar travel", "Sundarbans tour", "Bangladesh tour operators", "BD Travel Spirit"],
+  authors: [{ name: "BD Travel Spirit" }],
+  creator: "BD Travel Spirit",
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://bdtravelspirit.com",
+    siteName: "BD Travel Spirit",
+    title: "BD Travel Spirit - Discover Bangladesh's Hidden Gems",
+    description: "Explore Bangladesh's breathtaking destinations, cultural heritage, and adventure experiences with BD Travel Spirit.",
+    images: [
+      {
+        url: "/logo.png",
+        width: 800,
+        height: 600,
+        alt: "BD Travel Spirit Logo",
+      }
+    ]
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "BD Travel Spirit - Discover Bangladesh's Hidden Gems",
+    description: "Explore Bangladesh's breathtaking destinations, cultural heritage, and adventure experiences with BD Travel Spirit.",
+    creator: "@bdtravelspirit",
+    images: ["/logo.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
 };
 
 const structuredData = {

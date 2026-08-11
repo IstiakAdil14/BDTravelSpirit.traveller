@@ -1,5 +1,11 @@
 import { Suspense } from 'react';
 import AllToursContent from '@/components/tours/AllToursContent';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'All Tours',
+  description: 'Browse all available tours and travel packages across Bangladesh.',
+};
 
 export default function AllToursPage() {
   return (
