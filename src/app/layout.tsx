@@ -29,6 +29,9 @@ export const metadata: Metadata = {
   keywords: ["Bangladesh travel", "BD tours", "Sylhet tours", "Cox's Bazar travel", "Sundarbans tour", "Bangladesh tour operators", "BD Travel Spirit"],
   authors: [{ name: "BD Travel Spirit" }],
   creator: "BD Travel Spirit",
+  verification: {
+    google: "aPjPi-A7WjPIceCmFCJEjhGUMB82LhBu1h0v5HUK9yE",
+  },
   openGraph: {
     type: "website",
     locale: "en_US",
