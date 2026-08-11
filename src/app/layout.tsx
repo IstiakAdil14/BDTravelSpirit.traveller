@@ -19,7 +19,7 @@ const inter = Inter({
 
 // Metadata (same as your previous setup)
 export const metadata: Metadata = {
-  metadataBase: new URL('https://bdtravelspirit.com'),
+  metadataBase: new URL('https://bd-travel-spirit.vercel.app'),
   title: {
     default: "BD Travel Spirit - Discover Bangladesh's Hidden Gems",
     template: "%s | BD Travel Spirit"
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://bdtravelspirit.com",
+    url: "https://bd-travel-spirit.vercel.app",
     siteName: "BD Travel Spirit",
     title: "BD Travel Spirit - Discover Bangladesh's Hidden Gems",
     description: "Explore Bangladesh's breathtaking destinations, cultural heritage, and adventure experiences with BD Travel Spirit.",
